@@ -1,0 +1,294 @@
+{
+  "snapshot_id": "published-service-prices-2026-11-07",
+  "synthetic": false,
+  "currency": "IDR",
+  "advisory_only": true,
+  "note": "Collected price observations are advisory context only. They do not approve work, set a market guarantee, change a quote, or establish a negotiation price.",
+  "status": "sufficient",
+  "quality": {
+    "row_count": 13,
+    "accepted_count": 13,
+    "excluded_count": 0,
+    "min_prices": 5,
+    "min_publishers": 3,
+    "percentile_method": "nearest_rank",
+    "source_verification": "Reported sources and collection dates are preserved; this offline build does not verify their contents or freshness."
+  },
+  "groups": [
+    {
+      "category": "ac_service",
+      "item_code": "cuci_ac",
+      "item_label": "AC cleaning",
+      "unit": "unit",
+      "scope": "split_ac_standard_0_5_1pk_cleaning_base_item_residential",
+      "status": "sufficient",
+      "sample_size": 5,
+      "publisher_count": 5,
+      "p25": 75000,
+      "p75": 75000,
+      "date_range": {
+        "first": "2026-11-07",
+        "last": "2026-11-07"
+      },
+      "locations": [
+        "Cakung",
+        "Tanah Abang"
+      ],
+      "observations": [
+        {
+          "price": 75000,
+          "publisher": "Denan Teknik",
+          "source": "https://denanteknik.com/",
+          "date": "2026-11-07",
+          "kecamatan": null
+        },
+        {
+          "price": 75000,
+          "publisher": "Dokter-AC / PT Aplikasi Service Anak Bangsa",
+          "source": "https://dokter-ac.com/service-ac/jakarta-pusat",
+          "date": "2026-11-07",
+          "kecamatan": null
+        },
+        {
+          "price": 75000,
+          "publisher": "Mandiri Jaya Servis",
+          "source": "https://www.mandirijayaservis.com/service-ac-jakarta-pusat",
+          "date": "2026-11-07",
+          "kecamatan": "Tanah Abang"
+        },
+        {
+          "price": 75000,
+          "publisher": "Riki Jaya Tehnik",
+          "source": "https://www.rikijayatehnik.com/",
+          "date": "2026-11-07",
+          "kecamatan": "Cakung"
+        },
+        {
+          "price": 75000,
+          "publisher": "SEJUK-AC",
+          "source": "https://sejuk-ac.com/",
+          "date": "2026-11-07",
+          "kecamatan": null
+        }
+      ],
+      "advisory_only": true
+    },
+    {
+      "category": "ac_service",
+      "item_code": "cuci_ac",
+      "item_label": "AC cleaning",
+      "unit": "unit",
+      "scope": "split_wall_ac_routine_cleaning_capacity_not_specified_published_base_item",
+      "status": "insufficient_data",
+      "sample_size": 1,
+      "publisher_count": 1,
+      "p25": null,
+      "p75": null,
+      "date_range": {
+        "first": "2026-11-07",
+        "last": "2026-11-07"
+      },
+      "locations": [],
+      "observations": [
+        {
+          "price": 100000,
+          "publisher": "PT Ataya Agung Pratama",
+          "source": "https://atayaagungpratama.com/",
+          "date": "2026-11-07",
+          "kecamatan": null
+        }
+      ],
+      "advisory_only": true
+    },
+    {
+      "category": "cleaning",
+      "item_code": "bersih_rumah",
+      "item_label": "Home cleaning",
+      "unit": "hour",
+      "scope": "daily_cleaning_app_promo_hourly_rate_min_two_hours_max_40m2",
+      "status": "insufficient_data",
+      "sample_size": 1,
+      "publisher_count": 1,
+      "p25": null,
+      "p75": null,
+      "date_range": {
+        "first": "2026-11-07",
+        "last": "2026-11-07"
+      },
+      "locations": [],
+      "observations": [
+        {
+          "price": 60000,
+          "publisher": "CleanSheet / PT Cita Indonesia Bersih",
+          "source": "https://citaindonesiabersih.com/services/daily-cleaning-cleansheet-jasa-cleaning-service/",
+          "date": "2026-11-07",
+          "kecamatan": null
+        }
+      ],
+      "advisory_only": true
+    },
+    {
+      "category": "cleaning",
+      "item_code": "bersih_rumah",
+      "item_label": "Home cleaning",
+      "unit": "job",
+      "scope": "daily_cleaning_one_worker_with_tools_two_hour_package_published_item",
+      "status": "insufficient_data",
+      "sample_size": 1,
+      "publisher_count": 1,
+      "p25": null,
+      "p75": null,
+      "date_range": {
+        "first": "2026-11-07",
+        "last": "2026-11-07"
+      },
+      "locations": [],
+      "observations": [
+        {
+          "price": 140000,
+          "publisher": "Sejasa",
+          "source": "https://www.sejasa.com/layanan/daily-cleaning",
+          "date": "2026-11-07",
+          "kecamatan": null
+        }
+      ],
+      "advisory_only": true
+    },
+    {
+      "category": "electrical",
+      "item_code": "cek_instalasi",
+      "item_label": "Installation inspection",
+      "unit": "service",
+      "scope": "electrical_installation_inspection_only_transport_included_service_fee_extra",
+      "status": "insufficient_data",
+      "sample_size": 1,
+      "publisher_count": 1,
+      "p25": null,
+      "p75": null,
+      "date_range": {
+        "first": "2026-11-07",
+        "last": "2026-11-07"
+      },
+      "locations": [],
+      "observations": [
+        {
+          "price": 100000,
+          "publisher": "temanjasa / PT Joinbareng Digital",
+          "source": "https://temanjasa.com/layanan/tukang-listrik",
+          "date": "2026-11-07",
+          "kecamatan": null
+        }
+      ],
+      "advisory_only": true
+    },
+    {
+      "category": "electrical",
+      "item_code": "ganti_mcb",
+      "item_label": "Circuit breaker replacement",
+      "unit": "pcs",
+      "scope": "one_mcb_replacement_labor_only_transport_included_service_fee_extra",
+      "status": "insufficient_data",
+      "sample_size": 1,
+      "publisher_count": 1,
+      "p25": null,
+      "p75": null,
+      "date_range": {
+        "first": "2026-11-07",
+        "last": "2026-11-07"
+      },
+      "locations": [],
+      "observations": [
+        {
+          "price": 125000,
+          "publisher": "temanjasa / PT Joinbareng Digital",
+          "source": "https://temanjasa.com/layanan/tukang-listrik",
+          "date": "2026-11-07",
+          "kecamatan": null
+        }
+      ],
+      "advisory_only": true
+    },
+    {
+      "category": "plumbing",
+      "item_code": "cek_kebocoran",
+      "item_label": "Leak inspection",
+      "unit": "service",
+      "scope": "pipe_or_drain_inspection_only_transport_included_service_fee_extra",
+      "status": "insufficient_data",
+      "sample_size": 1,
+      "publisher_count": 1,
+      "p25": null,
+      "p75": null,
+      "date_range": {
+        "first": "2026-11-07",
+        "last": "2026-11-07"
+      },
+      "locations": [],
+      "observations": [
+        {
+          "price": 95000,
+          "publisher": "temanjasa / PT Joinbareng Digital",
+          "source": "https://temanjasa.com/layanan/tukang-ledeng",
+          "date": "2026-11-07",
+          "kecamatan": null
+        }
+      ],
+      "advisory_only": true
+    },
+    {
+      "category": "washer",
+      "item_code": "cek_mesin_cuci",
+      "item_label": "Washing machine inspection",
+      "unit": "service",
+      "scope": "washer_visit_and_inspection_only_fee_waived_if_repair_proceeds",
+      "status": "insufficient_data",
+      "sample_size": 1,
+      "publisher_count": 1,
+      "p25": null,
+      "p75": null,
+      "date_range": {
+        "first": "2026-11-07",
+        "last": "2026-11-07"
+      },
+      "locations": [],
+      "observations": [
+        {
+          "price": 75000,
+          "publisher": "Sejasa",
+          "source": "https://www.sejasa.com/layanan/service-mesin-cuci",
+          "date": "2026-11-07",
+          "kecamatan": null
+        }
+      ],
+      "advisory_only": true
+    },
+    {
+      "category": "washer",
+      "item_code": "servis_mesin_cuci",
+      "item_label": "Washing machine service",
+      "unit": "unit",
+      "scope": "top_loading_washer_minor_repair_labor_only_parts_excluded_published_item",
+      "status": "insufficient_data",
+      "sample_size": 1,
+      "publisher_count": 1,
+      "p25": null,
+      "p75": null,
+      "date_range": {
+        "first": "2026-11-07",
+        "last": "2026-11-07"
+      },
+      "locations": [],
+      "observations": [
+        {
+          "price": 150000,
+          "publisher": "Sejasa",
+          "source": "https://www.sejasa.com/layanan/service-mesin-cuci",
+          "date": "2026-11-07",
+          "kecamatan": null
+        }
+      ],
+      "advisory_only": true
+    }
+  ],
+  "excluded": []
+}

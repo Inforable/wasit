@@ -628,6 +628,18 @@
             "customer",
             "agent"
           ]
+        },
+        "pending_question": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 1000
+            },
+            {
+              "type": "null"
+            }
+          ]
         }
       }
     },
@@ -2065,6 +2077,18 @@
           "anyOf": [
             {
               "$ref": "common.schema.json#/$defs/lifecycle"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "pending_question": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 1000
             },
             {
               "type": "null"

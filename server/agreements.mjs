@@ -160,6 +160,7 @@ export function createAgreements({ store, now = Date.now, newId = defaultId, loa
       const currentOwner = await first(tx, 'SELECT * FROM requests WHERE id=$1 AND archived_at IS NULL', [requestId]);
       const branch = await first(tx, 'SELECT * FROM branches WHERE id=$1 AND request_id=$2', [branchId, requestId]);
       if (!currentOwner || currentOwner.user_id !== actor.actor_id || !branch) throw failure(404, 'not_found', 'The request or provider branch was not found.');
+      if(branch.pending_question)throw failure(409,'customer_question_pending','Answer the provider question before selecting this quotation.');
       const replay = await first(tx, 'SELECT * FROM deals WHERE request_id=$1', [requestId]);
       if (replay) {
         if (replay.branch_id !== branchId || Number(replay.quote_revision) !== quoteRevision) throw failure(409, 'deal_exists', 'This request already has a selected provider and quote.');
@@ -253,6 +254,8 @@ export function createAgreements({ store, now = Date.now, newId = defaultId, loa
     }
     return store.transaction(async (tx) => {
       const row = await header(tx, dealId, true); ownership(row, actor, true); expectedActive(row, body);
+      const question=await first(tx,'SELECT pending_question FROM branches WHERE id=$1',[row.branch_id]);
+      if(question?.pending_question)throw failure(409,'customer_question_pending','Answer the provider question before proposing changed work.');
       if (!row.active_version_id) throw failure(409, 'invalid_transition', 'Activate the first agreement before proposing changes.');
       const persistedQuote = await first(tx, 'SELECT data_json,request_id FROM quotes WHERE branch_id=$1 ORDER BY version DESC LIMIT 1', [row.branch_id]);
       if (!persistedQuote || persistedQuote.request_id !== row.request_id || stableJson(parse(persistedQuote.data_json)) !== stableJson(quote)) throw failure(409, 'stale_quote', 'The provider quote changed. Review the latest quoted work.');

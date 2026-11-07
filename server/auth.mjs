@@ -207,6 +207,19 @@ export function createAuth({
     const account=await first('SELECT display_name,email FROM accounts WHERE actor_id=$1',[session.actor.actor_id]);
     return { user: { id: session.actor.actor_id, role: 'consumer',...(account?{display_name:account.display_name,email:account.email}:{}) } };
   }
+  async function restoreSession({req}) {
+    configured();
+    if(header(req,'authorization'))throw fail(403,'wrong_role','Open the customer workspace separately from the provider link.');
+    const session=await consumerSession(req);
+    if(!session)return {user:null};
+    const actorId=session.actor.actor_id;
+    const [account,profileRow]=await Promise.all([
+      first('SELECT display_name,email FROM accounts WHERE actor_id=$1',[actorId]),
+      first('SELECT profile_json FROM profiles WHERE id=$1',[actorId]),
+    ]);
+    let profile=null;try{profile=profileRow?JSON.parse(profileRow.profile_json):null;}catch{}
+    return {actor_id:actorId,csrf_token:session.csrf,user:{id:actorId,role:'consumer',...(account?{display_name:account.display_name,email:account.email}:{})},profile};
+  }
   async function logout({ req, res, body }) {
     requireJsonOrEmpty(req, body);
     const actor = await requireConsumer(req, { mutation: true });
@@ -218,6 +231,7 @@ export function createAuth({
   const routes = [
     ['POST', /^\/api\/demo\/session$/, bootstrap],
     ['GET', /^\/api\/auth\/me$/, me],
+    ['GET', /^\/api\/auth\/session$/, restoreSession],
     ['POST', /^\/api\/auth\/logout$/, logout],
     ['GET', linkRoute, ({ req, params }) => getProviderLink(req, params[0], params[1])],
     ['POST', linkRoute, ({ req, params, body }) => { requireJsonOrEmpty(req, body); return issueProviderLink(req, params[0], params[1]); }],

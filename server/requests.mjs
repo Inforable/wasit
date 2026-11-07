@@ -45,8 +45,8 @@ export function createRequests({store,now=Date.now,newId=makeId,formatter=format
   }
   async function insertRequest(db,input,actor,id,result,parentId=null) {
     const status=result.status==='ready'?'contacting':'needs_clarification',at=now();
-    await db.query('INSERT INTO requests(id,parent_id,user_id,request_text,input_json,generation,status,job_json,questions_json,weights_json,formatter_by,manual_for,scenario_id,created_at) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)',
-      [id,parentId,actor.actor_id,input.request_text,JSON.stringify(input),0,status,result.job?JSON.stringify(result.job):null,JSON.stringify(result.questions??[]),JSON.stringify(result.job?.weights??{}),result.engine==='model'?'model':'rules',input.manual_for??null,input.scripted?'scripted':null,at]);
+    await db.query('INSERT INTO requests(id,parent_id,user_id,request_text,input_json,generation,status,job_json,questions_json,weights_json,formatter_by,manual_for,scenario_id,created_at,model_config_json) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15)',
+      [id,parentId,actor.actor_id,input.request_text,JSON.stringify(input),0,status,result.job?JSON.stringify(result.job):null,JSON.stringify(result.questions??[]),JSON.stringify(result.job?.weights??{}),result.engine==='model'?'model':'rules',input.manual_for??null,input.scripted?'scripted':null,at,result.model_config?JSON.stringify(result.model_config):null]);
     const request=await first(db,'SELECT * FROM requests WHERE id=$1',[id]);
     await event(db,id,null,'request_created',result.job?'The request is ready to contact eligible providers.':'A few request details need confirmation.',{engine:result.engine==='model'?'model':'rules'});
     if(result.rejected)await event(db,id,null,'validation_rejected',String(result.rejected).slice(0,240));
@@ -56,7 +56,7 @@ export function createRequests({store,now=Date.now,newId=makeId,formatter=format
   async function create(input,actor) {
     consumer(actor);
     const id=newId('request');
-    const result=await formatter(input,{now:now(),id});
+    const result=await formatter(input,{now:now(),id,actor_id:actor.actor_id});
     await store.transaction(tx=>insertRequest(tx,input,actor,id,result));
     return snapshot(id,actor);
   }
@@ -65,7 +65,7 @@ export function createRequests({store,now=Date.now,newId=makeId,formatter=format
     if (!answers || typeof answers!=='object' || Array.isArray(answers)) throw error(400,'invalid_payload','Answer the requested clarification questions.');
     const original=parse(parent.input_json,{request_text:parent.request_text});
     const input={...original,answers:{...original.answers,...answers}},id=newId('request');
-    const formatted=await formatter(input,{now:now(),id});
+    const formatted=await formatter(input,{now:now(),id,actor_id:actor.actor_id,model_config:parse(parent.model_config_json)});
     const childId=await store.transaction(async tx=>{
       await tx.query('UPDATE requests SET status=status WHERE id=$1',[requestId]);
       const row=await owned(tx,requestId,actor);
@@ -91,7 +91,7 @@ export function createRequests({store,now=Date.now,newId=makeId,formatter=format
     const rows=(await store.query('SELECT b.*,p.name AS provider_label,p.rating FROM branches b LEFT JOIN providers p ON p.id=b.provider_id WHERE b.request_id=$1 ORDER BY b.created_at,b.id',[requestId])).rows;
     const branches=[];
     for(const row of rows) branches.push({
-      id:row.id,provider_label:row.provider_label??'Service provider',mode:modeOf(row.mode),wasit_mode:row.wasit_mode==='customer'?'customer':'agent',
+      id:row.id,provider_label:row.provider_label??'Service provider',mode:modeOf(row.mode),wasit_mode:row.wasit_mode==='customer'?'customer':'agent',pending_question:row.pending_question??null,
       status:['awaiting_reply','processing','ready','closed','timed_out'].includes(row.status)?row.status:'awaiting_reply',
       clarifications_sent:Number(row.clarifications_sent??0),countered:!!row.countered,asked_terms:!!row.asked_terms,
       messages:await communications.messages(row.id),quote:await quotes.current(row.id),
@@ -165,6 +165,9 @@ export function createRequests({store,now=Date.now,newId=makeId,formatter=format
     }
     const branch=await first(store,'SELECT * FROM branches WHERE id=$1 AND request_id=$2',[task.branch_id,request.id]);
     if(!branch)throw error(404,'not_found','The provider branch was not found.');
+    if(branch.pending_question&&['rfq','send','reply','decide'].includes(task.kind))return commit(task,async tx=>{
+      await tx.query("UPDATE branches SET status='awaiting_reply',deadline_at=NULL WHERE id=$1",[branch.id]);
+    });
     if(task.kind==='timeout')return commit(task,async tx=>{
       if(branch.status==='awaiting_reply'&&Number(branch.deadline_at)<=now()) {
         await tx.query("UPDATE branches SET status='timed_out',updated_at=$1 WHERE id=$2",[now(),branch.id]);
@@ -216,7 +219,7 @@ export function createRequests({store,now=Date.now,newId=makeId,formatter=format
       const decision=await decideBuyer({job,quote,branch,competitorQuotes},llm);
       return commit(task,async tx=>{
         const fresh=await first(tx,'SELECT * FROM branches WHERE id=$1',[branch.id]);
-        if(fresh.wasit_mode==='customer')return;
+        if(fresh.wasit_mode==='customer'||fresh.pending_question)return;
         if(decision.rejected)await event(tx,request.id,branch.id,'validation_rejected',decision.rejected,{sources:decision.source_message_ids});
         await event(tx,request.id,branch.id,'decision',decision.reason,{engine:decision.engine,sources:decision.source_message_ids});
         if(decision.action==='close') {
@@ -305,7 +308,7 @@ export function createRequests({store,now=Date.now,newId=makeId,formatter=format
       const request=await owned(tx,requestId,actor);
       const branch=await first(tx,'SELECT * FROM branches WHERE id=$1 AND request_id=$2',[branchId,requestId]);
       if(!branch)throw error(404,'not_found','The provider branch was not found.');
-      await tx.query('UPDATE branches SET wasit_mode=$1,updated_at=$2 WHERE id=$3',[mode,now(),branchId]);
+      await tx.query("UPDATE branches SET wasit_mode=$1,pending_question=CASE WHEN $1='agent' THEN NULL ELSE pending_question END,updated_at=$2 WHERE id=$3",[mode,now(),branchId]);
       if(mode==='customer'){
         await tx.query("UPDATE tasks SET status='cancelled',lease_token=NULL,lease_until=NULL WHERE branch_id=$1 AND kind IN ('rfq','reply','send','decide') AND status IN ('pending','processing')",[branchId]);
       }else{

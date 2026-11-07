@@ -747,6 +747,28 @@
         }
       },
       "required": []
+    },
+    "model_preferences": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "request_model",
+        "bill_model"
+      ],
+      "properties": {
+        "request_model": {
+          "enum": [
+            "gpt-6-luna",
+            "gpt-6.1-terra"
+          ]
+        },
+        "bill_model": {
+          "enum": [
+            "gpt-6-luna",
+            "gpt-6.1-terra"
+          ]
+        }
+      }
     }
   }
 }

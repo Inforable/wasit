@@ -1,4 +1,5 @@
 import { TABLES } from './schema.mjs';
+import { createHash } from 'node:crypto';
 
 function pgType(type) {
   if (type === 'INTEGER PRIMARY KEY AUTOINCREMENT') return 'BIGSERIAL PRIMARY KEY';
@@ -21,9 +22,23 @@ const indexes = [
   'CREATE INDEX IF NOT EXISTS quotes_by_branch ON quotes(branch_id, version)',
   'CREATE UNIQUE INDEX IF NOT EXISTS locked_deal_by_request ON locked_deals(request_id)',
 ];
+// Increment when immutable-function or trigger semantics change.
+const triggerRevision='immutable-records-v1';
+const revisionKey='postgres_schema_revision';
+export const POSTGRES_SCHEMA_REVISION=createHash('sha256').update(JSON.stringify({tables:TABLES,indexes,triggerRevision})).digest('hex');
+
+async function revisionMatches(db) {
+  const relation=(await db.query("SELECT to_regclass('settings') AS relation")).rows[0]?.relation;
+  if(!relation)return false;
+  const row=(await db.query('SELECT value_json FROM settings WHERE key=$1',[revisionKey])).rows[0];
+  if(!row)return false;
+  try{return JSON.parse(row.value_json)?.revision===POSTGRES_SCHEMA_REVISION;}catch{return false;}
+}
 export async function migratePostgres(store) {
-  await store.transaction(async (tx) => {
+  if(await revisionMatches(store))return {applied:false,revision:POSTGRES_SCHEMA_REVISION};
+  return store.transaction(async (tx) => {
     await tx.query('SELECT pg_advisory_xact_lock($1)', [17460401]);
+    if(await revisionMatches(tx))return {applied:false,revision:POSTGRES_SCHEMA_REVISION};
     for (const [table, columns] of Object.entries(TABLES)) {
       const definitions = Object.entries(columns).map(([name, type]) => `"${name}" ${pgType(type)}`);
       await tx.query(`CREATE TABLE IF NOT EXISTS "${table}" (${definitions.join(', ')})`);
@@ -46,5 +61,7 @@ export async function migratePostgres(store) {
       await tx.query(`DROP TRIGGER IF EXISTS "${name}" ON "${table}"`);
       await tx.query(`CREATE TRIGGER "${name}" BEFORE ${event} ON "${table}" FOR EACH ROW EXECUTE FUNCTION wasit_reject_mutation()`);
     }
+    await tx.query('INSERT INTO settings(key,value_json) VALUES($1,$2) ON CONFLICT(key) DO UPDATE SET value_json=EXCLUDED.value_json',[revisionKey,JSON.stringify({revision:POSTGRES_SCHEMA_REVISION})]);
+    return {applied:true,revision:POSTGRES_SCHEMA_REVISION};
   });
 }

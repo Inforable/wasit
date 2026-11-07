@@ -4,6 +4,7 @@ import { catalog } from './catalog.mjs';
 import { parseAmounts } from './money.mjs';
 import { publicTerms } from './agreement-terms.mjs';
 import { assertTaskGeneration } from './task-guard.mjs';
+import { providerQuestion } from './provider-questions.mjs';
 
 const failure = (status,code,message) => new HttpError(status,code,message);
 const defaultId = (prefix) => prefix + '_' + randomBytes(10).toString('hex');
@@ -87,6 +88,7 @@ export function createCommunications({ store,now = Date.now,newId = defaultId,ge
         }
       }
       authorize(branch,actor,{send:true});
+      if(sender==='agent'&&branch.pending_question&&!['booking','agreement','version'].includes(intent))throw failure(409,'customer_question_pending','The customer must answer the provider question before the agent continues.');
       if (sender === 'agent' && branch.wasit_mode === 'customer' && !['booking','agreement','version'].includes(intent)) throw failure(409,'taken_over','The customer currently controls this branch.');
       const last = await first(tx,'SELECT MAX(created_at) AS at FROM messages WHERE branch_id=$1',[branchId]);
       const at = Math.max(now(),Number(last?.at ?? 0)+1);
@@ -95,7 +97,8 @@ export function createCommunications({ store,now = Date.now,newId = defaultId,ge
       const actualIntent = sender === 'provider' ? 'reply' : sender === 'consumer' ? 'customer' : intent;
       await tx.query('INSERT INTO messages (id,branch_id,direction,intent,text,sender,client_message_id,engine,amounts_json,created_at) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)',
         [id,branchId,direction,actualIntent,body,sender,clientMessageId??null,actualEngine,JSON.stringify(parseAmounts(body).map((amount) => amount.value)),at]);
-      if (sender === 'provider') await tx.query("UPDATE branches SET status='processing',updated_at=$1 WHERE id=$2",[at,branchId]);
+      if (sender === 'provider') await tx.query("UPDATE branches SET status='processing',pending_question=COALESCE($1,pending_question),updated_at=$2 WHERE id=$3",[providerQuestion(body),at,branchId]);
+      else if(sender==='consumer')await tx.query('UPDATE branches SET pending_question=NULL,updated_at=$1 WHERE id=$2',[at,branchId]);
       return {message:messageView(await first(tx,'SELECT * FROM messages WHERE id=$1',[id])),replayed:false};
     });
   }
@@ -125,7 +128,7 @@ export function createCommunications({ store,now = Date.now,newId = defaultId,ge
     const deal = await privateDeal(branchId);
     if (deal && deal.branch_id !== branch.id) throw failure(409,'invalid_transition','The agreement does not belong to this provider branch.');
     return {
-      branch_id:branch.id,provider_label:branch.provider_label,mode:modeOf(branch.mode),
+      branch_id:branch.id,provider_label:branch.provider_label,mode:modeOf(branch.mode),pending_question:branch.pending_question??null,
       active_version_id:deal?.active_version_id??null,pending_version_id:deal?.pending_version_id??null,
       job_public:pick(job,['category','scope','units','location_label','schedule_label']),
       messages:await messages(branchId),

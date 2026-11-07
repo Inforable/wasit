@@ -127,7 +127,10 @@ export function createQuoteService({ store, now = Date.now, newId = id, extracto
   const first = async (db, text, params) => (await db.query(text, params)).rows[0] ?? null;
   async function current(branchId, db = store) {
     const row = await first(db, 'SELECT data_json FROM quotes WHERE branch_id=$1 ORDER BY version DESC LIMIT 1', [branchId]);
-    return row ? JSON.parse(row.data_json) : null;
+    if(!row)return null;
+    const quote=JSON.parse(row.data_json),branch=await first(db,'SELECT pending_question FROM branches WHERE id=$1',[branchId]);
+    if(branch?.pending_question){quote.status='needs_detail';quote.fixed_total=null;quote.unresolved=[...new Set([...(quote.unresolved??[]),'scope'])];}
+    return quote;
   }
   async function processMessage({ branchId, messageId, expectedGeneration, taskId, leaseToken }) {
     const context = await first(store, 'SELECT b.request_id,r.job_json FROM branches b JOIN requests r ON r.id=b.request_id WHERE b.id=$1', [branchId]);
@@ -137,7 +140,7 @@ export function createQuoteService({ store, now = Date.now, newId = id, extracto
     let raw, engine = 'rules', rejected = [];
     if (extractor) {
       try {
-        raw = await extractor({ message: { id: message.id, text: message.text }, job_public: {
+        raw = await extractor({ request_id: context.request_id, message: { id: message.id, text: message.text }, job_public: {
           category: job.category, scope: job.scope, units: job.units, location_label: job.location_label, schedule_label: job.schedule_label,
         }, previous_quote: previous });
         engine = 'model';
@@ -175,6 +178,8 @@ export function createQuoteService({ store, now = Date.now, newId = id, extracto
       }
       const schedule = checked.schedule_label ?? (injection(message.text) || mentionsSchedule(message.text) ? null : previous?.schedule_label ?? null);
       if (!schedule) unresolved.push('schedule');
+      const branchQuestion=await first(tx,'SELECT pending_question FROM branches WHERE id=$1',[branchId]);
+      if(branchQuestion?.pending_question)unresolved.push('scope');
       const required = [...new Set(unresolved)];
       const fixed = required.length ? null : lines.filter((line) => line.kind === 'fixed').reduce((sum, line) => sum + line.quantity * line.unit_price, 0);
       if (fixed != null && !money(fixed)) throw new HttpError(422, 'invalid_price', 'The quoted total exceeds the supported range.');

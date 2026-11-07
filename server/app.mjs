@@ -15,7 +15,8 @@ import { createValidator } from './contracts.mjs';
 import { CATEGORIES, catalog } from './catalog.mjs';
 import { demoScenarios, demoInput } from './demo.mjs';
 import { planningScenarios, referenceFor } from './reference-prices.mjs';
-import { createAgentRuntime } from './agents/index.mjs';
+import { createAgentRouter } from './agent-router.mjs';
+import { createModelPreferences } from './model-preferences.mjs';
 import { createBudgetedFetch } from './model-budget.mjs';
 
 const fail = (status, code, message) => new HttpError(status, code, message);
@@ -23,17 +24,19 @@ const parse = value => value == null ? null : JSON.parse(value);
 const health = () => {
   const models=Object.fromEntries(['buyer','extractor','provider','formatter','support'].map(role=>[role,process.env['OPENAI_MODEL_'+role.toUpperCase()]??process.env.OPENAI_MODEL??null]));
   const enabled=!!process.env.OPENAI_API_KEY&&Object.values(models).some(Boolean);
-  return {ok:true,ai_mode:enabled?'AI available - rules fallback':'Offline - rules',models:enabled?models:null};
+  return {ok:true,ai_mode:enabled?'AI ready':'Wasit ready',models:enabled?models:null};
 };
 
 export async function createBackend(options = {}) {
   const store = options.store ?? await openStore({ sqliteFile: resolve(process.cwd(), process.env.WASIT_DB ?? 'data/wasit.sqlite') });
   const now = options.now ?? Date.now;
   const validate = await createValidator();
-  const agents = options.agents ?? await createAgentRuntime({store,now,fetchImpl:createBudgetedFetch({store,now})});
   const body = (name, input) => validate('api.schema.json#/$defs/' + name, input);
   const auth = createAuth({ store, now, ...options.auth });
   const accounts = createAccounts({store,auth,now});
+  const environment=options.env??process.env;
+  const preferences=createModelPreferences({store,auth,env:environment});
+  const agents=options.agents??createAgentRouter({store,preferences,env:environment,now,fetchImpl:createBudgetedFetch({store,now,fetchImpl:options.fetchImpl??globalThis.fetch,dailyLimit:environment.WASIT_MODEL_DAILY_CALL_LIMIT??500})});
   const directory = createDirectory({ store, now });
   await directory.seed();
   const communications = createCommunications({ store, now, mintToken: auth.mintProviderGrant });
@@ -71,7 +74,7 @@ export async function createBackend(options = {}) {
     if (!row) throw fail(409, 'agreement_required', 'Select and submit an agreement before continuing.');
     return { actor, dealId: row.id };
   }
-  const routes = [...auth.routes,...accounts.routes];
+  const routes = [...auth.routes,...accounts.routes,...preferences.routes];
   const add = (method, pattern, fn) => routes.push([method, pattern, fn]);
   add('GET', /^\/api\/catalog$/, () => ({ categories: CATEGORIES.map(entry => catalog(entry.id)) }));
   add('GET', /^\/api\/reference-prices$/, ({url}) => referenceFor(referenceBook,Object.fromEntries(['category','item_code','unit','scope'].map(key=>[key,url.searchParams.get(key)]))));
@@ -128,7 +131,7 @@ export async function createBackend(options = {}) {
     if(deal.active_version_id!==input.expected_active_version_id)throw fail(409,'stale_version','Reload the active agreement before reading a bill.');
     if(!agents.billPreview)throw fail(503,'bill_reader_unavailable','Image reading is unavailable. Enter the bill items manually and confirm each amount.');
     const request = await first('SELECT job_json FROM requests WHERE id=$1',[deal.request_id]);
-    return agents.billPreview({...input,category:parse(request?.job_json)?.category,terms:deal.versions.find(version=>version.id===deal.active_version_id)?.terms});
+    return agents.billPreview({...input,category:parse(request?.job_json)?.category,terms:deal.versions.find(version=>version.id===deal.active_version_id)?.terms},actor.actor_id);
   });
   add('GET', /^\/api\/requests\/([^/]+)\/planning$/,async ({req,params:[id]}) => {
     const actor=await ownedRequest(req,id),snapshot=await requests.snapshot(id,actor);
@@ -180,7 +183,7 @@ export async function createBackend(options = {}) {
     const [selector,service,method]=actions[input.action];body(selector,input.payload);
     await service[method](id,input.payload,actor);return dealView(id,owner);
   });
-  return {store,auth,accounts,directory,communications,quotes,agreements,lifecycle,requests,agents,routes,health,close:()=>store.close()};
+  return {store,auth,accounts,preferences,directory,communications,quotes,agreements,lifecycle,requests,agents,routes,health,close:()=>store.close()};
 }
 
 // Business services are initialized only for recognized routes; health remains available during configuration.
@@ -188,11 +191,11 @@ export function createRuntimeHandler(options = {}) {
   let backendPromise;
   const backend = () => backendPromise ??= createBackend(options).catch(error => { backendPromise=undefined;throw error; });
   const authPaths = [
-    ['POST',/^\/api\/demo\/session$/],['GET',/^\/api\/auth\/me$/],['POST',/^\/api\/auth\/logout$/],
+    ['POST',/^\/api\/demo\/session$/],['GET',/^\/api\/auth\/me$/],['GET',/^\/api\/auth\/session$/],['POST',/^\/api\/auth\/logout$/],
     ['GET',/^\/api\/requests\/([^/]+)\/branches\/([^/]+)\/link$/],['POST',/^\/api\/requests\/([^/]+)\/branches\/([^/]+)\/link$/],
   ];
   const paths = [
-    ...authPaths,['POST',/^\/api\/auth\/(register|login)$/],['GET',/^\/api\/profile$/],['PUT',/^\/api\/profile$/],['GET',/^\/api\/catalog$/],['GET',/^\/api\/reference-prices$/],['GET',/^\/api\/providers$/],['GET',/^\/api\/requests$/],['POST',/^\/api\/requests$/],
+    ...authPaths,['GET',/^\/api\/settings\/models$/],['PUT',/^\/api\/settings\/models$/],['POST',/^\/api\/auth\/(register|login)$/],['GET',/^\/api\/profile$/],['PUT',/^\/api\/profile$/],['GET',/^\/api\/catalog$/],['GET',/^\/api\/reference-prices$/],['GET',/^\/api\/providers$/],['GET',/^\/api\/requests$/],['POST',/^\/api\/requests$/],
     ['GET',/^\/api\/requests\/([^/]+)$/],['POST',/^\/api\/requests\/([^/]+)\/(clarify|process|finish|deals)$/],
     ['POST',/^\/api\/requests\/([^/]+)\/branches\/([^/]+)\/(takeover|say)$/],
     ['GET',/^\/api\/requests\/([^/]+)\/planning$/],['GET',/^\/api\/deals\/([^/]+)$/],

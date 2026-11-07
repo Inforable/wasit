@@ -29,7 +29,7 @@ export const TABLES = {
     seed_version: 'TEXT', updated_by: 'TEXT', updated_at: 'INTEGER',
   },
   requests: {
-    id: 'TEXT PRIMARY KEY', parent_id: 'TEXT', user_id: 'TEXT', request_text: 'TEXT', input_json: 'TEXT', generation: 'INTEGER NOT NULL DEFAULT 0', archived_at: 'INTEGER',
+    id: 'TEXT PRIMARY KEY', parent_id: 'TEXT', user_id: 'TEXT', request_text: 'TEXT', input_json: 'TEXT', model_config_json: 'TEXT', generation: 'INTEGER NOT NULL DEFAULT 0', archived_at: 'INTEGER',
     status: 'TEXT', job_json: 'TEXT', questions_json: 'TEXT', weights_json: 'TEXT',
     formatter_by: 'TEXT', fair_range_json: 'TEXT', scenario_id: 'TEXT', manual_for: 'TEXT',
     timeout_ms: 'INTEGER', accepted_quote_id: 'TEXT', error: 'TEXT', created_at: 'INTEGER',

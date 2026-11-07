@@ -4,6 +4,7 @@ import { parseAmounts } from './money.mjs';
 import { formatRequest } from './formatter.mjs';
 import { HttpError } from './errors.mjs';
 import { assertTaskGeneration } from './task-guard.mjs';
+import { statesIncluded } from './included.mjs';
 
 const id = (prefix) => prefix + '_' + randomBytes(10).toString('hex');
 const money = (value) => Number.isSafeInteger(value) && value >= 0 && value <= 100_000_000;
@@ -51,7 +52,7 @@ export function extractQuotedFacts({ message, job }) {
   for (const { item, text } of atomicStatements(message.text, job.category)) {
     if (injection(text)) continue;
     const amounts = parseAmounts(text).map((a) => a.value);
-    const included = /\b(?:included|including|free|termasuk|gratis)\b/i.test(text);
+    const included = statesIncluded(text);
     const terms = quantityAndUnit(text, item, job);
     let kind = item.kind === 'addon' ? 'optional' : 'fixed';
     let price = amounts.length === 1 ? amounts[0] : null;
@@ -87,7 +88,7 @@ function sourceMatches(line, message, job) {
     if (!terms || terms.quantity !== line.quantity || terms.unit !== line.unit) return false;
     const amounts = parseAmounts(text).map((amount) => amount.value);
     if (line.kind === 'unknown') return line.unit_price === null;
-    if (line.kind === 'included') return line.unit_price === 0 && /\b(?:included|including|free|termasuk|gratis)\b/i.test(text) && amounts.every((value) => value === 0);
+    if (line.kind === 'included') return line.unit_price === 0 && statesIncluded(text) && amounts.every((value) => value === 0);
     return amounts.length === 1 && amounts[0] === line.unit_price;
   });
 }

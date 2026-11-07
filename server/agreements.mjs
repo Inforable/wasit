@@ -6,6 +6,7 @@ import { catalog, normalizeItem, supportedUnits } from './catalog.mjs';
 import { parseAmounts } from './money.mjs';
 import { stableJson } from '../shared/canonical.mjs';
 import { quoteEligibility } from './comparison.mjs';
+import { statesIncluded } from './included.mjs';
 
 const failure = (status, code, message) => new HttpError(status, code, message);
 const parse = (value) => typeof value === 'string' ? JSON.parse(value) : structuredClone(value);
@@ -105,7 +106,7 @@ export function createAgreements({ store, now = Date.now, newId = defaultId, loa
     if (!message || message.branch_id !== branchId || (message.sender ?? (message.direction === 'in' ? 'provider' : null)) !== 'provider' || !String(message.text).includes(line.source.snippet)) throw failure(422, 'invalid_source', 'Each price must come from this provider branch and an exact source quote.');
     if (normalizeItem(category, line.source.snippet) !== line.item_code || !supportedUnits(category, line.item_code).includes(line.unit)) throw failure(422, 'invalid_source', 'The source must identify the quoted item and a supported unit.');
     if (line.unit_price != null && line.unit_price > 0 && !parseAmounts(line.source.snippet).some((amount) => amount.value === line.unit_price)) throw failure(422, 'invalid_source', 'The quoted price must be present in the source for this item.');
-    if (line.unit_price === 0 && !/(gratis|free|termasuk|included|\b0\b)/i.test(line.source.snippet)) throw failure(422, 'invalid_source', 'A free or included item must be stated explicitly.');
+    if (line.unit_price === 0 && !(statesIncluded(line.source.snippet) || /\b0\b/.test(line.source.snippet))) throw failure(422, 'invalid_source', 'A free or included item must be stated explicitly.');
     return message;
   }
   function quoteTerms(quote, job) {

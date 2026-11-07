@@ -6,10 +6,10 @@ Owner: A. Status reflects foundation work only. Done means tested implementation
 |---|---|---|
 | BE-01 | Done | Bootstrap HTTP/DB/UI, errors, migrations, static SPA and health; tests/build pass. |
 | BE-02 | Partial | Persistent production store, sessions/CSRF, owner checks, provider bearer/expiry. Local tables and client hooks exist; production adapter and auth endpoints remain. |
-| BE-03 | Todo | Five service catalogs, units, money/WIB parsing and request formatter. English chip answers round-trip; maximum budget explicitly confirmed. |
+| BE-03 | Done | Five service catalogs, units, money/WIB parsing and request formatter. English chip answers round-trip; maximum budget explicitly confirmed. |
 | BE-04 | Todo | Provider directory, consent, area/availability, private branches and idempotent messages. Provider payload is an allowlist. |
 | BE-05 | Partial | Quote revisions, provenance and quoted totals. Schema/fixtures exist; extraction pipeline, source validation and pricing service remain. |
-| BE-06 | Todo | Comparison groups and preference ranking. Required costs cannot be unknown; only equivalent scopes are ranked; optional estimates excluded. |
+| BE-06 | Done | Comparison groups and preference ranking. Required costs cannot be unknown; only equivalent scopes are ranked; optional estimates excluded. |
 | BE-07 | Todo | Request orchestration, takeover, finish, event snapshots and serverless-safe task processing. Persist jobs/leases; GET never triggers model mutations. |
 | BE-08 | Partial | Versioned agreements and two-party acceptance. Local immutable terms/acceptance constraints and public digest utility exist; transactional service/routes remain. |
 | BE-09 | Todo | Bill checks, cumulative quantities, changes and explicit budget increase. Pending/rejected proposal preserves active agreement. |
@@ -24,3 +24,9 @@ Owner: A. Status reflects foundation work only. Done means tested implementation
 Dependencies: BE-02/03 → BE-04/05 → BE-06/07 → BE-08 → BE-09 → BE-10/12. BE-11/13/14 can proceed behind fixed contracts. BE-15 grows at every gate. BE-16 initial publication does not imply transactional production readiness.
 
 Common acceptance: integer Rupiah; public provider projection; source-bound facts; immutable version terms; idempotent mutations; explicit expected quote/version. Every money/access/state rule has meaningful verification. No process-local timer or file is production persistence.
+
+## Verification log
+
+- BE-03: seven offline test groups pass; five schema-valid categories, money/WIB, explicit budget and English clarification.
+- BE-06 / AG-03: thirteen tests pass for comparable ranking, latest revision, authorized citations, privacy and model fallback.
+- Combined verification with foundation/storage: 50 tests passed. HTTP request orchestration remains BE-07.

@@ -6,7 +6,7 @@ Runtime model output is untrusted structured data. The server owns prices, state
 |---|---|---|---|
 | AG-01 | B | Todo | Rules extractor with line-specific source/item/unit/quantity checks; unknown remains null. |
 | AG-02 | B | Partial | Model schemas exist; implement model adapter, schema resolution, 8s timeout and fallback. No unsupported provider/model claims. |
-| AG-03 | A | Todo | Buyer policy and model decision: ask_detail/counter/counter_terms/close; target authorization, equivalent competitor citations and server-rendered templates. |
+| AG-03 | A | Done | Buyer policy and model decision: ask_detail/counter/counter_terms/close; target authorization, equivalent competitor citations and server-rendered templates. |
 | AG-04 | B | Todo | Provider simulation using its own price list and floor, visibly labeled; support one human branch. |
 | AG-05 | B | Todo | Formatter fill, bill reader and card explanation adapters; only validated facts/amounts, OCR requires user confirmation. |
 | AG-06 | A | Partial | Event schema/fixtures exist; add persistent task state, engine/source events and rejection reasons. |

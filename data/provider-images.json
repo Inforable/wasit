@@ -4,34 +4,134 @@
     "path": "/providers/ac_service.webp",
     "description": "Illustrative air-conditioner technician cleaning a wall-mounted unit.",
     "synthetic": true,
-    "prompt": "Use case: photorealistic-natural. Asset type: square service-category photo used inside a rounded-square provider avatar on a bright home-services website. Create a SINGLE 1:1 square documentary-style photograph, crisp natural texture, soft bright daylight, warm white and pale neutral contemporary Jakarta home interior, restrained indigo accents. One fictional adult Indonesian service professional wearing clean unbranded indigo workwear. Realistic anatomy and hands. Center the person, tool and service action so they remain recognizable in a small square crop. Friendly competent candid mood, not a studio headshot. Clearly illustrative synthetic demo imagery, not an identifiable real company or person. NO text, lettering, logos, watermarks, brand marks, collage or split panels. Opaque background.\nScene: an adult male air-conditioner technician cleaning a white wall-mounted split AC with its front cover open; visible filter grille, a small cleaning brush and microfiber cloth. Medium-close view with technician face and raised working hands, AC and tool action centrally framed; white wall, tidy daylight apartment. Safe routine cleaning, no exposed electrical wiring."
+    "prompt": "Use case: photorealistic-natural. Asset type: square service-category photo used inside a rounded-square provider avatar on a bright home-services website. Create a SINGLE 1:1 square documentary-style photograph, crisp natural texture, soft bright daylight, warm white and pale neutral contemporary Jakarta home interior, restrained indigo accents. One fictional adult Indonesian service professional wearing clean unbranded indigo workwear. Realistic anatomy and hands. Center the person, tool and service action so they remain recognizable in a small square crop. Friendly competent candid mood, not a studio headshot. Clearly illustrative synthetic demo imagery, not an identifiable real company or person. NO text, lettering, logos, watermarks, brand marks, collage or split panels. Opaque background.\nScene: an adult male air-conditioner technician cleaning a white wall-mounted split AC with its front cover open; visible filter grille, a small cleaning brush and microfiber cloth. Medium-close view with technician face and raised working hands, AC and tool action centrally framed; white wall, tidy daylight apartment. Safe routine cleaning, no exposed electrical wiring.",
+    "provider_id": "provider_ac_service_human",
+    "provider_name": "Dingin Jaya Teknik"
   },
   {
     "category": "washer",
     "path": "/providers/washer.webp",
     "description": "Illustrative appliance technician inspecting a front-loading washing machine.",
     "synthetic": true,
-    "prompt": "Use case: photorealistic-natural. Asset type: square service-category photo used inside a rounded-square provider avatar on a bright home-services website. Create a SINGLE 1:1 square documentary-style photograph, crisp natural texture, soft bright daylight, warm white and pale neutral contemporary Jakarta home interior, restrained indigo accents. One fictional adult Indonesian service professional wearing clean unbranded indigo workwear. Realistic anatomy and hands. Center the person, tool and service action so they remain recognizable in a small square crop. Friendly competent candid mood, not a studio headshot. Clearly illustrative synthetic demo imagery, not an identifiable real company or person. NO text, lettering, logos, watermarks, brand marks, collage or split panels. Opaque background.\nScene: an adult male appliance technician crouched beside an unplugged white front-loading washing machine, carefully inspecting the lower service panel with a screwdriver. Washer round door, technician face and hands clearly visible in the central square composition; bright tidy laundry corner, no visible brand."
+    "prompt": "Use case: photorealistic-natural. Asset type: square service-category photo used inside a rounded-square provider avatar on a bright home-services website. Create a SINGLE 1:1 square documentary-style photograph, crisp natural texture, soft bright daylight, warm white and pale neutral contemporary Jakarta home interior, restrained indigo accents. One fictional adult Indonesian service professional wearing clean unbranded indigo workwear. Realistic anatomy and hands. Center the person, tool and service action so they remain recognizable in a small square crop. Friendly competent candid mood, not a studio headshot. Clearly illustrative synthetic demo imagery, not an identifiable real company or person. NO text, lettering, logos, watermarks, brand marks, collage or split panels. Opaque background.\nScene: an adult male appliance technician crouched beside an unplugged white front-loading washing machine, carefully inspecting the lower service panel with a screwdriver. Washer round door, technician face and hands clearly visible in the central square composition; bright tidy laundry corner, no visible brand.",
+    "provider_id": "provider_washer_human",
+    "provider_name": "Putar Jaya Elektronik"
   },
   {
     "category": "plumbing",
     "path": "/providers/plumbing.webp",
     "description": "Illustrative plumber checking the pipe joint beneath a kitchen sink.",
     "synthetic": true,
-    "prompt": "Use case: photorealistic-natural. Asset type: square service-category photo used inside a rounded-square provider avatar on a bright home-services website. Create a SINGLE 1:1 square documentary-style photograph, crisp natural texture, soft bright daylight, warm white and pale neutral contemporary Jakarta home interior, restrained indigo accents. One fictional adult Indonesian service professional wearing clean unbranded indigo workwear. Realistic anatomy and hands. Center the person, tool and service action so they remain recognizable in a small square crop. Friendly competent candid mood, not a studio headshot. Clearly illustrative synthetic demo imagery, not an identifiable real company or person. NO text, lettering, logos, watermarks, brand marks, collage or split panels. Opaque background.\nScene: an adult male plumber crouched at an open kitchen-sink cabinet, checking the clean P-trap pipe joint with an adjustable wrench. White sink edge and pipework visible, technician face and hands in the central composition; bright tidy neutral-tile kitchen, realistic professional maintenance."
+    "prompt": "Use case: photorealistic-natural. Asset type: square service-category photo used inside a rounded-square provider avatar on a bright home-services website. Create a SINGLE 1:1 square documentary-style photograph, crisp natural texture, soft bright daylight, warm white and pale neutral contemporary Jakarta home interior, restrained indigo accents. One fictional adult Indonesian service professional wearing clean unbranded indigo workwear. Realistic anatomy and hands. Center the person, tool and service action so they remain recognizable in a small square crop. Friendly competent candid mood, not a studio headshot. Clearly illustrative synthetic demo imagery, not an identifiable real company or person. NO text, lettering, logos, watermarks, brand marks, collage or split panels. Opaque background.\nScene: an adult male plumber crouched at an open kitchen-sink cabinet, checking the clean P-trap pipe joint with an adjustable wrench. White sink edge and pipework visible, technician face and hands in the central composition; bright tidy neutral-tile kitchen, realistic professional maintenance.",
+    "provider_id": "provider_plumbing_human",
+    "provider_name": "Tirta Ledeng"
   },
   {
     "category": "electrical",
     "path": "/providers/electrical.webp",
     "description": "Illustrative electrician checking an unpowered outlet with a multimeter.",
     "synthetic": true,
-    "prompt": "Use case: photorealistic-natural. Asset type: square service-category photo used inside a rounded-square provider avatar on a bright home-services website. Create a SINGLE 1:1 square documentary-style photograph, crisp natural texture, soft bright daylight, warm white and pale neutral contemporary Jakarta home interior, restrained indigo accents. One fictional adult Indonesian service professional wearing clean unbranded indigo workwear. Realistic anatomy and hands. Center the person, tool and service action so they remain recognizable in a small square crop. Friendly competent candid mood, not a studio headshot. Clearly illustrative synthetic demo imagery, not an identifiable real company or person. NO text, lettering, logos, watermarks, brand marks, collage or split panels. Opaque background.\nScene: an adult male electrician checking a visibly powered-off detached wall-outlet faceplate on a clean work area with a multimeter and insulated hand tool. Safe unenergized demonstration, protective work gloves, no live exposed conductor or sparks. Face, multimeter and hands centrally framed in a bright neutral home interior, no readable display text."
+    "prompt": "Use case: photorealistic-natural. Asset type: square service-category photo used inside a rounded-square provider avatar on a bright home-services website. Create a SINGLE 1:1 square documentary-style photograph, crisp natural texture, soft bright daylight, warm white and pale neutral contemporary Jakarta home interior, restrained indigo accents. One fictional adult Indonesian service professional wearing clean unbranded indigo workwear. Realistic anatomy and hands. Center the person, tool and service action so they remain recognizable in a small square crop. Friendly competent candid mood, not a studio headshot. Clearly illustrative synthetic demo imagery, not an identifiable real company or person. NO text, lettering, logos, watermarks, brand marks, collage or split panels. Opaque background.\nScene: an adult male electrician checking a visibly powered-off detached wall-outlet faceplate on a clean work area with a multimeter and insulated hand tool. Safe unenergized demonstration, protective work gloves, no live exposed conductor or sparks. Face, multimeter and hands centrally framed in a bright neutral home interior, no readable display text.",
+    "provider_id": "provider_electrical_human",
+    "provider_name": "Terang Listrik"
   },
   {
     "category": "cleaning",
     "path": "/providers/cleaning.webp",
     "description": "Illustrative home-cleaning professional wiping a table with a microfiber cloth.",
     "synthetic": true,
-    "prompt": "Use case: photorealistic-natural. Asset type: square service-category photo used inside a rounded-square provider avatar on a bright home-services website. Create a SINGLE 1:1 square documentary-style photograph, crisp natural texture, soft bright daylight, warm white and pale neutral contemporary Jakarta home interior, restrained indigo accents. One fictional adult Indonesian service professional wearing clean unbranded indigo workwear. Realistic anatomy and hands. Center the person, tool and service action so they remain recognizable in a small square crop. Friendly competent candid mood, not a studio headshot. Clearly illustrative synthetic demo imagery, not an identifiable real company or person. NO text, lettering, logos, watermarks, brand marks, collage or split panels. Opaque background.\nScene: an adult female home-cleaning professional wiping a pale wooden table with a teal microfiber cloth, clean indigo work shirt and simple protective gloves. Face, wiping hand and cloth centrally composed, bright sunlit tidy living room with soft white walls and subtle indoor plant in the background, natural candid motion."
+    "prompt": "Use case: photorealistic-natural. Asset type: square service-category photo used inside a rounded-square provider avatar on a bright home-services website. Create a SINGLE 1:1 square documentary-style photograph, crisp natural texture, soft bright daylight, warm white and pale neutral contemporary Jakarta home interior, restrained indigo accents. One fictional adult Indonesian service professional wearing clean unbranded indigo workwear. Realistic anatomy and hands. Center the person, tool and service action so they remain recognizable in a small square crop. Friendly competent candid mood, not a studio headshot. Clearly illustrative synthetic demo imagery, not an identifiable real company or person. NO text, lettering, logos, watermarks, brand marks, collage or split panels. Opaque background.\nScene: an adult female home-cleaning professional wiping a pale wooden table with a teal microfiber cloth, clean indigo work shirt and simple protective gloves. Face, wiping hand and cloth centrally composed, bright sunlit tidy living room with soft white walls and subtle indoor plant in the background, natural candid motion.",
+    "provider_id": "provider_cleaning_human",
+    "provider_name": "Kinclong Home Care"
+  },
+  {
+    "category": "ac_service",
+    "provider_id": "provider_ac_service_script_clear",
+    "provider_name": "Sejuk Prima Service",
+    "path": "/providers/ac_service_script_clear.webp",
+    "description": "Adult Indonesian male AC technician about 45 with short salt-and-pepper hair, teal polo, inspecting an AC wall-unit filter at shoulder level in a bright apartment.",
+    "synthetic": true,
+    "prompt": "Use case: photorealistic-natural. Asset: single square provider avatar photograph for a home-services demo. Adult Indonesian male AC technician about 45 with short salt-and-pepper hair, teal polo, inspecting an AC wall-unit filter at shoulder level in a bright apartment. One fictional adult professional, natural Indonesian home setting and daylight, candid competent expression, face and hands clearly centrally framed for a small rounded-square avatar. Realistic anatomy, correct safe tools. No text, logos, brands, watermarks, montage, or split panels. Distinct person and activity. Opaque background."
+  },
+  {
+    "category": "ac_service",
+    "provider_id": "provider_ac_service_script_detail",
+    "provider_name": "Rapi AC Care",
+    "path": "/providers/ac_service_script_detail.webp",
+    "description": "Young adult Indonesian woman AC maintenance professional in navy coveralls, holding a cleaning brush beside an open split AC in a cream-walled home.",
+    "synthetic": true,
+    "prompt": "Use case: photorealistic-natural. Asset: single square provider avatar photograph for a home-services demo. Young adult Indonesian woman AC maintenance professional in navy coveralls, holding a cleaning brush beside an open split AC in a cream-walled home. One fictional adult professional, natural Indonesian home setting and daylight, candid competent expression, face and hands clearly centrally framed for a small rounded-square avatar. Realistic anatomy, correct safe tools. No text, logos, brands, watermarks, montage, or split panels. Distinct person and activity. Opaque background."
+  },
+  {
+    "category": "washer",
+    "provider_id": "provider_washer_script_clear",
+    "provider_name": "Bersih Putar Service",
+    "path": "/providers/washer_script_clear.webp",
+    "description": "Adult Indonesian woman appliance technician in teal work shirt, kneeling beside an unplugged white front-load washing machine and checking its drain filter.",
+    "synthetic": true,
+    "prompt": "Use case: photorealistic-natural. Asset: single square provider avatar photograph for a home-services demo. Adult Indonesian woman appliance technician in teal work shirt, kneeling beside an unplugged white front-load washing machine and checking its drain filter. One fictional adult professional, natural Indonesian home setting and daylight, candid competent expression, face and hands clearly centrally framed for a small rounded-square avatar. Realistic anatomy, correct safe tools. No text, logos, brands, watermarks, montage, or split panels. Distinct person and activity. Opaque background."
+  },
+  {
+    "category": "washer",
+    "provider_id": "provider_washer_script_detail",
+    "provider_name": "Rapi Washer Care",
+    "path": "/providers/washer_script_detail.webp",
+    "description": "Middle-aged Indonesian male appliance professional with glasses and gray work shirt examining the control panel of a top-loading washing machine, bright home laundry.",
+    "synthetic": true,
+    "prompt": "Use case: photorealistic-natural. Asset: single square provider avatar photograph for a home-services demo. Middle-aged Indonesian male appliance professional with glasses and gray work shirt examining the control panel of a top-loading washing machine, bright home laundry. One fictional adult professional, natural Indonesian home setting and daylight, candid competent expression, face and hands clearly centrally framed for a small rounded-square avatar. Realistic anatomy, correct safe tools. No text, logos, brands, watermarks, montage, or split panels. Distinct person and activity. Opaque background."
+  },
+  {
+    "category": "plumbing",
+    "provider_id": "provider_plumbing_script_clear",
+    "provider_name": "Pipa Prima Service",
+    "path": "/providers/plumbing_script_clear.webp",
+    "description": "Adult Indonesian plumber woman in navy workwear checking a kitchen tap with adjustable wrench, tidy white tile kitchen, medium-close view.",
+    "synthetic": true,
+    "prompt": "Use case: photorealistic-natural. Asset: single square provider avatar photograph for a home-services demo. Adult Indonesian plumber woman in navy workwear checking a kitchen tap with adjustable wrench, tidy white tile kitchen, medium-close view. One fictional adult professional, natural Indonesian home setting and daylight, candid competent expression, face and hands clearly centrally framed for a small rounded-square avatar. Realistic anatomy, correct safe tools. No text, logos, brands, watermarks, montage, or split panels. Distinct person and activity. Opaque background."
+  },
+  {
+    "category": "plumbing",
+    "provider_id": "provider_plumbing_script_detail",
+    "provider_name": "Rapi Plumbing Care",
+    "path": "/providers/plumbing_script_detail.webp",
+    "description": "Older Indonesian male plumber in green work shirt fitting a dry pipe joint below a white bathroom basin, medium-close view.",
+    "synthetic": true,
+    "prompt": "Use case: photorealistic-natural. Asset: single square provider avatar photograph for a home-services demo. Older Indonesian male plumber in green work shirt fitting a dry pipe joint below a white bathroom basin, medium-close view. One fictional adult professional, natural Indonesian home setting and daylight, candid competent expression, face and hands clearly centrally framed for a small rounded-square avatar. Realistic anatomy, correct safe tools. No text, logos, brands, watermarks, montage, or split panels. Distinct person and activity. Opaque background."
+  },
+  {
+    "category": "electrical",
+    "provider_id": "provider_electrical_script_clear",
+    "provider_name": "Arus Prima Service",
+    "path": "/providers/electrical_script_clear.webp",
+    "description": "Adult Indonesian woman electrician in slate work shirt and protective gloves using an insulated hand tool beside an unpowered detached outlet on a workbench, no exposed live wires.",
+    "synthetic": true,
+    "prompt": "Use case: photorealistic-natural. Asset: single square provider avatar photograph for a home-services demo. Adult Indonesian woman electrician in slate work shirt and protective gloves using an insulated hand tool beside an unpowered detached outlet on a workbench, no exposed live wires. One fictional adult professional, natural Indonesian home setting and daylight, candid competent expression, face and hands clearly centrally framed for a small rounded-square avatar. Realistic anatomy, correct safe tools. No text, logos, brands, watermarks, montage, or split panels. Distinct person and activity. Opaque background."
+  },
+  {
+    "category": "electrical",
+    "provider_id": "provider_electrical_script_detail",
+    "provider_name": "Rapi Electrical Care",
+    "path": "/providers/electrical_script_detail.webp",
+    "description": "Middle-aged Indonesian male electrician in green uniform holding a multimeter beside a small visibly switched-off home breaker panel, no exposed live wires.",
+    "synthetic": true,
+    "prompt": "Use case: photorealistic-natural. Asset: single square provider avatar photograph for a home-services demo. Middle-aged Indonesian male electrician in green uniform holding a multimeter beside a small visibly switched-off home breaker panel, no exposed live wires. One fictional adult professional, natural Indonesian home setting and daylight, candid competent expression, face and hands clearly centrally framed for a small rounded-square avatar. Realistic anatomy, correct safe tools. No text, logos, brands, watermarks, montage, or split panels. Distinct person and activity. Opaque background."
+  },
+  {
+    "category": "cleaning",
+    "provider_id": "provider_cleaning_script_clear",
+    "provider_name": "Bersih Prima Home",
+    "path": "/providers/cleaning_script_clear.webp",
+    "description": "Adult Indonesian male home-cleaning professional in teal polo wiping a large kitchen counter with a microfiber cloth, sunlit home.",
+    "synthetic": true,
+    "prompt": "Use case: photorealistic-natural. Asset: single square provider avatar photograph for a home-services demo. Adult Indonesian male home-cleaning professional in teal polo wiping a large kitchen counter with a microfiber cloth, sunlit home. One fictional adult professional, natural Indonesian home setting and daylight, candid competent expression, face and hands clearly centrally framed for a small rounded-square avatar. Realistic anatomy, correct safe tools. No text, logos, brands, watermarks, montage, or split panels. Distinct person and activity. Opaque background."
+  },
+  {
+    "category": "cleaning",
+    "provider_id": "provider_cleaning_script_detail",
+    "provider_name": "Rapi Home Care",
+    "path": "/providers/cleaning_script_detail.webp",
+    "description": "Adult Indonesian woman home-cleaning professional wearing a neat beige headscarf and navy workwear, cleaning a bright living-room window with a squeegee.",
+    "synthetic": true,
+    "prompt": "Use case: photorealistic-natural. Asset: single square provider avatar photograph for a home-services demo. Adult Indonesian woman home-cleaning professional wearing a neat beige headscarf and navy workwear, cleaning a bright living-room window with a squeegee. One fictional adult professional, natural Indonesian home setting and daylight, candid competent expression, face and hands clearly centrally framed for a small rounded-square avatar. Realistic anatomy, correct safe tools. No text, logos, brands, watermarks, montage, or split panels. Distinct person and activity. Opaque background."
   }
 ]

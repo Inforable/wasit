@@ -1,6 +1,7 @@
 import { Component, useState } from 'react';
 import { MessageCircle, Phone, MessagesSquare, AlertTriangle, ShieldCheck } from 'lucide-react';
 import { rp, initials, avatarBg } from '../lib/format.js';
+import { providerPhoto } from '../lib/provider-photos.js';
 
 export function Cta({ children, busy, ...props }) {
   return (
@@ -26,9 +27,8 @@ export function ChannelBadge({ channel, small = false }) {
   );
 }
 
-const PHOTO_CATEGORIES = new Set(['ac_service','washer','plumbing','electrical','cleaning']);
 export function Avatar({ name, size = 64, category }) {
-  const src = PHOTO_CATEGORIES.has(category) ? '/providers/' + category + '.webp' : null;
+  const src = providerPhoto(name, category);
   const [failed, setFailed] = useState(null);
   return <span className="avatar" style={{ width:size,height:size,borderRadius:size*0.31,fontSize:size*0.34,background:avatarBg(name),overflow:'hidden' }} aria-hidden="true">
     {src && failed!==src ? <img src={src} alt="" width={size} height={size} loading="lazy" decoding="async" fetchPriority="low" onError={()=>setFailed(src)} style={{width:'100%',height:'100%',objectFit:'cover',borderRadius:'inherit'}}/> : initials(name)}

@@ -42,6 +42,7 @@ export async function seedProviders(store, { now = Date.now } = {}) {
 export function scriptedReply(input, intent, job, prices, options = {}) {
   const provider = input?.provider ?? input;
   const detailKey = input?.provider ? input.detailKey : options.detailKey;
+  const term = input?.provider ? input.term : options.term;
   if (input?.provider) ({ intent, job, prices } = input);
   prices ??= seedPrices(provider);
   if (provider.persona === 'human') return null;
@@ -50,12 +51,21 @@ export function scriptedReply(input, intent, job, prices, options = {}) {
   const includedLabel = book.items.find((item) => item.id === book.includedItem).label;
   const unit = book.items.find((item) => item.id === book.baseItem).units[0];
   if (intent === 'counter') return `${baseLabel}: ${job.units} ${unit} at ${formatRp(prices.floor)} per ${unit}. This is my final service price. Transport ${prices.transport == null ? 'has not been quoted' : formatRp(prices.transport) + ' per job'}.`;
-  if (intent === 'counter_terms') return 'I can extend the service warranty to 60 days. Please confirm the complete terms before booking.';
+  if (intent === 'counter_terms') {
+    if (term === 'waive_transport') return prices.transport == null
+      ? 'Transport has not been quoted. Please confirm the exact service area first.'
+      : 'Transport: 1 job at Rp0 per job, waived for the quoted scope.';
+    if (term === 'longer_warranty' && Number.isInteger(prices.warranty_days) && prices.warranty_days >= 0 && prices.warranty_days <= 365) {
+      const days = Math.max(prices.warranty_days, Math.min(60, prices.warranty_days + 30));
+      return 'Service warranty: ' + days + ' days. Review these terms before booking.';
+    }
+    return 'Please specify the transport or warranty term you would like me to review.';
+  }
   if (intent === 'booking') return 'Thank you. I will review and accept the agreement before the work starts.';
   if (detailKey === 'transport' && prices.transport == null) return 'I need the exact service area before quoting transport. Transport is not free unless I confirm it.';
   const extras = Object.entries(prices.addons ?? {}).map(([id, amount]) => {
     const item = book.items.find((entry) => entry.id === id);
     return amount == null ? item.label + ': price not yet quoted' : item.label + ': 1 ' + item.units[0] + ' at ' + formatRp(amount) + ' per ' + item.units[0] + ', only if needed and approved';
   }).join('. ');
-  return `${baseLabel}: ${job.units} ${unit} at ${formatRp(prices.base)} per ${unit}. ${prices.includes_item ? includedLabel + ': 1 ' + book.items.find((item) => item.id === book.includedItem).units[0] + ' included' : includedLabel + ' has not been quoted'}. Transport ${prices.transport == null ? 'depends on the location and has not been quoted' : formatRp(prices.transport) + ' per job'}. Available: ${job.schedule_label}. ${extras}.`;
+  return `${baseLabel}: ${job.units} ${unit} at ${formatRp(prices.base)} per ${unit}. ${prices.includes_item ? includedLabel + ': 1 ' + book.items.find((item) => item.id === book.includedItem).units[0] + ' included' : includedLabel + ' has not been quoted'}. Transport ${prices.transport == null ? 'depends on the location and has not been quoted' : formatRp(prices.transport) + ' per job'}. Available: ${job.schedule_label}. ${Number.isInteger(prices.warranty_days) && prices.warranty_days >= 0 && prices.warranty_days <= 365 ? prices.warranty_days === 0 ? 'No service warranty.' : 'Service warranty: ' + prices.warranty_days + ' days.' : 'Service warranty has not been quoted.'} ${extras}.`;
 }

@@ -3,7 +3,9 @@ import { stableJson } from '../shared/canonical.mjs';
 
 // Explicit allowlist: consumer spending limits never enter the provider digest or payload.
 export function publicTerms(terms) {
-  return Object.fromEntries(['scope', 'units', 'location_label', 'schedule_label', 'lines', 'committed_total', 'change_reason'].map((key) => [key, terms[key]]));
+  const keys = ['scope', 'units', 'location_label', 'schedule_label', 'lines', 'committed_total', 'change_reason'];
+  for (const key of ['warranty_days', 'warranty_source']) if (Object.hasOwn(terms, key)) keys.push(key);
+  return Object.fromEntries(keys.map((key) => [key, terms[key]]));
 }
 export function termsDigest(terms) {
   return createHash('sha256').update(stableJson(publicTerms(terms)), 'utf8').digest('hex');

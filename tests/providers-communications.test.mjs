@@ -224,3 +224,13 @@ test('branch creation cannot commit after its request generation is replaced',as
  await store.query('UPDATE requests SET archived_at=$1 WHERE id=$2',[NOW,request.id]);
  await assert.rejects(communications.createBranches(request.id,request,providers),e=>e.code==='stale_task');
 });
+
+test('non-price provider replies answer the requested term and never swap warranty for transport',async t=>{
+  const {directory}=await setup(t),provider=PROVIDERS.find(entry=>entry.persona==='script_clear'&&entry.category==='ac_service'),prices=await directory.pricesOf(provider.id),request=job();
+  const {extractWarrantyFact}=await import('../server/warranty-terms.mjs'),{extractQuotedFacts}=await import('../server/quote-service.mjs');
+  const initial=scriptedReply({provider,job:request,prices,intent:'rfq'});assert.equal(extractWarrantyFact({id:'msg_initial001',text:initial}).warranty_days,30);
+  const transport=scriptedReply({provider,job:request,prices,intent:'counter_terms',term:'waive_transport'}),transportFact=extractQuotedFacts({message:{id:'msg_waiver001',text:transport},job:request}).lines.find(line=>line.item_code==='transport');
+  assert.equal(transportFact.unit_price,0);assert.equal(extractWarrantyFact({id:'msg_waiver001',text:transport}).mentioned,false);
+  const warranty=scriptedReply({provider,job:request,prices,intent:'counter_terms',term:'longer_warranty'});assert.equal(extractWarrantyFact({id:'msg_extension01',text:warranty}).warranty_days,60);assert.equal(extractQuotedFacts({message:{id:'msg_extension01',text:warranty},job:request}).lines.some(line=>line.item_code==='transport'),false);
+  const unspecified=scriptedReply({provider,job:request,prices,intent:'counter_terms'});assert.equal(extractWarrantyFact({id:'msg_unspecified1',text:unspecified}).warranty_days,null);assert.ok(!unspecified.includes('60'));
+});

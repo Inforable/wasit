@@ -195,3 +195,13 @@ test('zero-budget free explicitly quoted scope remains eligible', () => {
   assert.equal(result.cards[0].parts.price, 100);
   assert.equal(quoteEligibility(zeroJob, free).total, 0);
 });
+
+test('warranty counter-terms require their own recorded provider source and allow that source in decisions',async()=>{
+  const offer=structuredClone(original),transport=offer.lines.find(line=>line.item_code==='transport');
+  transport.kind='included';transport.unit_price=0;offer.fixed_total=90000;offer.warranty_days=30;offer.warranty_source={message_id:'msg_warranty01',snippet:'Service warranty 30 days.'};
+  const ctx=context(offer,{competitorQuotes:[],branch:{countered:true}}),policy=allowedBuyerActions(ctx);
+  assert.deepEqual(policy.available_terms,['longer_warranty']);let sent;
+  const result=await decideBuyer(ctx,async call=>{sent=JSON.parse(call.user);return {action:'counter_terms',detail_key:null,cite:'longer_warranty',source_message_ids:['msg_warranty01'],reason:'Ask about the explicitly quoted warranty.'};});
+  assert.equal(result.engine,'model');assert.ok(sent.own_source_message_ids.includes('msg_warranty01'));
+  delete ctx.quote.warranty_source;assert.equal(allowedBuyerActions(ctx).available_terms.includes('longer_warranty'),false);
+});

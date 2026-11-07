@@ -106,6 +106,71 @@ test('source verification rejects invented zero and snippets that remove a negat
  }
 });
 
+test('standalone no and conditional zero cannot authorize free work or a trimmed model source',()=>{
+ for(const text of ['No inspection is included','No transport included','Transport Rp0 if approved','Transport Rp0 unless another visit is needed','Transport Rp0 jika disetujui','Transport Rp0 kalau disetujui','Transport Rp0 apabila disetujui']){
+  const msg=message(text),line=extractQuotedFacts({message:msg,job}).lines[0];
+  assert.ok(line,text);assert.equal(line.kind,'unknown',text);assert.equal(line.unit_price,null,text);
+  assert.equal(isExplicitlyIncluded(text),false,text);
+  const snippet=text.startsWith('No ')?text.slice(3):text.split(/\s+(?:if|unless|jika|kalau|apabila)\s+/)[0];
+  for(const kind of ['included','fixed']){
+   const forged={...line,kind,unit_price:0,source:{message_id:msg.id,snippet}};
+   assert.equal(validateQuotedFacts({extraction:{lines:[forged]},message:msg,job}).lines.length,0,text+' '+kind);
+  }
+ }
+ for(const text of ['Transport no charge','Transport at no extra charge','Transport at no additional charge','Transport is not only included but free']){
+  const line=extractQuotedFacts({message:message(text),job}).lines[0];assert.equal(line.kind,'included',text);assert.equal(line.unit_price,0,text);
+ }
+ const unconditional=extractQuotedFacts({message:message('Transport Rp0'),job}).lines[0];assert.equal(unconditional.kind,'fixed');assert.equal(unconditional.unit_price,0);
+});
+
+test('inspection references in a deferred service price do not invent a separate inspection charge',()=>{
+ const washer={...job,category:'washer'};
+ for(const phrase of ['after inspection','following the inspection','pending inspection','until inspection','setelah pemeriksaan']){
+  const msg=message('Washing machine service: 1 unit, price '+phrase+'.');
+  const facts=extractQuotedFacts({message:msg,job:washer});
+  assert.deepEqual(facts.lines.map(line=>[line.item_code,line.kind,line.unit_price]),[['servis_mesin_cuci','unknown',null]],phrase);
+ }
+ const explicit=extractQuotedFacts({message:message('Inspection included.'),job:washer});assert.equal(explicit.lines[0].item_code,'cek_mesin_cuci');assert.equal(explicit.lines[0].kind,'included');
+});
+
+test('warranty changes require complete provider sources and uncertain updates replace prior benefits',async()=>{
+ const store=await openStore({sqliteFile:':memory:',databaseUrl:'',production:false});
+ try{
+  await store.query('INSERT INTO requests(id,user_id,job_json,status) VALUES($1,$2,$3,$4)',[job.id,'consumer_demo01',JSON.stringify(job),'negotiating']);
+  await store.query("INSERT INTO branches(id,request_id,mode,status) VALUES($1,$2,'human','processing')",['branch_human01',job.id]);
+  const service=createQuoteService({store});let sequence=0;
+  const submit=async text=>{const msg=message(text);msg.id='msg_warranty'+(++sequence);await store.query("INSERT INTO messages(id,branch_id,sender,text,created_at,direction) VALUES($1,$2,'provider',$3,$4,'in')",[msg.id,msg.branch_id,msg.text,sequence]);return(await service.processMessage({branchId:msg.branch_id,messageId:msg.id})).quote;};
+  let quote=await submit('AC cleaning Rp90.000; transport included; inspection included; '+job.schedule_label+'; Warranty 30 days.');validate('quote.schema.json',quote);assert.equal(quote.warranty_days,30);const original=structuredClone(quote);
+  quote=await submit('Thank you.');assert.equal(quote.warranty_days,30);assert.deepEqual(quote.warranty_source,original.warranty_source);
+  quote=await submit('Warranty 60 days if approved.');assert.equal(quote.warranty_days,null);assert.equal(quote.warranty_source,null);
+  quote=await submit('Warranty 60 days.');assert.equal(quote.warranty_days,60);assert.equal(quote.warranty_source.snippet,'Warranty 60 days.');
+  quote=await submit('No warranty.');assert.equal(quote.warranty_days,0);validate('quote.schema.json',quote);
+  const forged={...quote,id:'quote_forgedwarranty01',revision:20,warranty_days:60,warranty_source:{message_id:'msg_warranty3',snippet:'Warranty 60 days'}};
+  await store.query("INSERT INTO quotes(id,branch_id,request_id,version,data_json,status) VALUES($1,$2,$3,$4,$5,'ready')",[forged.id,'branch_human01',job.id,forged.revision,JSON.stringify(forged)]);
+  const checked=await service.current('branch_human01');assert.equal(checked.warranty_days,null);assert.equal(checked.warranty_source,null);
+  assert.deepEqual(JSON.parse((await store.query('SELECT data_json FROM quotes WHERE id=$1',[original.id])).rows[0].data_json),original);
+ }finally{await store.close();}
+});
+
+test('a standalone denial or conditional zero invalidates a prior ready quote without changing history',async()=>{
+ const store=await openStore({sqliteFile:':memory:',databaseUrl:'',production:false});
+ try{
+  await store.query('INSERT INTO requests(id,user_id,job_json,status) VALUES($1,$2,$3,$4)',[job.id,'consumer_demo01',JSON.stringify(job),'negotiating']);
+  await store.query("INSERT INTO branches(id,request_id,mode,status) VALUES($1,$2,'human','processing')",['branch_human01',job.id]);
+  const service=createQuoteService({store});let number=0;
+  const submit=async text=>{const msg=message(text);msg.id='msg_conditional'+(++number);await store.query("INSERT INTO messages(id,branch_id,sender,text,created_at,direction) VALUES($1,$2,'provider',$3,$4,'in')",[msg.id,msg.branch_id,msg.text,number]);return (await service.processMessage({branchId:msg.branch_id,messageId:msg.id})).quote;};
+  const original=await submit('AC cleaning Rp90.000; transport included; inspection included; '+job.schedule_label);assert.equal(original.status,'ready');
+  for(const text of ['No transport included','Transport Rp0 if approved','No inspection is included']){
+   const quote=await submit(text);assert.equal(quote.status,'needs_detail',text);assert.equal(quote.fixed_total,null,text);
+   const code=text.includes('inspection')?'cek_freon':'transport';assert.equal(quote.lines.find(line=>line.item_code===code).unit_price,null,text);
+  }
+  assert.deepEqual(JSON.parse((await store.query('SELECT data_json FROM quotes WHERE id=$1',[original.id])).rows[0].data_json),original);
+  const legacy={...original,id:'quote_conditionallegacy01',revision:10,lines:original.lines.map(line=>line.item_code==='transport'?{...line,kind:'fixed',source:{message_id:'msg_conditional3',snippet:'Transport Rp0'}}:line)};
+  await store.query("INSERT INTO quotes(id,branch_id,request_id,version,data_json,status) VALUES($1,$2,$3,$4,$5,'ready')",[legacy.id,'branch_human01',job.id,legacy.revision,JSON.stringify(legacy)]);
+  const checked=await service.current('branch_human01');assert.equal(checked.status,'needs_detail');assert.equal(checked.fixed_total,null);assert.equal(checked.lines.find(line=>line.item_code==='transport').unit_price,null);
+ }finally{await store.close();}
+});
+
 test('HTTP provider correction invalidates a prior free quote and prevents selection or unsupported counter',async t=>{
  const store=await openStore({sqliteFile:':memory:',databaseUrl:'',production:false}),origin='http://localhost:5180',at=1794012900000;
  const app=await createBackend({store,env:{},agents:{},now:()=>at,auth:{secure:false,allowedOrigins:[origin],publicOrigin:origin}});

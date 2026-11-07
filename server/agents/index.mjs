@@ -74,15 +74,15 @@ export async function createAgentRuntime(options={}) {
       return useful?{...checked,engine:'model'}:{...rules,engine:'rules',rejected:'The suggested fields did not add a verified request fact.'};
     }catch(cause){return {...rules,engine:'rules',rejected:failure(cause)};}
   }
-  async function provider({provider:profile,job,prices,intent='rfq',detailKey}={}) {
-    const baseline=scriptedReply({provider:profile,job,prices,intent,detailKey});
+  async function provider({provider:profile,job,prices,intent='rfq',detailKey,term=null}={}) {
+    const baseline=scriptedReply({provider:profile,job,prices,intent,detailKey,term});
     if(!baseline||!available('provider'))return {message:baseline,engine:'rules'};
     // A model selects between verified phrasings; it cannot invent a lower floor or extra service promise.
     const candidates=[baseline,'Thank you for asking. '+baseline].filter(value=>value.length<=1000);
     try{
       const result=await structured({role:'provider',name:'wasit_provider',schema:schemas.provider,maxOutputTokens:700,
         system:SOURCE_RULES+' You simulate this provider only. Select exactly one of approved_messages verbatim. Never expose the internal floor. Never change prices, quantities or promises. You do not know the consumer budget or other provider offers.',
-        user:JSON.stringify({provider:{id:profile.id,name:profile.name},job_public:publicJob(job),intent,detail_key:detailKey??null,own_price_list:{base:prices.base,floor:prices.floor,transport:prices.transport,addons:prices.addons,includes_item:!!prices.includes_item,warranty_days:prices.warranty_days},approved_messages:candidates}),
+        user:JSON.stringify({provider:{id:profile.id,name:profile.name},job_public:publicJob(job),intent,detail_key:detailKey??null,requested_term:term,own_price_list:{base:prices.base,floor:prices.floor,transport:prices.transport,addons:prices.addons,includes_item:!!prices.includes_item,warranty_days:prices.warranty_days},approved_messages:candidates}),
       });
       if(!candidates.includes(result.message))return {message:baseline,engine:'rules',rejected:'The simulated provider response introduced unverified wording or terms.'};
       return {message:result.message,engine:'model'};

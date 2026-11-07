@@ -186,13 +186,13 @@ export function createRequests({store,now=Date.now,newId=makeId,formatter=format
         const deadline=now()+HUMAN_REPLY_MS;
         await tx.query("UPDATE branches SET status='awaiting_reply',deadline_at=$1,updated_at=$2 WHERE id=$3",[deadline,now(),branch.id]);
         if(modeOf(branch.mode)==='human')await enqueue(tx,request,branch.id,'timeout',sent.message.id,{},deadline);
-        else await enqueue(tx,request,branch.id,'reply',sent.message.id,{intent:payload.intent??'rfq',detailKey:payload.detailKey??null});
+        else await enqueue(tx,request,branch.id,'reply',sent.message.id,{intent:payload.intent??'rfq',detailKey:payload.detailKey??null,term:payload.term??null});
       });
     }
     if(task.kind==='reply') {
       if(branch.wasit_mode==='customer'||await isLocked(request.id))return commit(task,async()=>{});
       const provider=await directory.getProvider(branch.provider_id),prices=await directory.pricesOf(branch.provider_id);
-      const replyInput={provider,prices,job,intent:payload.intent??'rfq',detailKey:payload.detailKey};
+      const replyInput={provider,prices,job,intent:payload.intent??'rfq',detailKey:payload.detailKey,term:payload.term??null};
       let output;
       try{output=providerReply?await providerReply(replyInput):null;}catch{output={message:scriptedReply(replyInput),engine:'rules',rejected:'The provider simulation model was unavailable.'};}
       const text=output?.message??scriptedReply(replyInput);
@@ -232,7 +232,7 @@ export function createRequests({store,now=Date.now,newId=makeId,formatter=format
           const count=Number(fresh.clarifications_sent??0)+(decision.action==='ask_detail'?1:0);
           await tx.query('UPDATE branches SET clarifications_sent=$1,countered=$2,asked_terms=$3,status=$4,updated_at=$5 WHERE id=$6',
             [count,fresh.countered||decision.action==='counter'?1:0,fresh.asked_terms||decision.action==='counter_terms'?1:0,'processing',now(),branch.id]);
-          await enqueue(tx,request,branch.id,'send',quote.id,{text:decision.message,intent:decision.action==='ask_detail'?'clarify':decision.action,detailKey:decision.detail_key,engine:decision.engine});
+          await enqueue(tx,request,branch.id,'send',quote.id,{text:decision.message,intent:decision.action==='ask_detail'?'clarify':decision.action,detailKey:decision.detail_key,term:decision.action==='counter_terms'?decision.cite:null,engine:decision.engine});
         }
       });
     }

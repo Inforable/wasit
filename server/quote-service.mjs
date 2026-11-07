@@ -4,6 +4,7 @@ import { parseAmounts } from './money.mjs';
 import { formatRequest } from './formatter.mjs';
 import { HttpError } from './errors.mjs';
 import { assertTaskGeneration } from './task-guard.mjs';
+import { extractWarrantyFact, validateWarrantyFact } from './warranty-terms.mjs';
 
 const id = (prefix) => prefix + '_' + randomBytes(10).toString('hex');
 const money = (value) => Number.isSafeInteger(value) && value >= 0 && value <= 100_000_000;
@@ -12,16 +13,18 @@ const clean = (text) => String(text).trim().replace(/\s+/g, ' ');
 const escape = (text) => text.replace(/[.*+?^$\{\}()|[\]\\]/g, '\\$&');
 
 const inclusionWords = /\b(?:included|including|free|termasuk|gratis|no\s+(?:extra\s+|additional\s+)?charge|tanpa\s+biaya)\b/i;
+const conditionalPrice = /\b(?:if|unless|jika|kalau|apabila|conditional)\b/i;
 export function hasDeniedInclusion(text) {
   const statement=String(text).toLowerCase().replace(/[\u2018\u2019]/g,"'").replace(/\bnot\s+only\b/g,'also').replace(/\bno\s+(?:extra\s+|additional\s+)?charge\b/g,'free').replace(/\btanpa\s+biaya(?:\s+tambahan)?\b/g,'free');
-  return /\b(?:not|never|no longer|isn't|isnt|aren't|arent|wasn't|wasnt|won't|wont|cannot|can't|cant|tidak|tak|bukan|belum|nggak|enggak|gak|ga|tdk|blm)(?:\s+[\w'-]+){0,5}\s+(?:included|including|free|termasuk|gratis)\b/i.test(statement)||/\b(?:excluded|excluding|excludes|exclude|charged separately|separate charge|additional charge|extra charge|biaya tambahan|bayar terpisah|dikenakan biaya|di luar|diluar)\b/i.test(statement);
+  return /\b(?:not|never|no|isn't|isnt|aren't|arent|wasn't|wasnt|won't|wont|cannot|can't|cant|tidak|tak|bukan|belum|nggak|enggak|gak|ga|tdk|blm)(?:\s+[\w'-]+){0,5}\s+(?:included|including|free|termasuk|gratis)\b/i.test(statement)||/\b(?:excluded|excluding|excludes|exclude|charged separately|separate charge|additional charge|extra charge|biaya tambahan|bayar terpisah|dikenakan biaya|di luar|diluar)\b/i.test(statement);
 }
 export function isExplicitlyIncluded(text) {
-  return inclusionWords.test(String(text))&&!hasDeniedInclusion(text)&&!/\b(?:if|unless|jika|kalau|apabila|conditional)\b/i.test(String(text));
+  return inclusionWords.test(String(text))&&!hasDeniedInclusion(text)&&!conditionalPrice.test(String(text));
 }
 function quotedAmount(text) {
   const amounts=parseAmounts(text);
   if(amounts.length!==1)return null;
+  if(amounts[0].value===0&&conditionalPrice.test(String(text)))return null;
   if(/\b(?:not|bukan|tidak|belum)\s*(?:rp\.?\s*)?$/i.test(String(text).slice(0,amounts[0].index)))return null;
   if(hasDeniedInclusion(text)&&(amounts[0].value===0||/\b(?:in|dalam|dari|of)\s*(?:the\s+(?:price|total)\s*)?$/i.test(String(text).slice(0,amounts[0].index))))return null;
   return amounts[0].value;
@@ -34,7 +37,10 @@ export function atomicStatements(text, category) {
     for (const item of catalog(category).items) {
       for (const keyword of new Set([...item.keywords, item.label, item.id,...(item.kind==='included'&&item.id!=='alat_bahan'?['inspection','pemeriksaan']:[])])) {
         const pattern = new RegExp('\\b' + escape(keyword) + '\\b', 'gi');
-        for (const match of clause.matchAll(pattern)) matches.push({ start: match.index, end: match.index + match[0].length, item });
+        for (const match of clause.matchAll(pattern)) {
+          if (/^(?:inspection|pemeriksaan)$/i.test(keyword) && /\b(?:after|following|pending|until|setelah|sesudah|menunggu)\s+(?:the\s+)?$/i.test(clause.slice(0,match.index))) continue;
+          matches.push({ start: match.index, end: match.index + match[0].length, item });
+        }
       }
     }
     matches.sort((a, b) => a.start - b.start || (b.end - b.start) - (a.end - a.start));
@@ -145,6 +151,12 @@ export function createQuoteService({ store, now = Date.now, newId = id, extracto
     const row = await first(db, 'SELECT data_json FROM quotes WHERE branch_id=$1 ORDER BY version DESC LIMIT 1', [branchId]);
     if(!row)return null;
     const quote=JSON.parse(row.data_json),branch=await first(db,'SELECT pending_question FROM branches WHERE id=$1',[branchId]);
+    if(quote.warranty_days!=null||quote.warranty_source!=null){
+      const source=await first(db,"SELECT id,text FROM messages WHERE id=$1 AND branch_id=$2 AND sender='provider'",[quote.warranty_source?.message_id??null,branchId]);
+      if(!source||!validateWarrantyFact({days:quote.warranty_days,source:quote.warranty_source,message:source})){
+        quote.warranty_days=null;quote.warranty_source=null;
+      }
+    }
     const zeros=(quote.lines??[]).filter(line=>line.unit_price===0);
     if(zeros.length){
       const sources=(await db.query("SELECT id,text FROM messages WHERE branch_id=$1 AND sender='provider'",[branchId])).rows;
@@ -208,8 +220,11 @@ export function createQuoteService({ store, now = Date.now, newId = id, extracto
       const required = [...new Set(unresolved)];
       const fixed = required.length ? null : lines.filter((line) => line.kind === 'fixed').reduce((sum, line) => sum + line.quantity * line.unit_price, 0);
       if (fixed != null && !money(fixed)) throw new HttpError(422, 'invalid_price', 'The quoted total exceeds the supported range.');
+      const warranty=extractWarrantyFact(message);
       const quote = { id: newId('quote'), branch_id: branchId, revision: (latest?.revision ?? 0) + 1,
         category: job.category, scope: job.scope, units: job.units, schedule_label: schedule,
+        warranty_days:warranty.mentioned?warranty.warranty_days:previous?.warranty_days??null,
+        warranty_source:warranty.mentioned?warranty.warranty_source:previous?.warranty_source??null,
         lines, status: required.length ? 'needs_detail' : fixed > job.max_budget ? 'over_budget' : 'ready',
         fixed_total: fixed, unresolved: required, updated_at: now() };
       await tx.query('INSERT INTO quotes(id,branch_id,request_id,version,data_json,status,created_at,source_message_id) VALUES ($1,$2,$3,$4,$5,$6,$7,$8)',

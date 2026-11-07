@@ -48,7 +48,7 @@ export function allowedBuyerActions({ job, quote, branch = {}, competitorQuotes 
       policy.available_terms.push('waive_transport');
     }
     // Warranty is not assumed when it was never quoted.
-    if (Number.isInteger(quote.warranty_days) && quote.warranty_days >= 0 && quote.warranty_days < 60) {
+    if (Number.isInteger(quote.warranty_days) && quote.warranty_days >= 0 && quote.warranty_days < 60 && typeof quote.warranty_source?.message_id === 'string' && typeof quote.warranty_source?.snippet === 'string') {
       policy.available_terms.push('longer_warranty');
     }
     if (policy.available_terms.length) policy.allowed_actions.push('counter_terms');
@@ -104,7 +104,7 @@ function messageFor(decision, amount) {
 }
 
 function sourceIds(quote) {
-  return unique((quote?.lines ?? []).map((line) => line.source?.message_id).filter((value) => typeof value === 'string'));
+  return unique([...(quote?.lines ?? []).map((line) => line.source?.message_id), quote?.warranty_source?.message_id].filter((value) => typeof value === 'string'));
 }
 
 function finish(decision, ctx, policy, engine, rejected) {

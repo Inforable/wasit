@@ -587,8 +587,66 @@
         "updated_at": {
           "type": "integer",
           "minimum": 0
+        },
+        "warranty_days": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 365
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "warranty_source": {
+          "anyOf": [
+            {
+              "$ref": "common.schema.json#/$defs/source"
+            },
+            {
+              "type": "null"
+            }
+          ]
         }
-      }
+      },
+      "dependentRequired": {
+        "warranty_days": [
+          "warranty_source"
+        ],
+        "warranty_source": [
+          "warranty_days"
+        ]
+      },
+      "allOf": [
+        {
+          "if": {
+            "required": [
+              "warranty_days"
+            ],
+            "properties": {
+              "warranty_days": {
+                "type": "integer"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "warranty_source": {
+                "$ref": "common.schema.json#/$defs/source"
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "warranty_source": {
+                "type": "null"
+              }
+            }
+          }
+        }
+      ]
     },
     "branch": {
       "type": "object",
@@ -935,8 +993,66 @@
               "type": "null"
             }
           ]
+        },
+        "warranty_days": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 365
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "warranty_source": {
+          "anyOf": [
+            {
+              "$ref": "common.schema.json#/$defs/source"
+            },
+            {
+              "type": "null"
+            }
+          ]
         }
-      }
+      },
+      "dependentRequired": {
+        "warranty_days": [
+          "warranty_source"
+        ],
+        "warranty_source": [
+          "warranty_days"
+        ]
+      },
+      "allOf": [
+        {
+          "if": {
+            "required": [
+              "warranty_days"
+            ],
+            "properties": {
+              "warranty_days": {
+                "type": "integer"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "warranty_source": {
+                "$ref": "common.schema.json#/$defs/source"
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "warranty_source": {
+                "type": "null"
+              }
+            }
+          }
+        }
+      ]
     },
     "terms": {
       "type": "object",
@@ -999,8 +1115,66 @@
           "type": "integer",
           "minimum": 0,
           "maximum": 100000000
+        },
+        "warranty_days": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 365
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "warranty_source": {
+          "anyOf": [
+            {
+              "$ref": "common.schema.json#/$defs/source"
+            },
+            {
+              "type": "null"
+            }
+          ]
         }
-      }
+      },
+      "dependentRequired": {
+        "warranty_days": [
+          "warranty_source"
+        ],
+        "warranty_source": [
+          "warranty_days"
+        ]
+      },
+      "allOf": [
+        {
+          "if": {
+            "required": [
+              "warranty_days"
+            ],
+            "properties": {
+              "warranty_days": {
+                "type": "integer"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "warranty_source": {
+                "$ref": "common.schema.json#/$defs/source"
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "warranty_source": {
+                "type": "null"
+              }
+            }
+          }
+        }
+      ]
     },
     "acceptance": {
       "type": "object",

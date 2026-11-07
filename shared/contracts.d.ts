@@ -1,4 +1,7 @@
 export type Category = 'ac_service' | 'washer' | 'plumbing' | 'electrical' | 'cleaning';
+export type ModelId = 'gpt-6-luna' | 'gpt-6.1-terra' | 'gpt-5.4-nano';
+export interface ModelConfig { request_model: ModelId; bill_model: ModelId }
+export interface RequestModels { enabled: boolean; selected: ModelConfig; initial: ModelConfig; available: Array<{id:ModelId;label:string}>; revision:number; busy:boolean }
 export type Engine = 'rules' | 'model';
 export type Unit = 'job' | 'unit' | 'pcs' | 'service' | 'hour' | 'm2';
 export type BuyerAction = 'ask_detail' | 'counter' | 'counter_terms' | 'close';
@@ -24,10 +27,12 @@ export interface Quote {
   status: 'needs_detail' | 'ready' | 'over_budget'; fixed_total: number | null;
   unresolved: Array<'base_price' | 'transport' | 'schedule' | 'scope' | 'unit_quantity'>;
   updated_at: number;
+  warranty_days?: number | null; warranty_source?: Source | null;
 }
 export interface PublicTerms {
   scope: string; units: number; location_label: string; schedule_label: string;
   lines: TermLine[]; committed_total: number; change_reason: string | null;
+  warranty_days?: number | null; warranty_source?: Source | null;
 }
 export interface Terms extends PublicTerms { spending_limit: number }
 export interface Acceptance {

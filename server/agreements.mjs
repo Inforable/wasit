@@ -4,6 +4,7 @@ import { termsDigest, committedTotal, publicTerms } from './agreement-terms.mjs'
 import { checkBillLines } from './bill-check.mjs';
 import { catalog } from './catalog.mjs';
 import { validateQuotedFacts } from './quote-service.mjs';
+import { validateWarrantyFact } from './warranty-terms.mjs';
 import { stableJson } from '../shared/canonical.mjs';
 import { quoteEligibility } from './comparison.mjs';
 
@@ -82,6 +83,10 @@ export function createAgreements({ store, now = Date.now, newId = defaultId, loa
   }
   function validateTerms(terms,job=null) {
     if (!Array.isArray(terms.lines) || !terms.lines.length || terms.lines.length > 16 || !isMoney(terms.spending_limit)) throw failure(422, 'ambiguous_terms', 'The agreement needs complete lines and an explicit spending limit.');
+    if (hasOwn(terms, 'warranty_days') || hasOwn(terms, 'warranty_source')) {
+      const days = terms.warranty_days, source = terms.warranty_source;
+      if (!hasOwn(terms, 'warranty_days') || !hasOwn(terms, 'warranty_source') || (days === null ? source !== null : !Number.isInteger(days) || days < 0 || days > 365 || !source || typeof source.message_id !== 'string' || typeof source.snippet !== 'string' || !source.snippet.trim() || source.snippet.length > 1000)) throw failure(422, 'ambiguous_terms', 'Warranty must be an exact sourced duration or remain unquoted.');
+    }
     const keys = new Set(), ids = new Set();
     for (const line of terms.lines) {
       if (!line || !Number.isInteger(line.quantity) || line.quantity < 1 || line.quantity > 20 || keys.has(lineKey(line))) throw failure(422, 'ambiguous_terms', 'Agreement items must have clear, unique units and quantities.');
@@ -121,6 +126,10 @@ export function createAgreements({ store, now = Date.now, newId = defaultId, loa
       lines: quote.lines.map(({ source, kind, ...line }) => ({ ...line, kind: kind === 'fixed' ? 'committed' : kind, source_message_id: source.message_id })),
       committed_total: quote.fixed_total, spending_limit: job.max_budget, change_reason: null,
     };
+    if (hasOwn(quote, 'warranty_days') || hasOwn(quote, 'warranty_source')) {
+      terms.warranty_days = quote.warranty_days ?? null;
+      terms.warranty_source = quote.warranty_source == null ? null : structuredClone(quote.warranty_source);
+    }
     validateTerms(terms,job);
     return terms;
   }
@@ -154,6 +163,11 @@ export function createAgreements({ store, now = Date.now, newId = defaultId, loa
     if (!job || quote?.branch_id !== branchId || quote?.revision !== quoteRevision) throw failure(409, 'stale_quote', 'The quote changed. Review its current revision.');
     const terms = quoteTerms(quote, job);
     for (const line of quote.lines) await validateSource(line, branchId, job);
+    if (quote.warranty_days != null) {
+      const message = await sourceLoader(quote.warranty_source?.message_id);
+      if (!message || message.branch_id !== branchId || (message.sender ?? (message.direction === 'in' ? 'provider' : null)) !== 'provider' || !validateWarrantyFact({ days: quote.warranty_days, source: quote.warranty_source, message })) throw failure(422, 'invalid_source', 'Warranty must match this provider branch and its complete provider statement.');
+    }
+
     return store.transaction(async (tx) => {
       await tx.query('UPDATE requests SET status=status WHERE id=$1', [requestId]);
       const currentOwner = await first(tx, 'SELECT * FROM requests WHERE id=$1 AND archived_at IS NULL', [requestId]);

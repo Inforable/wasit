@@ -274,3 +274,30 @@ test('affirmative no-additional-charge transport remains selectable',async t=>{
   ctx.messages.set(message.id,message);quote.revision++;line.kind='included';line.unit_price=0;line.source={message_id:message.id,snippet:message.text};quote.fixed_total=90000;
   await ctx.persist(quote);assert.equal((await ctx.create()).versions[0].terms.committed_total,90000);
 });
+
+test('sourced warranty enters the public digest and remains immutable after later provider updates',async t=>{
+  const ctx=await setup(t),quote=structuredClone(ctx.quote),message={id:'msg_warranty3001',branch_id:quote.branch_id,sender:'provider',text:'Service warranty: 30 days for labor only.',created_at:ctx.job.created_at+1000};
+  ctx.messages.set(message.id,message);quote.revision++;quote.warranty_days=30;quote.warranty_source={message_id:message.id,snippet:message.text};await ctx.persist(quote);
+  const deal=await ctx.create(),version=deal.versions[0];validate('deal.schema.json',deal);
+  assert.equal(version.terms.warranty_days,30);assert.deepEqual(version.terms.warranty_source,quote.warranty_source);
+  const {termsDigest}=await import('../server/agreement-terms.mjs');
+  assert.notEqual(termsDigest({...version.terms,warranty_days:60}),version.terms_digest);
+  const projected=(await ctx.service.getPublicVersions(deal.id,provider))[0];assert.equal(projected.public_terms.warranty_days,30);assert.equal(projected.public_terms.spending_limit,undefined);validate('common.schema.json#/$defs/public_terms',projected.public_terms);
+  const active=await ctx.activate(deal),before=JSON.stringify(active.versions[0]);
+  const changed=structuredClone(quote),later={...message,id:'msg_warranty6001',text:'Service warranty: 60 days.'};ctx.messages.set(later.id,later);changed.revision++;changed.warranty_days=60;changed.warranty_source={message_id:later.id,snippet:later.text};await ctx.persist(changed);
+  const read=await ctx.service.getDeal(deal.id,consumer);assert.equal(JSON.stringify(read.versions[0]),before);assert.equal(read.versions[0].terms.warranty_days,30);
+});
+test('warranty source must belong to this provider and affirm its full duration without conditions',async t=>{
+  for(const mode of ['conditional','branch','duration'])await t.test(mode,async t=>{
+    const ctx=await setup(t),quote=structuredClone(ctx.quote),message={id:'msg_warrantybad1',branch_id:mode==='branch'?'branch_other001':quote.branch_id,sender:'provider',text:mode==='conditional'?'Warranty 60 days only if the provider approves.':'Warranty 30 days.',created_at:ctx.job.created_at+1000};
+    ctx.messages.set(message.id,message);quote.revision++;quote.warranty_days=mode==='duration'?60:mode==='conditional'?60:30;quote.warranty_source={message_id:message.id,snippet:mode==='conditional'?'Warranty 60 days':message.text};await ctx.persist(quote);
+    await assert.rejects(ctx.create(),isError(422,'invalid_source'));
+  });
+});
+test('legacy agreement terms and digests remain byte-compatible without warranty retrofit',async t=>{
+  const ctx=await setup(t),deal=await ctx.create(),version=deal.versions[0];
+  assert.equal(Object.hasOwn(version.terms,'warranty_days'),false);assert.equal(Object.hasOwn(version.terms,'warranty_source'),false);
+  const {createHash}=await import('node:crypto'),{stableJson}=await import('../shared/canonical.mjs');
+  const original=Object.fromEntries(['scope','units','location_label','schedule_label','lines','committed_total','change_reason'].map(key=>[key,version.terms[key]]));
+  assert.equal(createHash('sha256').update(stableJson(original),'utf8').digest('hex'),version.terms_digest);
+});

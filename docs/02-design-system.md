@@ -343,11 +343,11 @@ The public entry and onboarding have no app chrome. The consumer app uses `.shel
 | `/welcome` | Always shows the centered public entry: Better deals from local pros. No surprise extras. Starting returns a saved profile to the app, or opens setup for an unsaved profile. Returning here never resets data or signs out. |
 | `/` | First visit shows entry; after entry and profile setup it shows the app composer. `/home` replaces its URL with `/`. |
 | `/setup` | Two-step profile and three-factor priorities with total100 and optional locks. The quick demo profile remains available; email registration is optional. |
-| `/request` | New request composer within the shared shell. Rotating examples, presets, repeat last request and Enter submission remain available. Missing fields open an inline follow-up sheet. |
+| `/request` | New request composer within the shared shell. Rotating examples, presets, repeat last request and Enter submission remain available. Submission opens the full-page one-question interview; answers are preserved through Back/Next and final confirmation. |
 | `/account` | Optional named sign-in/registration or account switching. A named account still completes its own profile. |
 | `/profile`, `/settings/priorities` | Edit the saved profile or priorities within the shell. `/settings/profile` replaces its URL with `/profile`; `/onboarding` with `/setup`. |
 | `/settings` | Profile and area, priorities, account, AI models and demo controls. Theme remains in the topbar. |
-| `/settings/models` | Two server-allowed model selectors for request/negotiation and bill images, explicit Save and Restore defaults. Preferences belong to the current actor and apply to new requests and new bill previews; existing requests retain their saved configuration unless their owner explicitly applies a request-level override in the negotiation room. |
+| `/settings/models` | Separate request and bill selectors, each offering the three server-allowed models, explicit Save and Restore defaults. Preferences belong to the current actor and apply to new requests and new bill previews; existing requests retain their saved configuration unless their owner explicitly applies a request-level override in the negotiation room. |
 | `/demo` | Scenario and view controls. Back to app and Back to welcome are separate navigation actions. Fullscreen presentation can be entered and exited without resetting profile or route. Reset is a separate explicit action. |
 | `/requests/:id` | Live scoreboard and negotiation room; comparison appears after processing or explicit Compare navigation. |
 | `/requests/:id/compare` | Offer deck/table with item scope, committed quote total, unknown costs and ranking eligibility. |
@@ -403,3 +403,11 @@ digulir dalam barisnya sendiri dengan padding 22 px.
 ### Provider imagery
 
 Each of the fifteen seeded providers has a distinct, service-appropriate synthetic photo mapped by provider identity and category. Shared avatars preserve their dimensions and rounded shape. Images use local 384-pixel WebP, lazy loading, asynchronous decoding and a low fetch priority. The public welcome loads no provider images. Missing images and providers without an assigned photo show initials; no unrelated category photo is substituted. Prompt and synthetic-image records are stored in data/provider-images.json.
+
+### Guided interview and header model control
+
+The interview uses the shared page/screen-enter, back-link, deck-title/deck-sub, scope-echo, clarify-progress/scope-bar, clarify-q, scope-need, scope-hint, clarify-choices and scope-foot structures. It is a full page beneath the shell header, with one question visible. Answer cards use a two-column grid, indigo selected border/check, shared tokens and a wide CTA. Custom exact quantity remains available; a 4-or-more choice never invents a count. Final facts remain editable before discovery.
+
+The compact model choice sits below the wordmark in the topbar, replacing AI ready. The menu explains whether it changes the next request default or future actions of the current request. It supports keyboard focus, Escape, outside dismissal, busy/conflict recovery and explicit Apply. Short labels keep 320px header controls usable; the full menu names Luna, Terra and GPT-5.4 Nano (Fast).
+
+Processing uses the centered animated mark, stage explanation, glass percent card, animated track, four numbered steps and request quote. Percentages derive from actual stage state, not elapsed time. Reduced motion skips nonessential movement. Every provider outcome remains visible; unresolved outcomes show a reason and disabled Review.

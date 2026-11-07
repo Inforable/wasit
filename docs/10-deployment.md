@@ -40,3 +40,5 @@ Check the canonical URL without an authenticated Vercel browser session. Verify 
 Static hosting, successful local tests and model credentials do not establish hosted database readiness. Long preview URLs can remain protected while the canonical production domain is public. Deployment protection has not been disabled.
 
 Verified integrated deployment: https://wasit-n6zas3fkz-fayadhs-projects-f3190830.vercel.app. The canonical project domain follows subsequent production releases.
+
+Latest verified public revision: 9815a42, with a full-page interview and three model options. A second public AC journey explicitly selecting Nano passes 12/12 stages, 52 checks and 65 HTTPS requests. Final conservative warranty and expired-invitation changes pass 219 local tests and are published in the next closing release. GitHub checks are green on 63a28c2 and 9815a42.

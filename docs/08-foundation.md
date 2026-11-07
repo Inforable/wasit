@@ -14,4 +14,4 @@ A owns server/domain/storage/shared contracts. B owns frontend and runtime adapt
 
 Verification includes contract fixtures, domain and storage tests, authenticated HTTP flows across all five categories, and real Chrome checks for independent roles, versions, bills, retries, disputes and 390px layouts. Test reports distinguish synthetic data, mocked transport and live model results.
 
-The public foundation URL is https://wasit-id.vercel.app. Full production transactions remain gated by actual external-database provisioning and hosted checks. A successful local run or static deployment does not establish that gate.
+The public foundation URL is https://wasit-id.vercel.app. Neon Free is connected and a real public AC transaction journey passes through bilateral versions, simulated funding and settlement. Local five-category coverage and hosted AC evidence remain distinct; new revisions receive independent release checks.

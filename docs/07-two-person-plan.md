@@ -48,11 +48,11 @@ Partial berarti fondasi sebagian tersedia; tidak dihitung sebagai fitur terinteg
 
 ## Status integrasi aktual
 
-Backend request, quote, comparison, versioned agreement, bill, lifecycle and simulation services are implemented and tested. Named accounts and private profiles are implemented; hosted persistence remains open under BE-02. Runtime OpenAI adapters have actual live-test evidence in addition to mocked boundary tests.
+Backend request, quote, comparison, versioned agreement, bill, lifecycle and simulation services are implemented and tested. Named accounts and private profiles are implemented; Neon persistence and a public AC business journey are verified under BE-02. Runtime OpenAI adapters have actual live-test evidence in addition to mocked boundary tests.
 
 Consumer/provider/agreement screens have real Chrome verification. Shared shell, history, onboarding and motion are being aligned with the specified interaction contract; unfinished frontend gates remain explicit in their tickets. One integrator owns shared contracts/API while delegated agents own isolated modules.
 
-The public UI/API release is available at https://wasit-id.vercel.app. Production transactions still require completed Neon acceptance/provisioning and hosted checks. Local success is not production database evidence.
+The public UI/API release is available at https://wasit-id.vercel.app. Neon acceptance/provisioning is complete and the public AC transaction journey is verified; final revision checks remain recorded separately. Local success is not production database evidence.
 
 ## Bukti Codex
 

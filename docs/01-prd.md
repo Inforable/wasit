@@ -91,6 +91,14 @@ Discovery memeriksa consent, kategori, area dan ketersediaan. Consent berlaku te
 
 RFQ hanya membawa scope, lokasi umum, jumlah dan jadwal. Setiap provider memiliki cabang privat.
 
+### Current request interview and model controls
+
+Submitting the composer opens a full-page service interview inside the normal shell. It displays one question per step, a request echo, numbered progress, two-column answer cards, a required/optional label and a wide Next action. Back preserves answers. Quantity is exact; optional details support Not sure or Skip. Any missing location, appointment or private cap follows in the same sequence. A final editable confirmation precedes provider contact. The server can return up to three questions per batch; that does not mean three are visible together.
+
+The topbar replaces the engine-status label with the current model choice. On Home it changes the actor's request default; on a request it explicitly changes only future actions for that request. Existing results, original configuration and bill choice remain separate. Opening the request picker pauses future automatic processing while any current action finishes. Busy and revision conflicts preserve the draft choice.
+
+Supported choices are GPT-6 Luna, GPT-6.1 Terra and GPT-5.4 Nano (Fast). Existing defaults remain Luna for request actions and Terra for bill images. Nano was exercised in three real structured calls; it is an explicit choice, not an automatic timeout retry or a latency guarantee. A human provider's persisted 90-second reply deadline is labeled No provider reply, separately from model failure.
+
 ## 6. Model biaya dan provenance
 
 | Kind quote | Arti | Pengaruh total |
@@ -534,3 +542,15 @@ A delayed-authentication probe kept the welcome usable while the session read wa
 The full five-category HTTP journey passes 60/60 stages and 260/260 stage checks. Separate live OpenAI AC journeys each complete 12/12 stages, including a capped run that continues through verified rules after transport failures. No perfect-model-quality claim is made.
 
 Neon Free is provisioned and connected. Real PostgreSQL migrations and fresh pools pass; persisted revision caching reduces repeated cold migration work from approximately 6.5 seconds to approximately 0.2 seconds. A fresh public production AC journey passed 12/12 stages and 52 checks through 64 HTTPS requests, including persistent identity/profile/history, bilateral v1/v2, simulated funding, dispute/rework and release.
+
+### 17.6 Current corrective release
+
+The latest integrated source passes 219 automated tests and 16 contract fixtures. The full-page one-question consumer browser suite passes 37 checks; topbar/model/outcome checks pass 22. Warranty-specific HTTP and separate-role browser checks preserve source-backed terms and private boundaries. These suites overlap and are not independent population-quality measures.
+
+Negated or conditional inclusion/free statements never establish a zero fee. A real positive price remains payable. Existing stored wrong-zero quotations are revalidated on read and selection, and independent agreement creation checks the complete provider message. Historical quote storage and accepted terms are not rewritten.
+
+Non-price outcomes retain evidence: transport waiver is an explicit revised transport line; a confirmed warranty has paired warranty_days and warranty_source in the quote and immutable public agreement. Unknown duration or coverage stays unknown. Source-bound warranty is not a diagnosis, legal guarantee or added-work authorization. No bundle-discount promise is invented by the provider simulator.
+
+Offers show every provider outcome, including unanswered, incomplete, over-budget or otherwise unranked branches. Only valid equivalent-scope offers enter the ranking and enable Review. A low incomplete subtotal is not presented as the best complete deal.
+
+Provider grants verify branch ownership, expiry, stored token hash and the current signing secret. Rotation revokes old grants. Renewing an expired invitation requires an explicit owner action and CSRF; no provider can mint a new owner grant.

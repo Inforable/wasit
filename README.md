@@ -70,7 +70,7 @@ The frontend uses React 19, Vite 6.4.5 and the shared Wasit components. Product 
 
 ## Models and private configuration
 
-OpenAI features are optional. With a server-side API key configured, customers can choose supported request and bill models in Settings. Choices are stored per customer; a request keeps the model configuration captured when it was created. Supported choices are GPT-6 Luna and GPT-6.1 Terra.
+OpenAI features are optional. With a server-side API key configured, customers can choose supported request and bill models in Settings. Choices are stored per customer; a request keeps the model configuration captured when it was created. Supported choices are GPT-6 Luna, GPT-6.1 Terra and GPT-5.4 Nano (Fast). The topbar changes the next-request default on Home or explicitly overrides future actions of the current request. Existing defaults and earlier results are preserved; no automatic model switch is claimed.
 
 Structured outputs are independently validated. Text workflows retain rules fallback; bill-image reading returns an editable preview requiring confirmation, with manual entry available when image reading is unavailable. Shared call limits, concurrency leases and deadlines bound model use. API keys remain server secrets and are never sent to the frontend.
 

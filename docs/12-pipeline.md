@@ -44,14 +44,14 @@ The code status below describes implementation in the current working tree, sepa
 |---|---|---|---|---|
 | 0 | Profile | Implemented - profile, account/session and ownership checks. | Private name, default area/category and price/schedule/trust weights. Demo sessions work; optional registration/login preserves identity and owned work. | Named email is not represented as verified. |
 | 1 | Request | Implemented - owned requests and history. | A customer describes a service need. The request belongs to that customer and appears in their history. | Customer voice input is not connected. |
-| 2 | Format and clarify | Implemented core; in progress - category-specific post-submit interview. | Five supported categories; explicit location, schedule and maximum budget. Up to three questions at once. A repeated answer submission reuses the same owned child request. | Broader real-language coverage needs independent evaluation. |
+| 2 | Format and clarify | Implemented - full-page one-question interview and final explicit confirmation. | Five supported categories; explicit location, schedule and maximum budget. Up to three questions per server batch; one visible question per UI step. A repeated answer submission reuses the same owned child request. | Broader real-language coverage needs independent evaluation. |
 | 3 | Discover providers | Implemented - bounded eligibility and discovery. | Category, consent, distance/radius and opening-hour checks; at most five provider branches. | Directory businesses and reputation data are synthetic. |
 | 4 | Send private RFQs | Implemented - private branch RFQs and invitation access. | Separate conversations; only service scope, area and schedule are sent. Human invitation links use a separate bearer role. | No live WhatsApp or voice transport. |
 | 5 | Negotiate | Implemented - request-specific model selection, idle-safe apply and preserved history. | Ask missing costs, counter only from permitted facts/targets, ask permitted terms, or close. Customer takeover and explicit process calls control progress. | Actual commercial provider negotiations have not been measured. |
-| 6 | Build sourced quotes | Implemented core; corrective work in progress - negated free/included statements. | Item, unit, quantity, price and exact provider message are checked. Missing or invalid terms remain unresolved; optional work is excluded from the fixed total. | Provider audio/image quotation extraction is not connected. |
+| 6 | Build sourced quotes | Implemented - negation/conditional safeguards and complete-message source revalidation. | Item, unit, quantity, price and exact provider message are checked. Missing or invalid terms remain unresolved; optional work is excluded from the fixed total. | Provider audio/image quotation extraction is not connected. |
 | 7 | Compare equivalent work | Implemented - equivalent-scope ranking and advisory separation. | Complete quotes are grouped by equivalent scope, quantity, location and time. Customer priorities determine ranking. Advisory context and optional scenarios remain separate. | Price observations do not establish a final all-in market price; insufficient data remains visible. |
 | 8 | Choose | Implemented - stale/source checks and draft creation. | Current quotation, processed provider messages, scope, base quantity and appointment are checked again. Selection creates a draft. | Public production AC selection/review passed; real commercial availability remains unmeasured. |
-| 9 | Book with bilateral version 1 | Implemented core; sourced warranty preservation is in progress. Bilateral activation and separate simulated hold pass. | Submit, customer acceptance with private-cap acknowledgement, and provider acceptance of the same public terms. Version 1 becomes active; simulated funding is a separate action. | Real payment/escrow and commercial booking integration are outside the build. |
+| 9 | Book with bilateral version 1 | Implemented - sourced warranty, bilateral activation and separate simulated hold. | Submit, customer acceptance with private-cap acknowledgement, and provider acceptance of the same public terms. Version 1 becomes active; simulated funding is a separate action. | Real payment/escrow and commercial booking integration are outside the build. |
 | 10 | Check the on-site bill and agree changes | Implemented - confirmed bill check, versioned changes and simulated top-up. | Manual or confirmation-only image preview, version-bound bill checks, explicit new-work proposal, sufficient new limit, bilateral version 2 and a separate top-up. Version 1 stays immutable. | Real bill-image coverage is unmeasured beyond a small synthetic image check. |
 | 11 | Complete, resolve and close feedback | Implemented manual close; partial - recurring hosted 72-hour release executor. | Provider completion, customer confirmation, exact simulated release, settled review/provider reply, and version-bound dispute/evidence/rework paths. History resumes the final agreement. | No operational mediator or real settlement service. Recurring hosted auto-release execution is not deployed. |
 
@@ -71,7 +71,7 @@ The rehearsal deliberately starts with a category and an incomplete description,
 
 ### 2. Confirm missing facts
 
-The formatter creates a structured job or asks for missing location, appointment and maximum budget. The customer supplies the answers. A clarified request is a new child of the original; retrying the same clarification does not create duplicate children.
+The composer first opens the full-page category interview: exact quantity and two optional context questions, one per step. Back preserves answers; the final fact summary is editable. The formatter creates a structured job or asks for missing location, appointment and maximum budget. The customer supplies the answers. A clarified request is a new child of the original; retrying the same clarification does not create duplicate children.
 
 The job becomes ready only after the required facts are explicit. The runner verifies an explicit cap and an unauthorized-by-default public target.
 
@@ -89,11 +89,11 @@ The runner opens the separate human invitation through HTTP, checks the private-
 
 ### 5. Negotiate within the customer's authority
 
-Wasit can clarify missing costs, cite an eligible same-scope offer or an explicitly authorized target, ask an allowed term once, or close. The server computes what is allowed and renders factual outgoing text. The customer can take over a conversation without the agent guessing personal or technical facts.
+Wasit can clarify missing costs, cite an eligible same-scope offer or an explicitly authorized target, ask an allowed term once, or close. The server computes what is allowed and renders factual outgoing text. The customer can take over a conversation without the agent guessing personal or technical facts. Confirmed transport changes remain priced lines; warranty duration and full source are preserved into the bilateral public terms. Unknown or conditional benefits are not promoted into promises.
 
 A clear provider question about an unknown brand/model, capacity, inverter, access/floor, photo, serial number or private budget pauses automatic replies. Taking over preserves the raw question; an explicit customer reply clears it, and handing control back resumes the policy. The pending question removes quotation readiness and blocks selecting or proposing changed work, while an already accepted agreement remains unchanged. Ordinary price-acceptance proposals do not trigger this pause.
 
-The negotiation room provides a request-level OpenAI model selector. Editing pauses new automatic actions while an in-flight action finishes; an explicit Apply changes future request actions only. The original configuration, earlier events, bill model and account defaults remain unchanged. Concurrency and revision conflicts keep the selected draft available for review.
+The topbar provides a context-specific OpenAI model selector, including GPT-5.4 Nano (Fast). Editing pauses new automatic actions while an in-flight action finishes; an explicit Apply changes future request actions only. The original configuration, earlier events, bill model and account defaults remain unchanged. Concurrency and revision conflicts keep the selected draft available for review.
 
 Progress is driven by authenticated, bounded POST processing. A page read does not run hidden negotiation. In the rehearsal, scripted branches finish their bounded turns and a virtual clock advances the unanswered human branch past its persisted ninety-second deadline.
 
@@ -105,7 +105,7 @@ The runner checks source ownership and arithmetic for every quotation. Fixed tot
 
 ### 7. Compare what is actually comparable
 
-A customer compares complete equivalent work. A cheaper quote for fewer units or a different appointment cannot win the requested scope by accident. Scores use the customer's price, schedule and trust priorities.
+A customer compares complete equivalent work. All provider outcomes remain visible with status and reasons; incomplete or unanswered branches have no enabled Review action. A cheaper quote for fewer units or a different appointment cannot win the requested scope by accident. Scores use the customer's price, schedule and trust priorities.
 
 Published price context and optional-cost planning help the customer ask better questions. They do not change ranking, diagnose a fault, authorize extra work or increase the customer's cap. The rehearsal reads both views and verifies that the comparison remains unchanged.
 
@@ -212,3 +212,9 @@ The remaining commercial gaps are verified participating providers, actual commu
 - Production model attempts have a shared persisted daily cap, default 500 per UTC day. The live runner uses its own smaller persisted cap before network use.
 - A completed funded version can qualify for simulated release after 72 hours without an unresolved dispute or pending change. The explicit settlement service exists; a recurring hosted executor is not deployed. GET requests never settle money.
 - Advisory reference bands need the same item, unit and narrow scope, with at least five accepted observations from three publishers. Missing evidence remains insufficient data; it is not filled from synthetic offers.
+
+## Latest public fast-model rehearsal
+
+The public AC journey was repeated on the 9815a42 release with GPT-5.4 Nano explicitly selected for request actions. It passed 12/12 stages and 52/52 invariant checks across 65 HTTPS requests in 133.923 seconds, including the real human-reply deadline. Recorded events used 10 model engines and 9 rules engines; network model-call counts and token usage were not separately measured. This verifies the connected business journey, not perfect extraction or a latency SLA.
+
+The final local release suite passes 219 automated tests, 16 contract fixtures and the production build. Two subsequent conservative warranty guards additionally keep paid warranty upgrades and parts-only exclusions from becoming an unqualified free service warranty. Their focused regressions preserve accepted history. Provider invitation renewal is an explicit authenticated owner action; a CSRF failure cannot mint a new grant.

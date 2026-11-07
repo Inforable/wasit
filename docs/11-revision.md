@@ -53,8 +53,17 @@ Recorded on 7 November 2026. Entries follow decision order; earlier timestamps a
 | R43 | Give each of the fifteen seeded providers its own service-appropriate photo. | Ten additional generated WebP assets; fifteen distinct local paths, lazy loading and initials fallback. |
 
 | R44 | Add request-specific negotiation model selection with explicit apply and an idle-safe pause of future automatic actions. | 22 focused backend/runtime checks, 16 contract fixtures and 11 browser checks pass; prior events and account defaults are preserved. |
-| R45 | Require the post-submit service interview to present one question per step, with Back/Next and preserved answers. | Backend/context validation passes; sequential UI correction is in progress. |
-| R46 | Correct negated free/included statements and audit private provider access and non-price negotiation terms. | Reported fee-negation bug and missing warranty preservation are being corrected with regression checks. |
+| R45 | Require the post-submit service interview to present one question per step, with Back/Next and preserved answers. | Full-page one-question UI passes 37 Chrome checks; Back/Next, optional skip and final facts are preserved. |
+| R46 | Correct negated free/included statements and audit private provider access and non-price negotiation terms. | 219 automated tests pass after complete-message fee/warranty safeguards and immutable-history checks. |
+
+| R47 | Move the model choice into the topbar and align the actual stage progress structure and motion. | Context-aware header controls, real-state percentages and 22 browser checks pass. |
+| R48 | Show every provider outcome, with explicit reasons for incomplete, unanswered or unranked results. | All branches visible; only valid comparable offers enable Review. |
+| R49 | Add GPT-5.4 Nano (Fast) as an explicit third choice while preserving current defaults. | Three live structured calls complete in about 1.35-1.77 seconds; final expected facts pass with two validated rules fallbacks. No automatic retry or SLA claim. |
+| R50 | Verify provider grants against the current signing secret and support explicit owner renewal of expired private invitations. | Secret rotation, nonce tampering, CSRF failure and new-grant access checks pass. |
+| R51 | Restore failing extraction evaluation without changing independent expected labels. | Contextual inspection no longer invents a line; 219-test suite and GitHub CI on 63a28c2/9815a42 pass. |
+
+| R52 | Keep paid warranty upgrades and parts-only exclusions from becoming unconditional service promises; renew expired invitations only through an authenticated owner action. | Focused regressions and 219-test final suite pass; accepted history remains immutable. |
+| R53 | Rehearse the public journey with the new fast model and reconcile release evidence. | Nano-selected AC journey passes 12/12 stages, 52 checks and 65 HTTPS requests; no automatic fallback-model or latency guarantee is claimed. |
 
 ## Open release gates
 

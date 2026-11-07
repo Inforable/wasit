@@ -19,7 +19,7 @@ Recorded on 7 November 2026. Entries follow decision order; earlier timestamps a
 | R11 | Publish early on Vercel and use a short free Wasit address. | https://wasit-id.vercel.app is the canonical project domain. |
 | R12 | Use external PostgreSQL for hosted transactions; retain SQLite for development and invariant tests. Persist tasks, deadlines, generations and leases. | Adapters and reset/concurrency tests implemented; hosted database provisioning remains open. |
 | R13 | Keep commits modular around coherent features and update tickets as work is verified. Proceed without per-ticket review after explicit authorization. | Documentation, foundation and domain commits; ticket verification logs. |
-| R14 | Move the public message toward finding the best deal, then adopt the final headline: Clear quotes. No surprise extras. | Current approved copy. |
+| R14 | Move the public message toward finding the best deal, then adopt the final headline: Clear quotes. No surprise extras. | Earlier approved copy; updated by R41. |
 | R15 | Restore the headline to centered alignment. | Mobile and desktop screenshots inspected. |
 | R16 | Implement Person A services first; extend delegated implementation to Person B when requested. Keep integration ownership explicit. | Backend and frontend tasks run in parallel with isolated file ownership. |
 | R17 | Add source-bound quotes, bounded buyer actions, owner-only branches, profiles/prices, bill checks, simulated settlement, disputes and reviews. | Unit/storage/authenticated HTTP tests and separate-role Chrome flows. |
@@ -46,6 +46,8 @@ Recorded on 7 November 2026. Entries follow decision order; earlier timestamps a
 | R38 | Correct welcome visibility, avoid blocking font CSS, split heavy routes, restore sessions in one read and bind both local loopbacks. | Welcome visible in 849 ms with delayed authentication; local requests now 4-41 ms. |
 | R39 | Provision and connect Neon Free after human acceptance; cache schema revisions across cold instances. | Real PostgreSQL connectivity/migrations pass; cached opens approximately 0.2 seconds. |
 | R40 | Make the next provider acceptance action visible above the agreement after customer acceptance. | Four focused demo/human acceptance-to-active browser checks pass; no auto-accept. |
+
+| R41 | Adopt the approved home-services referee positioning, Better deals from local pros headline, explanatory paragraph and three benefits. Preserve centered entry layout and animations. | Welcome copy, page metadata and PRD updated; centered responsive checks pass at 320px, 390px and 1440px. |
 
 ## Open release gates
 

@@ -18,7 +18,22 @@ Dua kebutuhan tersebut menjadi satu perjalanan: **Compare → Negotiate → Agre
 English positioning:
 > **Compare service offers. Negotiate with confidence. Stay in control of the final bill.**
 
-Brand: **Wasit**. Tagline: **Clear quotes. No surprise extras.**
+Brand: **Wasit**. Tagline: **Better deals from local pros. No surprise extras.**
+
+Welcome copy (approved):
+
+> WASIT · THE REFEREE FOR HOME SERVICES
+>
+> Better deals from local pros.
+> No surprise extras.
+>
+> Tell Wasit what needs fixing. It asks several pros at once, gets the full price in writing, and haggles for you: free transport, bundle discounts, longer warranties. Nothing extra gets charged without your OK.
+
+- Several pros, one request
+- Haggles for more than just price
+- No extra charge without your OK
+
+The headline stays centered. Negotiated benefits are requests to providers; only explicitly confirmed terms enter an agreement.
 
 Kepastian harga berarti harga, cakupan, satuan dan jumlah pada versi yang diterima kedua pihak berlaku untuk pekerjaan tersebut. Ini tidak menjanjikan semua kerusakan akan selesai dengan biaya dasar, tidak membuktikan diagnosis, dan tidak menghalangi tindakan pihak di luar aplikasi.
 

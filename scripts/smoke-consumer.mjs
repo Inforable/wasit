@@ -10,7 +10,7 @@ export async function smokeConsumer({origin=process.env.WASIT_SMOKE_ORIGIN??'htt
  page.on('pageerror',error=>errors.push(error.message));
  const check=(name,condition=true)=>{assert.ok(condition,name);checks.push(name);console.log('PASS',name);};
  try {
-  await page.goto(origin);await page.getByRole('heading',{name:'Clear quotes. No surprise extras.'}).waitFor();
+  await page.goto(origin);await page.getByRole('heading',{name:'Better deals from local pros. No surprise extras.'}).waitFor();
   check('Entry is centered, chrome-less, and Light under a dark OS preference',await page.locator('.shell-header').count()===0&&await page.locator('html').getAttribute('data-theme')==='light');
   await page.screenshot({path:'results/consumer/welcome-mobile-after.png',fullPage:true});
   await page.getByRole('button',{name:'Find my best deal'}).click();await page.getByRole('heading',{name:'A little about you'}).waitFor();
@@ -58,7 +58,7 @@ export async function smokeConsumer({origin=process.env.WASIT_SMOKE_ORIGIN??'htt
   await page.setViewportSize({width:1440,height:1000});check('Desktop composer has no horizontal overflow',await page.evaluate(()=>document.documentElement.scrollWidth<=1440));await page.screenshot({path:'results/consumer/composer-desktop.png',fullPage:true});
   await page.goto(origin+'/demo');await page.getByRole('heading',{name:'Demo controls',exact:true}).waitFor();check('Demo provides explicit app and welcome returns',await page.getByRole('button',{name:'Back to app',exact:true}).count()===1&&await page.getByRole('button',{name:'Back to welcome',exact:true}).count()===1);
   const presentation=page.getByRole('button',{name:'Presentation view',exact:true});if(await presentation.isEnabled()){await presentation.click();await page.waitForFunction(()=>Boolean(document.fullscreenElement));await page.getByRole('button',{name:'Exit presentation view',exact:true}).click();await page.waitForFunction(()=>!document.fullscreenElement);check('Presentation view enters and exits explicitly');}
-  await page.getByRole('button',{name:'Back to welcome',exact:true}).click();await page.getByRole('heading',{name:'Clear quotes. No surprise extras.'}).waitFor();check('Returning to welcome keeps the current account and does not reset data');
+  await page.getByRole('button',{name:'Back to welcome',exact:true}).click();await page.getByRole('heading',{name:'Better deals from local pros. No surprise extras.'}).waitFor();check('Returning to welcome keeps the current account and does not reset data');
   check('No browser runtime exceptions occurred',errors.length===0);
   await writeFile('results/consumer/report.json',JSON.stringify({origin,checks,errors},null,2));return {checks,errors};
  }catch(error){await page.screenshot({path:'results/consumer/failure.png',fullPage:true}).catch(()=>{});await writeFile('results/consumer/failure.txt',page.url()+'\n'+String(error)+'\n'+await page.locator('body').innerText()).catch(()=>{});throw error;}finally{await browser.close();}

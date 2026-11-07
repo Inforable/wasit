@@ -172,3 +172,17 @@ test('production requires a private secret and HTTPS and uses host-only Secure c
   assert.match(session.setCookie,/; Secure/);assert.ok(!session.setCookie.includes('Domain='));
   assert.equal((await valid.request('/api/auth/me',{cookie:session.cookie})).status,200);
 });
+
+test('provider grants are revoked by secret rotation or nonce corruption',async t=>{
+  const ctx=await setup(t),session=await ctx.bootstrap();
+  const {branchId}=await ctx.seed(session.data.actor_id);
+  const original=await ctx.auth.mintProviderGrant(branchId),request={headers:{authorization:'Bearer '+original.token}};
+  assert.equal((await ctx.auth.requireProvider(request,branchId)).branch_id,branchId);
+  const rotated=createAuth({store:ctx.store,secret:'rotated-provider-secret-at-least-32-characters',publicOrigin:ORIGIN,allowedOrigins:[ORIGIN]});
+  await assert.rejects(rotated.requireProvider(request,branchId),error=>error.status===403&&error.code==='invalid_provider_token');
+  const fresh=await rotated.mintProviderGrant(branchId);
+  assert.equal((await rotated.requireProvider({headers:{authorization:'Bearer '+fresh.token}},branchId)).branch_id,branchId);
+  await assert.rejects(ctx.auth.requireProvider({headers:{authorization:'Bearer '+fresh.token}},branchId),error=>error.status===403);
+  await ctx.store.query('UPDATE branches SET token_nonce=$1 WHERE id=$2',['x'.repeat(43),branchId]);
+  await assert.rejects(rotated.requireProvider({headers:{authorization:'Bearer '+fresh.token}},branchId),error=>error.status===403);
+});

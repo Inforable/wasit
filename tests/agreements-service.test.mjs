@@ -251,3 +251,26 @@ test('stale digest, different actor replay and altered committed totals cannot c
   await assert.rejects(ctx.service.accept(deal.id,{...body,budget_ack_limit:null},{...provider,actor_id:'provider_wrong01',branch_id:'branch_other01'}),isError(403));
   assert.equal((await ctx.service.getDeal(deal.id,consumer)).active_version_id,null);
 });
+
+test('agreement selection independently rejects denied or conditional price source snippets',async t=>{
+  const cases=[
+    {text:'Transport is not included.',snippet:'Transport is not included.',kind:'included',price:0},
+    {text:'Not free transport for this job.',snippet:'free transport',kind:'included',price:0},
+    {text:'Transport included only if the technician approves.',snippet:'Transport included',kind:'included',price:0},
+    {text:'Transport not Rp20.000 per job.',snippet:'Transport not Rp20.000 per job.',kind:'fixed',price:20000},
+  ];
+  for(const entry of cases)await t.test(entry.text,async t=>{
+    const ctx=await setup(t),quote=structuredClone(ctx.quote),line=quote.lines.find(line=>line.item_code==='transport');
+    const message={id:'msg_deniedterm01',branch_id:quote.branch_id,sender:'provider',text:entry.text,created_at:ctx.job.created_at+2000};
+    ctx.messages.set(message.id,message);quote.revision++;line.kind=entry.kind;line.unit_price=entry.price;line.source={message_id:message.id,snippet:entry.snippet};
+    quote.fixed_total=quote.lines.filter(line=>line.kind==='fixed').reduce((sum,line)=>sum+line.quantity*line.unit_price,0);
+    await ctx.persist(quote);await assert.rejects(ctx.create(),isError(422,'invalid_source'));
+    assert.equal((await ctx.store.query('SELECT COUNT(*) AS n FROM deals')).rows[0].n,0);
+  });
+});
+test('affirmative no-additional-charge transport remains selectable',async t=>{
+  const ctx=await setup(t),quote=structuredClone(ctx.quote),line=quote.lines.find(line=>line.item_code==='transport');
+  const message={id:'msg_freetrans01',branch_id:quote.branch_id,sender:'provider',text:'Transport no additional charge.',created_at:ctx.job.created_at+2000};
+  ctx.messages.set(message.id,message);quote.revision++;line.kind='included';line.unit_price=0;line.source={message_id:message.id,snippet:message.text};quote.fixed_total=90000;
+  await ctx.persist(quote);assert.equal((await ctx.create()).versions[0].terms.committed_total,90000);
+});

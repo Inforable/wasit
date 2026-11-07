@@ -86,7 +86,7 @@ export function createAuth({
     const row = expectedBranchId == null
       ? await first('SELECT * FROM branches WHERE token_hash=$1', [hash(token)])
       : await first('SELECT * FROM branches WHERE id=$1', [expectedBranchId]);
-    if (!row || row.mode !== 'human' || !row.provider_id || !equal(row.token_hash, hash(token)) || !Number.isFinite(Number(row.token_expires_at)) || Number(row.token_expires_at) <= now()) throw fail(403, 'invalid_provider_token', 'The provider link is invalid or has expired.');
+    if (!row || row.mode !== 'human' || !row.provider_id || !tokenPattern.test(row.token_nonce ?? '') || !equal(providerToken(row.id, row.token_nonce), token) || !equal(row.token_hash, hash(token)) || !Number.isFinite(Number(row.token_expires_at)) || Number(row.token_expires_at) <= now()) throw fail(403, 'invalid_provider_token', 'The provider link is invalid or has expired.');
     const request = await first('SELECT id FROM requests WHERE id=$1 AND archived_at IS NULL', [row.request_id]);
     if (!request) throw fail(403, 'invalid_provider_token', 'The provider link is invalid or has expired.');
     return { role: 'provider', actor_id: row.provider_id, provider_id: row.provider_id, branch_id: row.id, request_id: row.request_id };

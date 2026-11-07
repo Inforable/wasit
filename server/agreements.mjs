@@ -2,8 +2,8 @@ import { randomBytes } from 'node:crypto';
 import { HttpError } from './errors.mjs';
 import { termsDigest, committedTotal, publicTerms } from './agreement-terms.mjs';
 import { checkBillLines } from './bill-check.mjs';
-import { catalog, normalizeItem, supportedUnits } from './catalog.mjs';
-import { parseAmounts } from './money.mjs';
+import { catalog } from './catalog.mjs';
+import { validateQuotedFacts } from './quote-service.mjs';
 import { stableJson } from '../shared/canonical.mjs';
 import { quoteEligibility } from './comparison.mjs';
 
@@ -99,13 +99,12 @@ export function createAgreements({ store, now = Date.now, newId = defaultId, loa
       if(terms.scope!==job.scope||terms.units!==job.units||terms.schedule_label!==job.schedule_label||terms.location_label!==job.location_label||!base||base.quantity!==job.units)throw failure(422,'incomplete_quote','The agreement scope, quantity, location and schedule must match the request.');
     }
   }
-  async function validateSource(line, branchId, category, expectedMessageId = null) {
+  async function validateSource(line, branchId, job, expectedMessageId = null) {
     if (!line.source?.message_id || !line.source?.snippet || (expectedMessageId && line.source.message_id !== expectedMessageId)) throw failure(422, 'invalid_source', 'The quoted line does not match its provider message.');
     const message = await sourceLoader(line.source.message_id);
     if (!message || message.branch_id !== branchId || (message.sender ?? (message.direction === 'in' ? 'provider' : null)) !== 'provider' || !String(message.text).includes(line.source.snippet)) throw failure(422, 'invalid_source', 'Each price must come from this provider branch and an exact source quote.');
-    if (normalizeItem(category, line.source.snippet) !== line.item_code || !supportedUnits(category, line.item_code).includes(line.unit)) throw failure(422, 'invalid_source', 'The source must identify the quoted item and a supported unit.');
-    if (line.unit_price != null && line.unit_price > 0 && !parseAmounts(line.source.snippet).some((amount) => amount.value === line.unit_price)) throw failure(422, 'invalid_source', 'The quoted price must be present in the source for this item.');
-    if (line.unit_price === 0 && !/(gratis|free|termasuk|included|\b0\b)/i.test(line.source.snippet)) throw failure(422, 'invalid_source', 'A free or included item must be stated explicitly.');
+    const verified = validateQuotedFacts({ extraction: { lines: [line] }, message, job }).lines;
+    if (!verified.some(candidate => candidate.item_code === line.item_code && candidate.unit === line.unit && candidate.quantity === line.quantity && candidate.unit_price === line.unit_price && candidate.kind === line.kind)) throw failure(422, 'invalid_source', 'The complete provider statement must affirm the quoted item, price and units.');
     return message;
   }
   function quoteTerms(quote, job) {
@@ -154,7 +153,7 @@ export function createAgreements({ store, now = Date.now, newId = defaultId, loa
     const [quote, job] = await Promise.all([quoteLoader(branchId), jobLoader(requestId)]);
     if (!job || quote?.branch_id !== branchId || quote?.revision !== quoteRevision) throw failure(409, 'stale_quote', 'The quote changed. Review its current revision.');
     const terms = quoteTerms(quote, job);
-    for (const line of quote.lines) await validateSource(line, branchId, job.category);
+    for (const line of quote.lines) await validateSource(line, branchId, job);
     return store.transaction(async (tx) => {
       await tx.query('UPDATE requests SET status=status WHERE id=$1', [requestId]);
       const currentOwner = await first(tx, 'SELECT * FROM requests WHERE id=$1 AND archived_at IS NULL', [requestId]);
@@ -250,7 +249,7 @@ export function createAgreements({ store, now = Date.now, newId = defaultId, loa
     const candidates = body.committed_line_ids.map((id) => quote.lines.find((line) => line.id === id));
     for (const line of candidates) {
       if (!line || line.kind !== 'optional' || line.item_code === 'other' || !isMoney(line.unit_price)) throw failure(422, 'unsupported_change', 'Only explicit provider-quoted optional work can be proposed.');
-      await validateSource(line, before.branch_id, job.category, body.change_message_id);
+      await validateSource(line, before.branch_id, job, body.change_message_id);
     }
     return store.transaction(async (tx) => {
       const row = await header(tx, dealId, true); ownership(row, actor, true); expectedActive(row, body);

@@ -8,11 +8,11 @@ Owner: A. Done means tested implementation. Partial identifies a remaining accep
 | BE-02 | Partial | SQLite/PostgreSQL ports, sessions/CSRF, owner checks, branch bearer/expiry and reset-safe token issuance are implemented and tested. Neon Free provisioning and production persistence verification remain. |
 | BE-03 | Done | Five service catalogs, units, money/WIB parsing and request formatter. English chip answers round-trip; maximum budget explicitly confirmed. |
 | BE-04 | Done | Provider directory, consent, area/availability, private branches and idempotent messages. Provider payload is an allowlist. |
-| BE-05 | Partial | Quote revisions, provenance and quoted totals. Schema/fixtures exist; extraction pipeline, source validation and pricing service remain. |
+| BE-05 | Done | Persisted idempotent quote revisions, atomic item/price/unit source validation, conservative extraction fallback, schedule withdrawal and stale-generation rejection. |
 | BE-06 | Done | Comparison groups and preference ranking. Required costs cannot be unknown; only equivalent scopes are ranked; optional estimates excluded. |
 | BE-07 | Todo | Request orchestration, takeover, finish, event snapshots and serverless-safe task processing. Persist jobs/leases; GET never triggers model mutations. |
-| BE-08 | Partial | Versioned agreements and two-party acceptance. Local immutable terms/acceptance constraints and public digest utility exist; transactional service/routes remain. |
-| BE-09 | Todo | Bill checks, cumulative quantities, changes and explicit budget increase. Pending/rejected proposal preserves active agreement. |
+| BE-08 | Done | Immutable versioned terms, public digest, explicit two-role acceptance, stale/replay checks and atomic activation. Pending changes preserve the active version. |
+| BE-09 | Done | Bill checks, cumulative quantities, changes and explicit budget increase. Pending/rejected proposal preserves active agreement. |
 | BE-10 | Todo | Simulation ledger bound to versions, topups, completion and release. No real payments; idempotent money actions. |
 | BE-11 | Done | Provider price list/profile, ratings and business feedback. Provider prices never become the reference price book. |
 | BE-12 | Todo | Disputes/evidence/reviews with role checks and explicit simulation policy. No invented refund guarantees. |
@@ -32,3 +32,4 @@ Common acceptance: integer Rupiah; public provider projection; source-bound fact
 - Combined verification with foundation/storage: 50 tests passed. HTTP request orchestration remains BE-07.
 
 - BE-02/04/11: auth eight HTTP/storage groups and provider communications twenty groups pass. Grants are hash-only, branch-bound and revoked by owner reset; own-price/profile/ratings/feedback omit competitor and private-budget data.
+- BE-05/08/09: quote provenance/replay tests and nine agreement/bill service groups pass, including concurrent acceptance, explicit limit increase, source mismatch and cumulative bill quantity checks.

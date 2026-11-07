@@ -6,6 +6,8 @@ import {readFile} from 'node:fs/promises';
 import {openStore} from '../server/store.mjs';
 import {createAuth} from '../server/auth.mjs';
 import {createAppHandler} from '../server/http.mjs';
+import {createRuntimeHandler} from '../server/app.mjs';
+import {createValidator} from '../server/contracts.mjs';
 import {createModelPreferences,DEFAULTS} from '../server/model-preferences.mjs';
 import {createAgentRouter} from '../server/agent-router.mjs';
 import {formatRequest} from '../server/formatter.mjs';
@@ -77,6 +79,11 @@ test('request roles use frozen model snapshots while new requests and bill previ
  await saveRequest(store,'request_legacy01',null);assert.deepEqual(await router.configForRequest('request_legacy01'),DEFAULTS);
  const legacyClarification=await router.formatter(incomplete,{now:NOW,actor_id:A,model_config:null});assert.deepEqual(legacyClarification.model_config,DEFAULTS);assert.equal(calls.at(-1).model,L);
  await assert.rejects(router.forRequest('request_missing01'),error=>error.status===404);
+ const previousCalls=structuredClone(calls);
+ await preferences.updateRequest(job.id,A,{request_model:T,expected_revision:0});
+ await router.buyer({request_id:job.id,role:'buyer',name:'wasit_buyer',schema:buyerSchema,system:'Choose close.',user:'A bounded next action.'});assert.equal(calls.at(-1).model,T);assert.deepEqual(calls.slice(0,-1),previousCalls);
+ await router.provider({provider,job,prices:seedPrices(provider),intent:'rfq'});assert.equal(calls.at(-1).model,T);
+ const frozenAgain=await router.formatter(incomplete,{id:'request_models04',now:NOW,actor_id:A,model_config:formatted.model_config});assert.equal(calls.at(-1).model,L);assert.deepEqual(frozenAgain.model_config,DEFAULTS);
  assert.deepEqual(env,initialEnv);for(const call of calls){assert.equal(call.body.store,false);assert.ok([L,T].includes(call.model));}
 });
 
@@ -92,4 +99,47 @@ test('four validated runtime tuples are cached and offline roles remain honestly
  assert.equal(offline.enabled,false);assert.equal(offline.buyer,null);assert.equal(offline.extractor,null);
  const result=await offline.formatter({request_text:'Clean AC'},{actor_id:A,now:NOW});assert.equal(result.engine,'rules');assert.ok(result.model_config);
  await assert.rejects(offline.billPreview({},A),error=>error.status===503&&error.code==='vision_unavailable');assert.equal(calls,0);
+});
+
+test('request model changes use revisions, preserve creation and account settings, and reject active work',async t=>{
+ const store=await setup(t),preferences=createModelPreferences({store,env,now:()=>NOW});
+ await saveRequest(store,job.id,DEFAULTS);await saveRequest(store,'request_otherowner01',DEFAULTS,B);
+ await preferences.update(A,{request_model:L,bill_model:L});
+ const before=await preferences.getRequest(job.id,A);assert.equal(before.revision,0);assert.equal(before.busy,false);assert.deepEqual(before.initial,DEFAULTS);
+ await assert.rejects(preferences.getRequest(job.id,B),e=>e.status===404);
+ await assert.rejects(preferences.updateRequest(job.id,B,{request_model:T,expected_revision:0}),e=>e.status===404);
+ for(const bad of [{request_model:'unsupported',expected_revision:0},{request_model:T,expected_revision:-1},{request_model:T,expected_revision:0,bill_model:L},{request_model:T,expected_revision:0,actor_id:B},{request_model:T},null])await assert.rejects(preferences.updateRequest(job.id,A,bad),e=>e.status===400);
+ await store.query("INSERT INTO tasks(id,request_id,kind,source_key,generation,status,lease_until) VALUES($1,$2,$3,$4,0,'processing',$5)",['task_modelbusy01',job.id,'decide','modeltest',NOW+5000]);
+ assert.equal((await preferences.getRequest(job.id,A)).busy,true);
+ await assert.rejects(preferences.updateRequest(job.id,A,{request_model:T,expected_revision:0}),e=>e.status===409&&e.code==='model_busy');
+ assert.equal((await store.query("SELECT COUNT(*) AS count FROM events WHERE kind='model_changed'")).rows[0].count,0);
+ await store.query("UPDATE tasks SET status='done' WHERE id=$1",['task_modelbusy01']);
+ const changed=await preferences.updateRequest(job.id,A,{request_model:T,expected_revision:0});assert.equal(changed.revision,1);assert.deepEqual(changed.selected,{request_model:T,bill_model:T});assert.deepEqual(changed.initial,DEFAULTS);
+ const replay=await preferences.updateRequest(job.id,A,{request_model:T,expected_revision:0});assert.equal(replay.revision,1);
+ const unchanged=await preferences.updateRequest(job.id,A,{request_model:T,expected_revision:1});assert.equal(unchanged.revision,1);
+ await assert.rejects(preferences.updateRequest(job.id,A,{request_model:L,expected_revision:0}),e=>e.code==='stale_model');
+ assert.deepEqual(await preferences.forActor(A),{request_model:L,bill_model:L});
+ assert.deepEqual(JSON.parse((await store.query('SELECT model_config_json FROM requests WHERE id=$1',[job.id])).rows[0].model_config_json),DEFAULTS);
+ const events=(await store.query("SELECT * FROM events WHERE request_id=$1 AND kind='model_changed'",[job.id])).rows;assert.equal(events.length,1);assert.equal(events[0].actor,'consumer');assert.deepEqual(JSON.parse(events[0].data_json),{previous_model:L,request_model:T,previous_revision:0,revision:1});assert.equal(events[0].engine,null);
+ const reloaded=createModelPreferences({store,env,now:()=>NOW});assert.deepEqual(await reloaded.forRequest(job.id),changed.selected);
+ const router=createAgentRouter({store,preferences:reloaded,env,fetchImpl:async()=>{throw Error('No network expected');}});assert.deepEqual(await router.configForRequest(job.id),changed.selected);
+ await store.query('UPDATE requests SET archived_at=$1 WHERE id=$2',[NOW,job.id]);await assert.rejects(preferences.getRequest(job.id,A),e=>e.status===404);await assert.rejects(preferences.updateRequest(job.id,A,{request_model:L,expected_revision:1}),e=>e.status===404);
+});
+
+test('production runtime request model routes enforce session ownership, origin, CSRF and exact payload',async t=>{
+ const store=await setup(t),origin='http://localhost:5180';
+ const server=createServer(createRuntimeHandler({store,now:()=>NOW,env:{},auth:{secret:'offline-request-model-route-secret-12345',allowedOrigins:[origin],publicOrigin:origin,secure:false},distDir:'dist'})).listen(0,'127.0.0.1');await once(server,'listening');t.after(()=>new Promise(resolve=>server.close(resolve)));
+ const base='http://127.0.0.1:'+server.address().port;
+ const bootstrap=async()=>{const res=await fetch(base+'/api/demo/session',{method:'POST',headers:{Origin:origin,'Content-Type':'application/json'},body:'{}'});return {cookie:res.headers.get('set-cookie').split(';')[0],...await res.json()};};
+ const owner=await bootstrap(),other=await bootstrap();await saveRequest(store,job.id,DEFAULTS,owner.actor_id);
+ const send=(session,{method='GET',csrf=session?.csrf_token,originHeader=origin,body}={})=>fetch(base+'/api/requests/'+job.id+'/models',{method,headers:{Origin:originHeader,...(session?{Cookie:session.cookie}:{}),...(csrf?{'X-CSRF-Token':csrf}:{}),...(body?{'Content-Type':'application/json'}:{})},...(body?{body:JSON.stringify(body)}:{})});
+ assert.equal((await send(null)).status,401);assert.equal((await send(other)).status,404);
+ let response=await send(owner);assert.equal(response.status,200);assert.equal((await response.json()).revision,0);
+ const body={request_model:T,expected_revision:0};
+ assert.equal((await send(owner,{method:'PUT',csrf:null,body})).status,403);assert.equal((await send(owner,{method:'PUT',originHeader:'https://wrong.example',body})).status,403);assert.equal((await send(other,{method:'PUT',body})).status,404);
+ assert.equal((await send(owner,{method:'PUT',body:{...body,bill_model:L}})).status,400);
+ response=await send(owner,{method:'PUT',body});assert.equal(response.status,200);const changed=await response.json();const validate=await createValidator();validate('api.schema.json#/$defs/request_models',changed);validate('api.schema.json#/$defs/request_model_update',body);assert.equal(changed.selected.request_model,T);assert.equal(changed.selected.bill_model,T);assert.equal(changed.revision,1);assert.equal(changed.enabled,false);assert.ok(!JSON.stringify(changed).includes('API_KEY'));
+ response=await send(owner,{method:'PUT',body});assert.equal(response.status,200);assert.equal((await response.json()).revision,1);
+ assert.equal((await send(owner,{method:'PUT',body:{request_model:L,expected_revision:0}})).status,409);
+ const snapshot=await fetch(base+'/api/requests/'+job.id,{headers:{Cookie:owner.cookie}});assert.equal(snapshot.status,200);const snapshotBody=await snapshot.json();assert.equal(snapshotBody.events.filter(event=>event.kind==='model_changed').length,1);for(const event of snapshotBody.events)validate('common.schema.json#/$defs/event',event);
 });

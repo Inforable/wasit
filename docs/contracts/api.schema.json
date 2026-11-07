@@ -62,6 +62,9 @@
         },
         "weights": {
           "$ref": "common.schema.json#/$defs/weights"
+        },
+        "confirm_details": {
+          "type": "boolean"
         }
       }
     },
@@ -312,6 +315,14 @@
               },
               {
                 "type": "boolean"
+              },
+              {
+                "type": "array",
+                "maxItems": 5,
+                "items": {
+                  "type": "string",
+                  "maxLength": 1000
+                }
               }
             ]
           }
@@ -767,6 +778,78 @@
             "gpt-6-luna",
             "gpt-6.1-terra"
           ]
+        }
+      }
+    },
+    "request_model_update": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "request_model",
+        "expected_revision"
+      ],
+      "properties": {
+        "request_model": {
+          "enum": [
+            "gpt-6-luna",
+            "gpt-6.1-terra"
+          ]
+        },
+        "expected_revision": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "request_models": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "enabled",
+        "selected",
+        "initial",
+        "available",
+        "revision",
+        "busy"
+      ],
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "selected": {
+          "$ref": "#/$defs/model_preferences"
+        },
+        "initial": {
+          "$ref": "#/$defs/model_preferences"
+        },
+        "available": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "id",
+              "label"
+            ],
+            "properties": {
+              "id": {
+                "enum": [
+                  "gpt-6-luna",
+                  "gpt-6.1-terra"
+                ]
+              },
+              "label": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "busy": {
+          "type": "boolean"
         }
       }
     }

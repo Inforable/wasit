@@ -5,6 +5,7 @@ import { formatRequest } from './formatter.mjs';
 import { compareQuotes } from './comparison.mjs';
 import { decideBuyer } from './buyer-policy.mjs';
 import { scriptedReply } from './providers.mjs';
+import { prepareIntake,applyIntakeAnswers } from './request-intake.mjs';
 
 const makeId = (prefix) => prefix + '_' + randomBytes(10).toString('hex');
 const parse = (text, fallback = null) => { try { return text ? JSON.parse(text) : fallback; } catch { return fallback; } };
@@ -46,17 +47,18 @@ export function createRequests({store,now=Date.now,newId=makeId,formatter=format
   async function insertRequest(db,input,actor,id,result,parentId=null) {
     const status=result.status==='ready'?'contacting':'needs_clarification',at=now();
     await db.query('INSERT INTO requests(id,parent_id,user_id,request_text,input_json,generation,status,job_json,questions_json,weights_json,formatter_by,manual_for,scenario_id,created_at,model_config_json) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15)',
-      [id,parentId,actor.actor_id,input.request_text,JSON.stringify(input),0,status,result.job?JSON.stringify(result.job):null,JSON.stringify(result.questions??[]),JSON.stringify(result.job?.weights??{}),result.engine==='model'?'model':'rules',input.manual_for??null,input.scripted?'scripted':null,at,result.model_config?JSON.stringify(result.model_config):null]);
+      [id,parentId,actor.actor_id,input.request_text,JSON.stringify({...input,_intake_details:result.details??null,_intake_phase:result.intake_stage??null}),0,status,result.job?JSON.stringify(result.job):null,JSON.stringify(result.questions??[]),JSON.stringify(result.job?.weights??{}),result.engine==='model'?'model':'rules',input.manual_for??null,input.scripted?'scripted':null,at,result.model_config?JSON.stringify(result.model_config):null]);
     const request=await first(db,'SELECT * FROM requests WHERE id=$1',[id]);
     await event(db,id,null,'request_created',result.job?'The request is ready to contact eligible providers.':'A few request details need confirmation.',{engine:result.engine==='model'?'model':'rules'});
     if(result.rejected)await event(db,id,null,'validation_rejected',String(result.rejected).slice(0,240));
-    if (result.job) await enqueue(db,request,null,'discover','initial');
+    if (result.status==='ready'&&result.job) await enqueue(db,request,null,'discover','initial');
     return request;
   }
   async function create(input,actor) {
     consumer(actor);
     const id=newId('request');
-    const result=await formatter(input,{now:now(),id,actor_id:actor.actor_id});
+    const profile=await first(store,'SELECT profile_json FROM profiles WHERE id=$1',[actor.actor_id]);
+    const result=prepareIntake(input,await formatter(input,{now:now(),id,actor_id:actor.actor_id,profileLocation:parse(profile?.profile_json)?.location_label}));
     await store.transaction(tx=>insertRequest(tx,input,actor,id,result));
     return snapshot(id,actor);
   }
@@ -64,8 +66,9 @@ export function createRequests({store,now=Date.now,newId=makeId,formatter=format
     const parent=await owned(store,requestId,actor);
     if (!answers || typeof answers!=='object' || Array.isArray(answers)) throw error(400,'invalid_payload','Answer the requested clarification questions.');
     const original=parse(parent.input_json,{request_text:parent.request_text});
-    const input={...original,answers:{...original.answers,...answers}},id=newId('request');
-    const formatted=await formatter(input,{now:now(),id,actor_id:actor.actor_id,model_config:parse(parent.model_config_json)});
+    const input=applyIntakeAnswers(original,answers),id=newId('request');
+    const profile=await first(store,'SELECT profile_json FROM profiles WHERE id=$1',[actor.actor_id]);
+    const formatted=prepareIntake(input,await formatter(input,{now:now(),id,actor_id:actor.actor_id,model_config:parse(parent.model_config_json),profileLocation:parse(profile?.profile_json)?.location_label}));
     const childId=await store.transaction(async tx=>{
       await tx.query('UPDATE requests SET status=status WHERE id=$1',[requestId]);
       const row=await owned(tx,requestId,actor);
@@ -104,7 +107,8 @@ export function createRequests({store,now=Date.now,newId=makeId,formatter=format
     const ranking=await comparison(request,rows);
     const dealRow=await first(store,'SELECT id,active_version_id FROM deals WHERE request_id=$1 ORDER BY created_at DESC LIMIT 1',[requestId]);
     const deal=dealRow&&agreements?await agreements.getDeal(dealRow.id,actor):null;
-    return {id:requestId,status:dealRow?.active_version_id?'locked':request.status,job:parse(request.job_json),questions:parse(request.questions_json,[]),branches,events,...ranking,deal,created_at:Number(request.created_at)};
+    const intake=parse(request.input_json,{});
+    return {id:requestId,status:dealRow?.active_version_id?'locked':request.status,request_text:request.request_text,request_details:intake._intake_details??null,question_stage:intake._intake_phase??null,job:parse(request.job_json),questions:parse(request.questions_json,[]),branches,events,...ranking,deal,created_at:Number(request.created_at)};
   }
   async function lockRuntime(tx) {
     await tx.query("INSERT INTO settings(key,value_json) VALUES($1,$2) ON CONFLICT(key) DO NOTHING",['request_runtime_lock','{}']);

@@ -66,18 +66,18 @@ function weightsOf(value) {
       || keys.reduce((sum, key) => sum + value[key], 0) !== 100) throw invalid('Priority weights must be integers adding up to 100.');
   return Object.fromEntries(keys.map((key) => [key, value[key]]));
 }
-function unitCount(text, supplied) {
+function unitCount(text, supplied, unknownAllowed=false) {
   if (supplied != null) {
     const number = Number(supplied);
     if (!Number.isInteger(number) || number < 1 || number > 20) throw invalid('The number of units must be from 1 to 20.');
     return number;
   }
-  if (/\b\d+\s*[?-]\s*\d+\s*(?:units?|buah|titik)\b/i.test(text)) throw invalid('Confirm one exact number of units before requesting quotes.');
-  const match = /\b(\d+)\s*(?:units?|buah|titik)\b/i.exec(text);
+  if (/\b\d+\s*[?-]\s*\d+\s*(?:ac\s+)?(?:units?|buah|titik|jobs?)\b/i.test(text)) {if(unknownAllowed)return null;throw invalid('Confirm one exact number of units before requesting quotes.');}
+  const match = /\b(\d+)\s*(?:ac\s+)?(?:units?|air conditioners?|washing machines?|machines?|buah|titik|jobs?)\b/i.exec(text);
   if (match) return unitCount('', Number(match[1]));
   const words = { one: 1, two: 2, three: 3, four: 4, five: 5, satu: 1, dua: 2, tiga: 3, empat: 4, lima: 5 };
-  const spoken = /\b(one|two|three|four|five|satu|dua|tiga|empat|lima)\s*(?:units?|buah|titik)\b/i.exec(text);
-  return spoken ? words[spoken[1].toLowerCase()] : 1;
+  const spoken = /\b(one|two|three|four|five|satu|dua|tiga|empat|lima)\s*(?:ac\s+)?(?:units?|air conditioners?|washing machines?|machines?|buah|titik|jobs?)\b/i.exec(text);
+  return spoken ? words[spoken[1].toLowerCase()] : unknownAllowed?null:1;
 }
 function questionsFor(parts) {
   const questions = [];
@@ -113,16 +113,17 @@ export function formatRequest(input, { now = Date.now(), id, profileLocation } =
   const location = nonempty(read('location_label', 'location')) ?? detectLocation(text)
     ?? nonempty(typeof profileLocation === 'object' ? profileLocation?.kecamatan ?? profileLocation?.label : profileLocation);
   const parts = { category: categoryOf(read('category'), text), schedule, max_budget: max, target_price: target, location_label: location };
+  const details={category:parts.category,units:unitCount(text,read('units'),true),location_label:location,schedule_label:schedule?.label??null,max_budget:max,target_price:target};
   const questions = questionsFor(parts);
-  if (questions.length) return { status: 'needs_clarification', questions };
+  if (questions.length) return { status: 'needs_clarification', questions,details };
   const jobId = id ?? 'request_' + randomUUID().replaceAll('-', '').slice(0, 20);
   if (typeof jobId !== 'string' || !/^[a-z]+_[a-zA-Z0-9_-]{6,64}$/.test(jobId)) throw invalid('The request identifier is invalid.');
   const job = {
-    id: jobId, category: parts.category, units: unitCount(text, input.units), scope: scopeFor(parts.category), request_text: text,
+    id: jobId, category: parts.category, units: unitCount(text,read('units'),input.confirm_details===true)??1, scope: scopeFor(parts.category), request_text: text,
     location_label: location, schedule_label: schedule.label, time_window: schedule.time_window,
     max_budget: max, target_price: target, target_authorized: input.target_authorized === true,
     weights: weightsOf(input.weights), created_at: Math.trunc(timestamp),
   };
-  return { status: 'ready', job };
+  return { status: 'ready', job,details };
 }
 export const formatRules = formatRequest;

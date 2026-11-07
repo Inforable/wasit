@@ -17,6 +17,7 @@ export function createAgentRouter({store,preferences,env=process.env,fetchImpl=g
  }
  async function configForRequest(requestId){
   if(requestId==null)return {...DEFAULTS};
+  if(preferences.forRequest)return preferences.forRequest(requestId);
   const row=(await store.query('SELECT model_config_json FROM requests WHERE id=$1',[requestId])).rows[0];
   if(!row)throw new HttpError(404,'not_found','The request was not found.');
   return storedModelConfig(row.model_config_json);

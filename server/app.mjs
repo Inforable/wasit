@@ -35,7 +35,7 @@ export async function createBackend(options = {}) {
   const auth = createAuth({ store, now, ...options.auth });
   const accounts = createAccounts({store,auth,now});
   const environment=options.env??process.env;
-  const preferences=createModelPreferences({store,auth,env:environment});
+  const preferences=createModelPreferences({store,auth,env:environment,now});
   const agents=options.agents??createAgentRouter({store,preferences,env:environment,now,fetchImpl:createBudgetedFetch({store,now,fetchImpl:options.fetchImpl??globalThis.fetch,dailyLimit:environment.WASIT_MODEL_DAILY_CALL_LIMIT??500})});
   const directory = createDirectory({ store, now });
   await directory.seed();
@@ -196,7 +196,7 @@ export function createRuntimeHandler(options = {}) {
   ];
   const paths = [
     ...authPaths,['GET',/^\/api\/settings\/models$/],['PUT',/^\/api\/settings\/models$/],['POST',/^\/api\/auth\/(register|login)$/],['GET',/^\/api\/profile$/],['PUT',/^\/api\/profile$/],['GET',/^\/api\/catalog$/],['GET',/^\/api\/reference-prices$/],['GET',/^\/api\/providers$/],['GET',/^\/api\/requests$/],['POST',/^\/api\/requests$/],
-    ['GET',/^\/api\/requests\/([^/]+)$/],['POST',/^\/api\/requests\/([^/]+)\/(clarify|process|finish|deals)$/],
+    ['GET',/^\/api\/requests\/([^/]+)$/],['GET',/^\/api\/requests\/([^/]+)\/models$/],['PUT',/^\/api\/requests\/([^/]+)\/models$/],['POST',/^\/api\/requests\/([^/]+)\/(clarify|process|finish|deals)$/],
     ['POST',/^\/api\/requests\/([^/]+)\/branches\/([^/]+)\/(takeover|say)$/],
     ['GET',/^\/api\/requests\/([^/]+)\/planning$/],['GET',/^\/api\/deals\/([^/]+)$/],
     ['GET',/^\/api\/deals\/([^/]+)\/bill-checks$/],

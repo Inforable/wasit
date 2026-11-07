@@ -5,6 +5,7 @@ import { parseAmounts } from './money.mjs';
 import { publicTerms } from './agreement-terms.mjs';
 import { assertTaskGeneration } from './task-guard.mjs';
 import { providerQuestion } from './provider-questions.mjs';
+import { publicCustomerContext } from './request-intake.mjs';
 
 const failure = (status,code,message) => new HttpError(status,code,message);
 const defaultId = (prefix) => prefix + '_' + randomBytes(10).toString('hex');
@@ -23,7 +24,8 @@ function projectTerms(terms) {
 export function rfqText(job) {
   const book = catalog(job.category);
   const requested = book.requiredItems.filter((id) => id !== 'transport').map((id) => book.items.find((item) => item.id === id).label).join(' and ');
-  return `Hello. A customer needs ${book.label} for ${job.units} requested unit(s) in ${job.location_label}, ${job.schedule_label}. Please quote ${requested}, transport, what is included, your available slot and warranty. List optional work separately; extra work requires prior approval.`;
+  const context=publicCustomerContext(job);
+  return `Hello. A customer needs ${book.label} for ${job.units} requested unit(s) in ${job.location_label}, ${job.schedule_label}. Please quote ${requested}, transport, what is included, your available slot and warranty. List optional work separately; extra work requires prior approval.`+(context?' Customer-reported context, not a diagnosis: '+context+'.':'');
 }
 export function createCommunications({ store,now = Date.now,newId = defaultId,getDeal,mintToken } = {}) {
   if (!store?.query || !store?.transaction) throw new TypeError('A transactional store is required.');

@@ -200,6 +200,41 @@
         "created_at": {
           "type": "integer",
           "minimum": 0
+        },
+        "customer_context": {
+          "type": "array",
+          "maxItems": 2,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "id",
+              "label",
+              "answers"
+            ],
+            "properties": {
+              "id": {
+                "enum": [
+                  "service_context",
+                  "detail_context"
+                ]
+              },
+              "label": {
+                "type": "string",
+                "maxLength": 100
+              },
+              "answers": {
+                "type": "array",
+                "minItems": 1,
+                "maxItems": 5,
+                "uniqueItems": true,
+                "items": {
+                  "type": "string",
+                  "maxLength": 100
+                }
+              }
+            }
+          }
         }
       }
     },
@@ -694,7 +729,8 @@
             "version_accepted",
             "version_activated",
             "bill_checked",
-            "reset"
+            "reset",
+            "model_changed"
           ]
         },
         "engine": {
@@ -1921,6 +1957,26 @@
                   "maxLength": 1000
                 },
                 "maxItems": 8
+              },
+              "kind": {
+                "enum": [
+                  "choice",
+                  "multi"
+                ]
+              },
+              "required": {
+                "type": "boolean"
+              },
+              "hint": {
+                "type": "string",
+                "maxLength": 1000
+              },
+              "default_value": {
+                "type": "string",
+                "maxLength": 1000
+              },
+              "allow_other": {
+                "type": "boolean"
               }
             }
           },
@@ -1963,6 +2019,108 @@
         "created_at": {
           "type": "integer",
           "minimum": 0
+        },
+        "request_text": {
+          "type": "string",
+          "maxLength": 1000
+        },
+        "question_stage": {
+          "enum": [
+            "scope",
+            "details",
+            null
+          ]
+        },
+        "request_details": {
+          "anyOf": [
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "category",
+                "units",
+                "location_label",
+                "schedule_label",
+                "max_budget",
+                "target_price"
+              ],
+              "properties": {
+                "category": {
+                  "enum": [
+                    "ac_service",
+                    "washer",
+                    "plumbing",
+                    "electrical",
+                    "cleaning",
+                    null
+                  ]
+                },
+                "units": {
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 20
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "location_label": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 1000
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "schedule_label": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 1000
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "max_budget": {
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 100000000
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "target_price": {
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 100000000
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
         }
       }
     },

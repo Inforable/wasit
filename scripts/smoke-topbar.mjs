@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import {mkdir,writeFile} from 'node:fs/promises';
 import {chromium} from 'playwright';
+import {openStore} from '../server/store.mjs';
 const origin=process.env.WASIT_SMOKE_ORIGIN??'http://127.0.0.1:3330';
 const browser=await chromium.launch({executablePath:'C:/Program Files/Google/Chrome/Application/chrome.exe',headless:true});
 const context=await browser.newContext({viewport:{width:390,height:844},colorScheme:'light'}),page=await context.newPage(),checks=[],errors=[];
@@ -44,5 +45,15 @@ try{
  check('Results summary separates actual provider count from comparable offers',(await page.locator('.results-summary').innerText()).includes(final.branches.length+' provider')&&(await page.locator('.results-summary').innerText()).includes((final.branches.length-other.length)+' offer'));
  if(other.length){await page.locator('.provider-outcome').first().getByRole('button',{name:'Details and conversation',exact:true}).click();check('Unranked provider conversation and source details remain inspectable',await page.locator('.provider-outcome .offer-details').count()===1);}
  await page.evaluate(()=>scrollTo(0,0));await page.screenshot({path:'results/topbar/all-provider-results.png',fullPage:true});
+ await page.getByRole('button',{name:/AI model:/}).click();await menu.getByRole('combobox').waitFor();check('The fast Nano model is available as a third explicit option',await menu.getByRole('option',{name:'GPT-5.4 Nano (Fast)',exact:true}).count()===1&&await menu.getByRole('option').count()===3);
+ await menu.getByRole('combobox').selectOption('gpt-5.4-nano');await menu.getByRole('button',{name:'Apply to next actions',exact:true}).click();await menu.getByText('This request will use GPT-5.4 Nano (Fast) for its next AI actions.',{exact:true}).waitFor();await page.keyboard.press('Escape');
+ const nano=await api('/api/requests/'+requestId+'/models');check('Nano selection is explicit and keeps account and bill defaults intact',nano.selected.request_model==='gpt-5.4-nano'&&(await api('/api/settings/models')).selected.request_model==='gpt-6.1-terra'&&nano.selected.bill_model===baseline.selected.bill_model);
+ await page.setViewportSize({width:320,height:780});await page.waitForTimeout(200);check('The selected Nano label fits the narrow topbar',await page.locator('.model-trigger').innerText().then(text=>text.includes('Nano'))&&await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
+ if(process.env.WASIT_SMOKE_SQLITE){
+  const fixture=await openStore({databaseUrl:'',sqliteFile:process.env.WASIT_SMOKE_SQLITE,production:false});
+  try{await fixture.query("UPDATE branches SET deadline_at=0 WHERE request_id=$1 AND mode='human'",[requestId]);await fixture.query("UPDATE tasks SET due_at=0 WHERE request_id=$1 AND kind='timeout' AND status='pending'",[requestId]);}finally{await fixture.close();}
+  await api('/api/requests/'+requestId+'/process',{method:'POST',body:{max_steps:2}});await page.setViewportSize({width:390,height:844});await page.reload();await page.getByRole('heading',{name:'Offers for you',exact:true}).waitFor();
+  check('A provider reply deadline is labeled separately from AI processing',await page.getByText('No provider reply',{exact:true}).count()===1&&await page.getByText('No provider reply within the 90-second reply window. Existing messages remain available.',{exact:true}).count()===1);await page.screenshot({path:'results/topbar/provider-reply-window.png',fullPage:true});
+ }
  check('No browser runtime errors',errors.length===0);await writeFile('results/topbar/checks.json',JSON.stringify({checks,errors},null,2));
 }finally{await browser.close();}

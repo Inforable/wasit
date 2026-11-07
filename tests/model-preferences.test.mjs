@@ -13,7 +13,7 @@ import {createAgentRouter} from '../server/agent-router.mjs';
 import {formatRequest} from '../server/formatter.mjs';
 import {extractQuotedFacts} from '../server/quote-service.mjs';
 import {PROVIDERS,seedPrices} from '../server/providers.mjs';
-const A='consumer_alpha01',B='consumer_bravo01',L='gpt-6-luna',T='gpt-6.1-terra',NOW=1794012900000;
+const A='consumer_alpha01',B='consumer_bravo01',L='gpt-6-luna',T='gpt-6.1-terra',N='gpt-5.4-nano',NOW=1794012900000;
 const env={OPENAI_API_KEY:'test-private-key-never-public',OPENAI_MODEL_BUYER:'old-model',OPENAI_REASONING_EFFORT:'low'};
 const job=formatRequest({request_text:'AC cleaning',category:'ac_service',location_label:'Kelapa Gading',schedule_label:'Tomorrow morning',max_budget:250000},{now:NOW,id:'request_models01'}).job;
 async function setup(t){const store=await openStore({databaseUrl:'',sqliteFile:':memory:',production:false});t.after(()=>store.close());return store;}
@@ -30,7 +30,7 @@ test('model settings persist only the owning consumer tuple and reject unsupport
  await assert.rejects(preferences.get('provider_owner01'),error=>error.status===401);
  const rows=(await store.query("SELECT key,value_json FROM settings WHERE key LIKE 'consumer_models:%'")).rows;
  assert.equal(rows.length,1);assert.equal(rows[0].key,'consumer_models:'+A);assert.deepEqual(JSON.parse(rows[0].value_json),chosen);
- const view=await preferences.get(A);assert.deepEqual(Object.keys(view).sort(),['available','defaults','enabled','selected']);assert.equal(view.enabled,true);assert.equal(view.available.length,2);assert.ok(!JSON.stringify(view).includes(env.OPENAI_API_KEY));assert.deepEqual(env,before);
+ const view=await preferences.get(A);assert.deepEqual(Object.keys(view).sort(),['available','defaults','enabled','selected']);assert.equal(view.enabled,true);assert.equal(view.available.length,3);assert.ok(!JSON.stringify(view).includes(env.OPENAI_API_KEY));assert.deepEqual(env,before);
  view.selected.request_model='tampered';assert.deepEqual(await preferences.forActor(A),chosen);
 });
 
@@ -142,4 +142,21 @@ test('production runtime request model routes enforce session ownership, origin,
  response=await send(owner,{method:'PUT',body});assert.equal(response.status,200);assert.equal((await response.json()).revision,1);
  assert.equal((await send(owner,{method:'PUT',body:{request_model:L,expected_revision:0}})).status,409);
  const snapshot=await fetch(base+'/api/requests/'+job.id,{headers:{Cookie:owner.cookie}});assert.equal(snapshot.status,200);const snapshotBody=await snapshot.json();assert.equal(snapshotBody.events.filter(event=>event.kind==='model_changed').length,1);for(const event of snapshotBody.events)validate('common.schema.json#/$defs/event',event);
+});
+
+test('fast model is explicit, all nine runtime tuples are isolated, and only Nano uses no reasoning',async t=>{
+ const store=await setup(t),preferences=createModelPreferences({store,env,now:()=>NOW}),calls=[];
+ const buyerSchema=JSON.parse(await readFile(new URL('../docs/contracts/agent-buyer.schema.json',import.meta.url),'utf8'));
+ const transport=async(_url,options)=>{const body=JSON.parse(options.body);calls.push(body);return completed(body.text.format.name==='wasit_bill'?{lines:[{item:'AC cleaning',unit:'unit',quantity:1,unit_price:100000}]}:{action:'close',detail_key:null,cite:'none',source_message_ids:[],reason:'No further negotiation is needed.'});};
+ const router=createAgentRouter({store,preferences,env,fetchImpl:transport,now:()=>NOW}),instances=[];
+ const view=await preferences.get(A);assert.deepEqual(view.selected,DEFAULTS);assert.deepEqual(view.defaults,DEFAULTS);assert.equal(view.available.find(model=>model.id===N).label,'GPT-5.4 Nano (Fast)');
+ for(const [i,request_model]of [L,T,N].entries())for(const [j,bill_model]of [L,T,N].entries()){
+  const id='request_nano'+i+j;await saveRequest(store,id,{request_model,bill_model});const runtime=await router.forRequest(id);instances.push(runtime);assert.equal(await router.forRequest(id),runtime);
+  await router.buyer({request_id:id,role:'buyer',name:'wasit_buyer',schema:buyerSchema,system:'Choose close.',user:'One bounded action.'});assert.equal(calls.at(-1).model,request_model);assert.equal(calls.at(-1).reasoning.effort,request_model===N?'none':'low');
+ }
+ assert.equal(new Set(instances).size,9);
+ for(const bill_model of [L,T,N]){await preferences.update(A,{request_model:L,bill_model});await router.billPreview({image_base64:'iVBORw0KGgo=',mime_type:'image/png',category:'ac_service'},A);assert.equal(calls.at(-1).model,bill_model);assert.equal(calls.at(-1).reasoning.effort,bill_model===N?'none':'low');}
+ await saveRequest(store,'request_nanoswitch01',DEFAULTS);await preferences.updateRequest('request_nanoswitch01',A,{request_model:N,expected_revision:0});assert.deepEqual(await preferences.forRequest('request_nanoswitch01'),{request_model:N,bill_model:T});assert.deepEqual((await preferences.getRequest('request_nanoswitch01',A)).initial,DEFAULTS);
+ const validate=await createValidator();validate('api.schema.json#/$defs/model_preferences',{request_model:N,bill_model:N});validate('api.schema.json#/$defs/request_models',await preferences.getRequest('request_nanoswitch01',A));validate('api.schema.json#/$defs/request_model_update',{request_model:N,expected_revision:1});
+ assert.equal(env.OPENAI_REASONING_EFFORT,'low');assert.deepEqual(await preferences.forActor(B),DEFAULTS);assert.ok(!JSON.stringify(await preferences.get(A)).includes(env.OPENAI_API_KEY));
 });

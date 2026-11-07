@@ -10,6 +10,8 @@ export function createAgentRouter({store,preferences,env=process.env,fetchImpl=g
   const selected=storedModelConfig(config),key=selected.request_model+'|'+selected.bill_model;
   if(!runtimes.has(key)){
    const roleEnv={...environment,OPENAI_MODEL_BUYER:selected.request_model,OPENAI_MODEL_EXTRACTOR:selected.request_model,OPENAI_MODEL_PROVIDER:selected.request_model,OPENAI_MODEL_FORMATTER:selected.request_model,OPENAI_MODEL_SUPPORT:selected.bill_model};
+   if(selected.request_model==='gpt-5.4-nano')for(const role of ['BUYER','EXTRACTOR','PROVIDER','FORMATTER'])roleEnv['OPENAI_REASONING_EFFORT_'+role]='none';
+   if(selected.bill_model==='gpt-5.4-nano')roleEnv.OPENAI_REASONING_EFFORT_SUPPORT='none';
    const pending=createAgentRuntime({store,env:roleEnv,fetchImpl,now}).catch(error=>{runtimes.delete(key);throw error;});
    runtimes.set(key,pending);
   }

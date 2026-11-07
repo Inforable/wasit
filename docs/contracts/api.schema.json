@@ -770,13 +770,15 @@
         "request_model": {
           "enum": [
             "gpt-6-luna",
-            "gpt-6.1-terra"
+            "gpt-6.1-terra",
+            "gpt-5.4-nano"
           ]
         },
         "bill_model": {
           "enum": [
             "gpt-6-luna",
-            "gpt-6.1-terra"
+            "gpt-6.1-terra",
+            "gpt-5.4-nano"
           ]
         }
       }
@@ -792,7 +794,8 @@
         "request_model": {
           "enum": [
             "gpt-6-luna",
-            "gpt-6.1-terra"
+            "gpt-6.1-terra",
+            "gpt-5.4-nano"
           ]
         },
         "expected_revision": {
@@ -835,7 +838,8 @@
               "id": {
                 "enum": [
                   "gpt-6-luna",
-                  "gpt-6.1-terra"
+                  "gpt-6.1-terra",
+                  "gpt-5.4-nano"
                 ]
               },
               "label": {

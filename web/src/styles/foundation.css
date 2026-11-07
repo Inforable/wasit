@@ -1,0 +1,6 @@
+.foundation-intro { padding: 22px; margin-top: 20px; }
+.foundation-intro h2 { font-size: 26px; line-height: 1.25; letter-spacing: -0.035em; margin: 16px 0; color: var(--ink); }
+.foundation-intro > p:not(.eyebrow) { font-size: 14px; line-height: 1.7; color: var(--muted); margin-bottom: 24px; }
+.component-gallery { gap: 16px; }
+.gallery-row { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+.shell-header .icon-btn { min-width: 44px; min-height: 44px; }

@@ -1,0 +1,31 @@
+{
+  "name": "wasit",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": "22.x"
+  },
+  "scripts": {
+    "dev": "node --env-file-if-exists=.env scripts/dev.mjs",
+    "server": "node --disable-warning=ExperimentalWarning --env-file-if-exists=.env server/index.mjs",
+    "build": "vite build",
+    "start": "node --disable-warning=ExperimentalWarning --env-file-if-exists=.env server/index.mjs",
+    "test": "node --disable-warning=ExperimentalWarning --test",
+    "check:contracts": "node scripts/check-contracts.mjs",
+    "check": "npm run check:contracts && npm test && npm run build"
+  },
+  "dependencies": {
+    "lucide-react": "0.468.0",
+    "motion": "12.23.12",
+    "qrcode": "1.5.4",
+    "react": "19.1.1",
+    "react-dom": "19.1.1"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "4.5.2",
+    "vite": "6.3.5",
+    "ajv": "8.17.1",
+    "ajv-formats": "3.0.1"
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "id": "request_demo01",
+  "status": "needs_clarification",
+  "job": null,
+  "questions": [
+    {
+      "id": "max_budget",
+      "label": "What is your maximum total budget?",
+      "options": [
+        "Rp250.000",
+        "Rp300.000",
+        "Other"
+      ]
+    }
+  ],
+  "branches": [],
+  "events": [],
+  "comparison": {
+    "groups": [],
+    "excluded": []
+  },
+  "cards": [],
+  "deal": null,
+  "created_at": 1794012900000
+}

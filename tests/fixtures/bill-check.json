@@ -1,0 +1,27 @@
+{
+  "id": "check_demo01",
+  "deal_id": "deal_demo01",
+  "version_id": "version_demo01",
+  "lines": [
+    {
+      "id": "billline_demo01",
+      "item_code": "cek_freon",
+      "label": "Refrigerant check",
+      "unit": "service",
+      "quantity": 1,
+      "unit_price": 25000,
+      "explanation": null
+    }
+  ],
+  "results": [
+    {
+      "bill_line_id": "billline_demo01",
+      "status": "already_included",
+      "agreement_line_id": "line_check01",
+      "reason": "This item is already included in the active agreement.",
+      "source_message_id": "msg_quote01"
+    }
+  ],
+  "submitted_total": 25000,
+  "created_at": 1794012904000
+}

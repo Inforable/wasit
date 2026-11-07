@@ -1,0 +1,12 @@
+{
+  "id": "event_demo01",
+  "request_id": "request_demo01",
+  "branch_id": "branch_human01",
+  "created_at": 1794012901200,
+  "kind": "decision",
+  "engine": "rules",
+  "summary": "Ask for a better price using a valid comparable offer.",
+  "source_message_ids": [
+    "msg_quote01"
+  ]
+}

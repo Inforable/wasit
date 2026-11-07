@@ -1,0 +1,66 @@
+[
+  {
+    "file": "job.json",
+    "schema": "job.schema.json"
+  },
+  {
+    "file": "quote.json",
+    "schema": "quote.schema.json"
+  },
+  {
+    "file": "quote-needs-detail.json",
+    "schema": "quote.schema.json"
+  },
+  {
+    "file": "message.json",
+    "schema": "common.schema.json#/$defs/message"
+  },
+  {
+    "file": "event.json",
+    "schema": "event.schema.json"
+  },
+  {
+    "file": "buyer-decision.json",
+    "schema": "agent-buyer.schema.json"
+  },
+  {
+    "file": "agent-extraction.json",
+    "schema": "extractor.model.schema.json"
+  },
+  {
+    "file": "request-clarification.json",
+    "schema": "snapshot.schema.json"
+  },
+  {
+    "file": "request-negotiating.json",
+    "schema": "snapshot.schema.json"
+  },
+  {
+    "file": "request-ranked.json",
+    "schema": "snapshot.schema.json"
+  },
+  {
+    "file": "request-no-match.json",
+    "schema": "snapshot.schema.json"
+  },
+  {
+    "file": "deal-locked.json",
+    "schema": "deal.schema.json"
+  },
+  {
+    "file": "deal-v2-pending.json",
+    "schema": "deal.schema.json"
+  },
+  {
+    "file": "deal-v2-active.json",
+    "schema": "deal.schema.json"
+  },
+  {
+    "file": "provider-snapshot.json",
+    "schema": "common.schema.json#/$defs/provider_snapshot"
+  },
+  {
+    "file": "bill-check.json",
+    "schema": "common.schema.json#/$defs/bill_check"
+  }
+]

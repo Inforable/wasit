@@ -1,0 +1,22 @@
+{
+  "id": "request_demo01",
+  "category": "ac_service",
+  "units": 1,
+  "scope": "ac_cleaning_inspection",
+  "request_text": "AC bocor, Sabtu pagi, budget maksimal Rp250rb",
+  "location_label": "Kelapa Gading",
+  "schedule_label": "Saturday, 7 Nov, 09:00 WIB",
+  "time_window": {
+    "start": "2026-11-07T01:00:00.000Z",
+    "end": "2026-11-07T05:00:00.000Z"
+  },
+  "max_budget": 250000,
+  "target_price": null,
+  "target_authorized": false,
+  "weights": {
+    "price": 50,
+    "slot": 25,
+    "trust": 25
+  },
+  "created_at": 1794012900000
+}

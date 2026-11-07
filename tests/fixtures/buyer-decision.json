@@ -1,0 +1,9 @@
+{
+  "action": "counter",
+  "detail_key": null,
+  "cite": "competitor_best",
+  "source_message_ids": [
+    "msg_quote01"
+  ],
+  "reason": "A current quote offers the same scope at a lower quoted total."
+}

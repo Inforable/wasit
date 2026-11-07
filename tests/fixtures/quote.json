@@ -1,0 +1,71 @@
+{
+  "id": "quote_demo01",
+  "branch_id": "branch_human01",
+  "revision": 1,
+  "category": "ac_service",
+  "scope": "ac_cleaning_inspection",
+  "units": 1,
+  "schedule_label": "Saturday, 7 Nov, 09:00 WIB",
+  "lines": [
+    {
+      "id": "line_base01",
+      "item_code": "cuci_ac",
+      "label": "AC cleaning",
+      "kind": "fixed",
+      "unit": "unit",
+      "quantity": 1,
+      "unit_price": 90000,
+      "condition": null,
+      "source": {
+        "message_id": "msg_quote01",
+        "snippet": "Cuci AC Rp90.000"
+      }
+    },
+    {
+      "id": "line_trans01",
+      "item_code": "transport",
+      "label": "Transport",
+      "kind": "fixed",
+      "unit": "job",
+      "quantity": 1,
+      "unit_price": 20000,
+      "condition": null,
+      "source": {
+        "message_id": "msg_quote01",
+        "snippet": "transport Rp20.000"
+      }
+    },
+    {
+      "id": "line_check01",
+      "item_code": "cek_freon",
+      "label": "Refrigerant check",
+      "kind": "included",
+      "unit": "service",
+      "quantity": 1,
+      "unit_price": 0,
+      "condition": null,
+      "source": {
+        "message_id": "msg_quote01",
+        "snippet": "cek freon termasuk"
+      }
+    },
+    {
+      "id": "line_extra01",
+      "item_code": "ganti_kapasitor",
+      "label": "Capacitor replacement",
+      "kind": "optional",
+      "unit": "pcs",
+      "quantity": 1,
+      "unit_price": 150000,
+      "condition": "Only if diagnosed and approved.",
+      "source": {
+        "message_id": "msg_quote01",
+        "snippet": "Kapasitor Rp150.000 per pcs kalau perlu dan disetujui"
+      }
+    }
+  ],
+  "status": "ready",
+  "fixed_total": 110000,
+  "unresolved": [],
+  "updated_at": 1794012901100
+}

@@ -5,6 +5,7 @@ import { checkBillLines } from './bill-check.mjs';
 import { catalog, normalizeItem, supportedUnits } from './catalog.mjs';
 import { parseAmounts } from './money.mjs';
 import { stableJson } from '../shared/canonical.mjs';
+import { quoteEligibility } from './comparison.mjs';
 
 const failure = (status, code, message) => new HttpError(status, code, message);
 const parse = (value) => typeof value === 'string' ? JSON.parse(value) : structuredClone(value);
@@ -39,8 +40,12 @@ export function createAgreements({ store, now = Date.now, newId = defaultId, loa
     if (actor.role === 'provider' && (!actor.branch_id || actor.branch_id !== row.branch_id)) throw failure(403, 'wrong_role', 'This agreement is not available for this provider branch.');
   }
   async function header(db, dealId, lock = false) {
-    if (lock) await db.query('UPDATE deals SET id=id WHERE id=$1', [dealId]);
-    return first(db, 'SELECT d.*, r.user_id, b.request_id AS linked_request_id FROM deals d JOIN requests r ON r.id=d.request_id JOIN branches b ON b.id=d.branch_id WHERE d.id=$1', [dealId]);
+    if (lock) {
+      const related=await first(db,'SELECT request_id FROM deals WHERE id=$1',[dealId]);
+      if(related)await db.query('UPDATE requests SET status=status WHERE id=$1',[related.request_id]);
+      await db.query('UPDATE deals SET id=id WHERE id=$1', [dealId]);
+    }
+    return first(db, 'SELECT d.*, r.user_id,r.job_json, b.request_id AS linked_request_id FROM deals d JOIN requests r ON r.id=d.request_id JOIN branches b ON b.id=d.branch_id WHERE d.id=$1 AND r.archived_at IS NULL', [dealId]);
   }
   async function readDeal(db, dealId) {
     const row = await first(db, 'SELECT * FROM deals WHERE id=$1', [dealId]);
@@ -75,7 +80,7 @@ export function createAgreements({ store, now = Date.now, newId = defaultId, loa
   function expectedActive(row, body) {
     if (!hasOwn(body ?? {}, 'expected_active_version_id') || body.expected_active_version_id !== (row.active_version_id ?? null)) throw failure(409, 'stale_version', 'The active agreement changed. Reload it before continuing.');
   }
-  function validateTerms(terms) {
+  function validateTerms(terms,job=null) {
     if (!Array.isArray(terms.lines) || !terms.lines.length || terms.lines.length > 16 || !isMoney(terms.spending_limit)) throw failure(422, 'ambiguous_terms', 'The agreement needs complete lines and an explicit spending limit.');
     const keys = new Set(), ids = new Set();
     for (const line of terms.lines) {
@@ -89,6 +94,10 @@ export function createAgreements({ store, now = Date.now, newId = defaultId, loa
     const total = committedTotal(terms.lines);
     if (total !== terms.committed_total) throw failure(422, 'ambiguous_terms', 'The committed total does not match the agreed lines.');
     if (total > terms.spending_limit) throw failure(422, 'budget_exceeded', 'The proposed work exceeds your spending limit. Propose and acknowledge a new limit first.');
+    if(job){
+      const base=terms.lines.find(line=>line.item_code===catalog(job.category).baseItem&&['committed','included'].includes(line.kind));
+      if(terms.scope!==job.scope||terms.units!==job.units||terms.schedule_label!==job.schedule_label||terms.location_label!==job.location_label||!base||base.quantity!==job.units)throw failure(422,'incomplete_quote','The agreement scope, quantity, location and schedule must match the request.');
+    }
   }
   async function validateSource(line, branchId, category, expectedMessageId = null) {
     if (!line.source?.message_id || !line.source?.snippet || (expectedMessageId && line.source.message_id !== expectedMessageId)) throw failure(422, 'invalid_source', 'The quoted line does not match its provider message.');
@@ -101,6 +110,8 @@ export function createAgreements({ store, now = Date.now, newId = defaultId, loa
   }
   function quoteTerms(quote, job) {
     if (!quote || quote.status !== 'ready' || !isMoney(quote.fixed_total) || !quote.schedule_label || quote.category !== job.category || quote.scope !== job.scope || quote.units !== job.units || quote.unresolved?.length) throw failure(422, 'incomplete_quote', 'Choose a complete quote with the requested category, scope, units and schedule.');
+    const eligible=quoteEligibility(job,quote);
+    if(!eligible.ok)throw failure(422,'incomplete_quote',eligible.reason);
     const book = catalog(job.category);
     for (const code of book.requiredItems) {
       const line = quote.lines.find((candidate) => candidate.item_code === code && ['fixed', 'included'].includes(candidate.kind));
@@ -111,7 +122,7 @@ export function createAgreements({ store, now = Date.now, newId = defaultId, loa
       lines: quote.lines.map(({ source, kind, ...line }) => ({ ...line, kind: kind === 'fixed' ? 'committed' : kind, source_message_id: source.message_id })),
       committed_total: quote.fixed_total, spending_limit: job.max_budget, change_reason: null,
     };
-    validateTerms(terms);
+    validateTerms(terms,job);
     return terms;
   }
   async function ensureMutableLifecycle(tx, dealId) {
@@ -133,7 +144,7 @@ export function createAgreements({ store, now = Date.now, newId = defaultId, loa
   async function createDeal({ requestId, branchId, quoteRevision, actor }) {
     actorRole(actor, 'consumer');
     if (!Number.isInteger(quoteRevision) || quoteRevision < 1) throw failure(400, 'invalid_payload', 'Choose a current quote revision.');
-    const owner = await first(store, 'SELECT * FROM requests WHERE id=$1', [requestId]);
+    const owner = await first(store, 'SELECT * FROM requests WHERE id=$1 AND archived_at IS NULL', [requestId]);
     if (!owner || owner.user_id !== actor.actor_id) throw failure(404, 'not_found', 'The request was not found.');
     const existing = await first(store, 'SELECT * FROM deals WHERE request_id=$1', [requestId]);
     if (existing) {
@@ -146,7 +157,7 @@ export function createAgreements({ store, now = Date.now, newId = defaultId, loa
     for (const line of quote.lines) await validateSource(line, branchId, job.category);
     return store.transaction(async (tx) => {
       await tx.query('UPDATE requests SET status=status WHERE id=$1', [requestId]);
-      const currentOwner = await first(tx, 'SELECT * FROM requests WHERE id=$1', [requestId]);
+      const currentOwner = await first(tx, 'SELECT * FROM requests WHERE id=$1 AND archived_at IS NULL', [requestId]);
       const branch = await first(tx, 'SELECT * FROM branches WHERE id=$1 AND request_id=$2', [branchId, requestId]);
       if (!currentOwner || currentOwner.user_id !== actor.actor_id || !branch) throw failure(404, 'not_found', 'The request or provider branch was not found.');
       const replay = await first(tx, 'SELECT * FROM deals WHERE request_id=$1', [requestId]);
@@ -154,6 +165,8 @@ export function createAgreements({ store, now = Date.now, newId = defaultId, loa
         if (replay.branch_id !== branchId || Number(replay.quote_revision) !== quoteRevision) throw failure(409, 'deal_exists', 'This request already has a selected provider and quote.');
         return readDeal(tx, replay.id);
       }
+      const pendingMessage=await first(tx,"SELECT m.id FROM messages m WHERE m.branch_id=$1 AND (m.sender='provider' OR (m.sender IS NULL AND m.direction='in')) AND NOT EXISTS(SELECT 1 FROM quotes q WHERE q.branch_id=m.branch_id AND q.source_message_id=m.id) LIMIT 1",[branchId]);
+      if(pendingMessage)throw failure(409,'quote_processing','A provider message is still being checked. Process it before selecting the quote.');
       const persistedQuote = await first(tx, 'SELECT data_json,request_id,version FROM quotes WHERE branch_id=$1 ORDER BY version DESC LIMIT 1', [branchId]);
       if (!persistedQuote || persistedQuote.request_id !== requestId || Number(persistedQuote.version) !== quoteRevision || stableJson(parse(persistedQuote.data_json)) !== stableJson(quote)) throw failure(409, 'stale_quote', 'The quote changed. Review its current revision.');
       if (currentOwner.job_json && stableJson(parse(currentOwner.job_json)) !== stableJson(job)) throw failure(409, 'stale_quote', 'The request details changed. Review the quote again.');
@@ -181,7 +194,7 @@ export function createAgreements({ store, now = Date.now, newId = defaultId, loa
       expectedActive(row, body);
       if (version.status !== 'draft' || row.pending_version_id !== version.id || version.parent_version_id !== (row.active_version_id ?? null)) throw failure(409, 'invalid_transition', 'Only the current draft can be submitted.');
       await ensureMutableLifecycle(tx, dealId);
-      validateTerms(version.terms);
+      validateTerms(version.terms,parse(row.job_json));
       await tx.query("UPDATE agreement_versions SET status='pending' WHERE id=$1", [version.id]);
       return readDeal(tx, dealId);
     });
@@ -202,7 +215,7 @@ export function createAgreements({ store, now = Date.now, newId = defaultId, loa
       expectedActive(row, body);
       if (version.status !== 'pending' || row.pending_version_id !== version.id || version.parent_version_id !== (row.active_version_id ?? null)) throw failure(409, 'invalid_transition', 'Only the current pending version can be accepted.');
       await ensureMutableLifecycle(tx, dealId);
-      validateTerms(version.terms);
+      validateTerms(version.terms,parse(row.job_json));
       await tx.query('INSERT INTO acceptances (id,version_id,role,actor_id,terms_digest,budget_ack_limit,accepted_at) VALUES ($1,$2,$3,$4,$5,$6,$7)', [newId('accept'), version.id, actor.role, actor.actor_id, version.terms_digest, expectedAck, now()]);
       const accepted = (await tx.query('SELECT role FROM acceptances WHERE version_id=$1', [version.id])).rows;
       if (new Set(accepted.map((item) => item.role)).size === 2) {

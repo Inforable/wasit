@@ -14,7 +14,7 @@ const definitions = [
     item('ganti_belt', 'Belt replacement', 'addon', ['pcs'], ['ganti belt', 'belt', 'sabuk']),
   ] },
   { id: 'plumbing', label: 'Plumbing service', scope: 'plumbing_repair_inspection', detect: /\bpipa\b|\bkran\b|\bkeran\b|plumb|ledeng|wastafel|toilet/i, items: [
-    item('perbaikan_pipa', 'Plumbing repair', 'base', ['job'], ['perbaikan pipa', 'servis pipa', 'jasa pipa', 'plumbing repair', 'plumbing service']),
+    item('perbaikan_pipa', 'Plumbing repair', 'base', ['job'], ['perbaikan pipa', 'servis pipa', 'jasa pipa', 'plumbing repair', 'plumbing service', 'pipe repair']),
     item('cek_kebocoran', 'Leak inspection', 'included', ['service'], ['cek kebocoran', 'pemeriksaan kebocoran', 'leak inspection', 'leak check']),
     item('ganti_pipa', 'Pipe replacement', 'addon', ['pcs'], ['ganti pipa', 'pipe replacement', 'pipa baru']),
     item('ganti_kran', 'Tap replacement', 'addon', ['pcs'], ['ganti kran', 'ganti keran', 'tap replacement', 'faucet']),

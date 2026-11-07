@@ -71,6 +71,57 @@ test('selection creates only a draft, excludes optional costs, and replays the o
   await assert.rejects(ctx.create(),isError(409,'deal_exists'));
 });
 
+test('selection enforces the requested base quantity and exact appointment scope',async t=>{
+  for(const change of ['quantity','schedule'])await t.test(change,async t=>{
+    const ctx=await setup(t),quote=structuredClone(ctx.quote);quote.revision++;
+    if(change==='quantity'){
+      ctx.job.units=2;quote.units=2;
+      await ctx.store.query('UPDATE requests SET job_json=$1 WHERE id=$2',[JSON.stringify(ctx.job),ctx.job.id]);
+    }else quote.schedule_label='A different unrequested appointment';
+    await ctx.persist(quote);
+    await assert.rejects(ctx.create(),isError(422,'incomplete_quote'));
+    assert.equal((await ctx.store.query('SELECT COUNT(*) AS n FROM deals')).rows[0].n,0);
+  });
+});
+
+test('unprocessed provider messages block selection regardless of timestamps or ID ordering',async t=>{
+  const ctx=await setup(t);
+  const message={id:'msg_aaaaaa01',branch_id:ctx.quote.branch_id,sender:'provider',text:'Cuci AC sekarang Rp80.000',created_at:1};
+  ctx.messages.set(message.id,message);
+  await ctx.store.query('INSERT INTO messages(id,branch_id,sender,text,direction,created_at) VALUES($1,$2,$3,$4,$5,$6)',[message.id,message.branch_id,message.sender,message.text,'in',message.created_at]);
+  await assert.rejects(ctx.create(),isError(409,'quote_processing'));
+  const revised=structuredClone(ctx.quote);revised.revision++;revised.fixed_total=100000;
+  revised.lines[0].unit_price=80000;revised.lines[0].source={message_id:message.id,snippet:message.text};
+  await ctx.persist(revised);
+  await ctx.store.query('UPDATE quotes SET source_message_id=$1 WHERE branch_id=$2 AND version=$3',[message.id,message.branch_id,revised.revision]);
+  const deal=await ctx.create();
+  assert.equal(deal.versions[0].terms.committed_total,100000);
+});
+
+test('archived requests cannot create or read agreements or accept existing proposals',async t=>{
+  const ctx=await setup(t),deal=await ctx.create(),version=deal.versions[0];
+  const body={version_id:version.id,terms_digest:version.terms_digest,expected_active_version_id:null,budget_ack_limit:version.terms.spending_limit};
+  await ctx.store.query('UPDATE requests SET archived_at=$1,generation=generation+1 WHERE id=$2',[1,ctx.job.id]);
+  await assert.rejects(ctx.create(),isError(404));
+  await assert.rejects(ctx.service.getDeal(deal.id,consumer),isError(404));
+  await assert.rejects(ctx.service.getPublicVersions(deal.id,provider),isError(404));
+  await assert.rejects(ctx.service.submit(deal.id,body,consumer),isError(404));
+  await assert.rejects(ctx.service.accept(deal.id,body,consumer),isError(404));
+  await assert.rejects(ctx.service.reject(deal.id,body,consumer),isError(404));
+  assert.equal((await ctx.store.query('SELECT COUNT(*) AS n FROM acceptances')).rows[0].n,0);
+});
+
+test('a reset during external quote loading discards a late selection before inserting a deal',async t=>{
+  const ctx=await setup(t);let started,release;
+  const ready=new Promise(resolve=>{started=resolve;}),gate=new Promise(resolve=>{release=resolve;});
+  const service=createAgreements({store:ctx.store,loadQuote:async()=>{started();await gate;return structuredClone(ctx.quote);},loadJob:async()=>structuredClone(ctx.job),loadSourceMessage:async id=>ctx.messages.get(id)});
+  const selecting=service.createDeal({requestId:ctx.job.id,branchId:ctx.quote.branch_id,quoteRevision:ctx.quote.revision,actor:consumer});
+  await ready;
+  await ctx.store.query('UPDATE requests SET archived_at=$1,generation=generation+1 WHERE id=$2',[1,ctx.job.id]);
+  release();await assert.rejects(selecting,isError(404));
+  assert.equal((await ctx.store.query('SELECT COUNT(*) AS n FROM deals')).rows[0].n,0);
+});
+
 test('selection rejects wrong owners, provider impersonation, stale quote data and false source association', async (t) => {
   const ctx = await setup(t);
   await assert.rejects(ctx.service.createDeal({requestId:ctx.job.id,branchId:ctx.quote.branch_id,quoteRevision:1,actor:stranger}),isError(404));

@@ -13,7 +13,7 @@ test('HTTP routing, JSON limits, SPA fallback and path containment', async (t) =
   await writeFile(join(root, 'private.txt'), 'private');
   const server = createAppServer({ distDir: dist, routes: [
     ['POST', /^\/api\/echo$/, ({ body }) => body],
-    ['POST', /^\/api\/deals\/([^/]+)\/bill$/, ({ body }) => ({ size: body.image?.length ?? 0 })],
+    ['POST', /^\/api\/deals\/([^/]+)\/bill-preview$/, ({ body }) => ({ size: body.image?.length ?? 0 })],
   ] });
   await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve));
   t.after(async () => { await new Promise((resolve) => server.close(resolve)); await rm(root, { recursive: true, force: true }); });
@@ -30,7 +30,7 @@ test('HTTP routing, JSON limits, SPA fallback and path containment', async (t) =
   assert.equal((await invalid.json()).error, 'bad_json');
   const oversized = await fetch(base + '/api/echo', { method: 'POST', body: JSON.stringify({ text: 'x'.repeat(65536) }) });
   assert.equal(oversized.status, 413);
-  const bill = await fetch(base + '/api/deals/deal_1/bill', { method: 'POST', body: JSON.stringify({ image: 'x'.repeat(70000) }) });
+  const bill = await fetch(base + '/api/deals/deal_1/bill-preview', { method: 'POST', body: JSON.stringify({ image: 'x'.repeat(70000) }) });
   assert.equal(bill.status, 200);
   assert.equal((await bill.json()).size, 70000);
   assert.equal((await fetch(base + '/..%2fprivate.txt')).status, 403);

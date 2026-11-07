@@ -65,6 +65,14 @@ test('lifecycle reads do not create payment/state rows and enforce ownership', a
   assert.equal(JSON.stringify(await lifecycle.view(dealId, provider)).includes('spending_limit'), false);
 });
 
+test('archived requests reject direct lifecycle reads, payment and completion without ledger changes',async t=>{
+  const {store,lifecycle}=await setup(t);
+  await store.query('UPDATE requests SET archived_at=$1,generation=generation+1 WHERE id=$2',[1,'request_demo01']);
+  for(const operation of [()=>lifecycle.view(dealId,consumer),()=>lifecycle.view(dealId,provider),()=>lifecycle.pay(dealId,body(),consumer),()=>lifecycle.markDone(dealId,body(),provider),()=>lifecycle.confirmDone(dealId,body(),consumer),()=>lifecycle.settleDue(dealId)])await assert.rejects(operation(),error=>error.status===404);
+  assert.equal((await store.query('SELECT COUNT(*) AS n FROM payments')).rows[0].n,0);
+  assert.equal((await store.query('SELECT COUNT(*) AS n FROM deal_state')).rows[0].n,0);
+});
+
 test('concurrent simulated pay/complete/confirm retries never duplicate ledger movements', async (t) => {
   const { lifecycle } = await setup(t);
   const [paid] = await Promise.all([lifecycle.pay(dealId, body(), consumer), lifecycle.pay(dealId, body(), consumer)]);

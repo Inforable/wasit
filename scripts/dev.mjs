@@ -11,7 +11,7 @@ function stop(code = 0) {
   for (const child of children) if (child.exitCode === null) child.kill();
 }
 for (const args of [
-  ['--disable-warning=ExperimentalWarning', '--env-file-if-exists=.env', 'server/index.mjs'],
+  ['--watch', '--disable-warning=ExperimentalWarning', '--env-file-if-exists=.env', 'server/index.mjs'],
   ['node_modules/vite/bin/vite.js'],
 ]) {
   const child = spawn(process.execPath, args, { cwd: root, stdio: 'inherit', env: process.env });

@@ -72,7 +72,7 @@ export function createAppHandler({ distDir, routes = [], health = () => ({ ok: t
       for (const [verb, pattern, handler] of table) {
         const match = url.pathname.match(pattern);
         if (verb !== method || !match) continue;
-        const limit = /^\/api\/deals\/[^/]+\/bill$/.test(url.pathname) ? 7 * 1024 * 1024 : 64 * 1024;
+        const limit = /^\/api\/deals\/[^/]+\/bill-preview$/.test(url.pathname) ? 3 * 1024 * 1024 : 64 * 1024;
         const body = ['POST', 'PUT', 'PATCH', 'DELETE'].includes(req.method) ? await readJson(req, limit) : {};
         const value = await handler({ req, res, url, params: match.slice(1), body });
         if (!res.writableEnded && !res.headersSent) {

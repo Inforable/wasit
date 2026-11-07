@@ -7,7 +7,7 @@ import { assertTaskGeneration } from './task-guard.mjs';
 
 const id = (prefix) => prefix + '_' + randomBytes(10).toString('hex');
 const money = (value) => Number.isSafeInteger(value) && value >= 0 && value <= 100_000_000;
-const injection = (text) => /ignore (?:all |previous |prior )?instructions|abaikan (?:semua )?instruksi|system prompt|sistem ai:|you are an ai/i.test(text);
+const injection = (text) => /ignore(?:\s+(?:all|previous|prior))*\s+instructions|abaikan (?:semua )?instruksi|system prompt|sistem ai:|you are an ai/i.test(text);
 const clean = (text) => String(text).trim().replace(/\s+/g, ' ');
 const escape = (text) => text.replace(/[.*+?^$\{\}()|[\]\\]/g, '\\$&');
 
@@ -79,6 +79,7 @@ export function extractQuotedFacts({ message, job }) {
 }
 
 function sourceMatches(line, message, job) {
+  if (injection(message.text)) return false;
   if (line.source?.message_id !== message.id || typeof line.source.snippet !== 'string' || !message.text.includes(line.source.snippet)) return false;
   const parts = atomicStatements(line.source.snippet, job.category).filter((part) => part.item.id === line.item_code && !injection(part.text));
   return parts.some(({ item, text }) => {
@@ -107,9 +108,15 @@ export function validateQuotedFacts({ extraction, message, job }) {
       condition: typeof raw.condition === 'string' ? raw.condition.slice(0,1000) : null,
       source: {message_id: raw.source.message_id, snippet: raw.source.snippet} });
   }
+  for (const factual of extractQuotedFacts({message,job}).lines) {
+    if (!supportedUnits(job.category,factual.item_code).includes(factual.unit) || !sourceMatches(factual,message,job)) continue;
+    const candidate=accepted.find(line=>line.item_code===factual.item_code);
+    if (!candidate) rejected.push('An explicit source-verified cost detail was omitted.');
+    else if (factual.kind!=='unknown' && candidate.kind==='unknown') rejected.push('An explicit source-verified price was downgraded to unknown.');
+  }
   const schedule = extraction?.schedule_label;
   const proof = extraction?.schedule_source;
-  const scheduleValid = !scheduleUncertain(message.text) && typeof schedule === 'string' && schedule === job.schedule_label &&
+  const scheduleValid = !injection(message.text) && !scheduleUncertain(message.text) && typeof schedule === 'string' && schedule === job.schedule_label &&
     proof?.message_id === message.id && typeof proof.snippet === 'string' && message.text.includes(proof.snippet) && !injection(proof.snippet) &&
     (clean(proof.snippet).toLowerCase().includes(clean(job.schedule_label).toLowerCase()) ||
       extractQuotedFacts({ message: { ...message, text: proof.snippet }, job }).schedule_label === job.schedule_label);
@@ -149,7 +156,9 @@ export function createQuoteService({ store, now = Date.now, newId = id, extracto
       if (replay) return {quote:JSON.parse(replay.data_json),engine,rejected,replayed:true};
       const latest = await current(branchId, tx);
       if ((latest?.revision ?? 0) !== (previous?.revision ?? 0)) throw new HttpError(409, 'stale_quote', 'A newer message changed this quote. Process it again.');
-      const merged = new Map((previous?.lines ?? []).map((line) => [line.item_code + ':' + line.unit, line]));
+      const mentioned = new Set(atomicStatements(message.text,job.category).map(({item})=>item.id));
+      const retained = injection(message.text) ? [] : (previous?.lines ?? []).filter(line=>!mentioned.has(line.item_code));
+      const merged = new Map(retained.map((line) => [line.item_code + ':' + line.unit, line]));
       const seen = new Map();
       for (const candidate of checked.lines) {
         const key = candidate.item_code + ':' + candidate.unit;
@@ -162,8 +171,9 @@ export function createQuoteService({ store, now = Date.now, newId = id, extracto
         const matches = lines.filter((line) => line.item_code === required);
         if (matches.length !== 1 || !['fixed','included'].includes(matches[0].kind)) unresolved.push(required === 'transport' ? 'transport' : required === catalog(job.category).baseItem ? 'base_price' : 'scope');
         if (matches.length > 1 || matches.some((line) => line.condition === 'Confirm the item quantity and unit.')) unresolved.push('unit_quantity');
+        if (required===catalog(job.category).baseItem && matches.some(line=>line.quantity!==job.units)) unresolved.push('unit_quantity');
       }
-      const schedule = checked.schedule_label ?? (mentionsSchedule(message.text) ? null : previous?.schedule_label ?? null);
+      const schedule = checked.schedule_label ?? (injection(message.text) || mentionsSchedule(message.text) ? null : previous?.schedule_label ?? null);
       if (!schedule) unresolved.push('schedule');
       const required = [...new Set(unresolved)];
       const fixed = required.length ? null : lines.filter((line) => line.kind === 'fixed').reduce((sum, line) => sum + line.quantity * line.unit_price, 0);

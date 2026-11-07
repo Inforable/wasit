@@ -292,6 +292,461 @@
     },
     "bill_response": {
       "$ref": "common.schema.json#/$defs/bill_check"
+    },
+    "clarify": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "answers": {
+          "type": "object",
+          "minProperties": 1,
+          "maxProperties": 12,
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 1000
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "boolean"
+              }
+            ]
+          }
+        }
+      },
+      "required": [
+        "answers"
+      ]
+    },
+    "process": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "max_steps": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 2
+        }
+      },
+      "required": []
+    },
+    "takeover": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "mode": {
+          "enum": [
+            "customer",
+            "agent"
+          ]
+        }
+      },
+      "required": [
+        "mode"
+      ]
+    },
+    "say": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "text",
+        "client_message_id"
+      ],
+      "properties": {
+        "text": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1000
+        },
+        "client_message_id": {
+          "type": "string",
+          "pattern": "^[a-z]+_[a-zA-Z0-9_-]{6,64}$"
+        }
+      }
+    },
+    "lifecycle_mutation": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "expected_active_version_id": {
+          "type": "string",
+          "pattern": "^[a-z]+_[a-zA-Z0-9_-]{6,64}$"
+        }
+      },
+      "required": [
+        "expected_active_version_id"
+      ]
+    },
+    "open_dispute": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "expected_active_version_id": {
+          "type": "string",
+          "pattern": "^[a-z]+_[a-zA-Z0-9_-]{6,64}$"
+        },
+        "reason": {
+          "enum": [
+            "no_show",
+            "unresolved_work",
+            "unapproved_charge"
+          ]
+        },
+        "detail": {
+          "type": "string",
+          "maxLength": 1000
+        },
+        "asked_amount": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 100000000
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "expected_active_version_id",
+        "reason"
+      ]
+    },
+    "respond_dispute": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "expected_active_version_id": {
+          "type": "string",
+          "pattern": "^[a-z]+_[a-zA-Z0-9_-]{6,64}$"
+        },
+        "dispute_id": {
+          "type": "string",
+          "pattern": "^[a-z]+_[a-zA-Z0-9_-]{6,64}$"
+        },
+        "accept": {
+          "type": "boolean"
+        },
+        "note": {
+          "type": "string",
+          "maxLength": 1000
+        }
+      },
+      "required": [
+        "expected_active_version_id",
+        "dispute_id",
+        "accept"
+      ]
+    },
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "expected_active_version_id": {
+          "type": "string",
+          "pattern": "^[a-z]+_[a-zA-Z0-9_-]{6,64}$"
+        },
+        "dispute_id": {
+          "type": "string",
+          "pattern": "^[a-z]+_[a-zA-Z0-9_-]{6,64}$"
+        },
+        "text": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 500
+        }
+      },
+      "required": [
+        "expected_active_version_id",
+        "dispute_id",
+        "text"
+      ]
+    },
+    "review": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "expected_active_version_id": {
+          "type": "string",
+          "pattern": "^[a-z]+_[a-zA-Z0-9_-]{6,64}$"
+        },
+        "stars": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 5
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "maxLength": 80
+          },
+          "maxItems": 12
+        },
+        "comment": {
+          "type": "string",
+          "maxLength": 280
+        }
+      },
+      "required": [
+        "expected_active_version_id",
+        "stars"
+      ]
+    },
+    "reply_review": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "expected_active_version_id": {
+          "type": "string",
+          "pattern": "^[a-z]+_[a-zA-Z0-9_-]{6,64}$"
+        },
+        "text": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 280
+        }
+      },
+      "required": [
+        "expected_active_version_id",
+        "text"
+      ]
+    },
+    "profile": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "consent": {
+          "type": "boolean"
+        },
+        "base_kecamatan": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "radius_km": {
+          "type": "number",
+          "minimum": 1,
+          "maximum": 40
+        },
+        "avail": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "days": {
+              "type": "array",
+              "items": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 6
+              },
+              "minItems": 1,
+              "maxItems": 7,
+              "uniqueItems": true
+            },
+            "start": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 23
+            },
+            "end": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 24
+            }
+          },
+          "required": [
+            "days",
+            "start",
+            "end"
+          ]
+        }
+      },
+      "required": []
+    },
+    "prices": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "base": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100000000
+        },
+        "floor": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100000000
+        },
+        "transport": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 100000000
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "addons": {
+          "type": "object",
+          "maxProperties": 16,
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 100000000
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "warranty_days": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 365
+        },
+        "includes_item": {
+          "type": "boolean"
+        }
+      },
+      "required": []
+    },
+    "demo_provider_action": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "action": {
+          "enum": [
+            "accept",
+            "reject",
+            "done",
+            "respond_dispute",
+            "reply_review"
+          ]
+        },
+        "payload": {
+          "type": "object"
+        }
+      },
+      "required": [
+        "action",
+        "payload"
+      ]
+    },
+    "bill_preview": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "expected_active_version_id",
+        "image_base64",
+        "mime_type"
+      ],
+      "properties": {
+        "expected_active_version_id": {
+          "type": "string",
+          "pattern": "^[a-z]+_[a-zA-Z0-9_-]{6,64}$"
+        },
+        "image_base64": {
+          "type": "string",
+          "minLength": 4,
+          "maxLength": 3000000,
+          "pattern": "^[A-Za-z0-9+/]+={0,2}$"
+        },
+        "mime_type": {
+          "enum": [
+            "image/png",
+            "image/jpeg",
+            "image/webp"
+          ]
+        }
+      }
+    },
+    "login": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "email": {
+          "type": "string",
+          "format": "email",
+          "maxLength": 254
+        },
+        "password": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        }
+      },
+      "required": [
+        "email",
+        "password"
+      ]
+    },
+    "register": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "display_name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "email": {
+          "type": "string",
+          "format": "email",
+          "maxLength": 254
+        },
+        "password": {
+          "type": "string",
+          "minLength": 8,
+          "maxLength": 128
+        }
+      },
+      "required": [
+        "display_name",
+        "email",
+        "password"
+      ]
+    },
+    "consumer_profile": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "display_name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "location_label": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1000
+        },
+        "default_category": {
+          "enum": [
+            null,
+            "ac_service",
+            "washer",
+            "plumbing",
+            "electrical",
+            "cleaning"
+          ]
+        },
+        "weights": {
+          "$ref": "common.schema.json#/$defs/weights"
+        }
+      },
+      "required": []
     }
   }
 }

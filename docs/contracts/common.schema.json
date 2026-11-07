@@ -622,6 +622,12 @@
               "type": "null"
             }
           ]
+        },
+        "wasit_mode": {
+          "enum": [
+            "customer",
+            "agent"
+          ]
         }
       }
     },
@@ -1150,6 +1156,10 @@
         "created_at": {
           "type": "integer",
           "minimum": 0
+        },
+        "note": {
+          "type": "string",
+          "maxLength": 1000
         }
       }
     },
@@ -1208,6 +1218,383 @@
               "type": "null"
             }
           ]
+        },
+        "status_label": {
+          "type": "string",
+          "maxLength": 1000
+        },
+        "active_version_id": {
+          "type": "string",
+          "pattern": "^[a-z]+_[a-zA-Z0-9_-]{6,64}$"
+        },
+        "amount": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "lines": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "label": {
+                    "type": "string",
+                    "maxLength": 1000
+                  },
+                  "quantity": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "unit": {
+                    "type": "string",
+                    "maxLength": 1000
+                  },
+                  "unit_price": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 100000000
+                  },
+                  "price": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 100000000
+                  }
+                },
+                "required": [
+                  "label",
+                  "quantity",
+                  "unit",
+                  "unit_price",
+                  "price"
+                ]
+              }
+            },
+            "total": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 100000000
+            }
+          },
+          "required": [
+            "lines",
+            "total"
+          ]
+        },
+        "due": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100000000
+        },
+        "funded_version_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[a-z]+_[a-zA-Z0-9_-]{6,64}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "done_version_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[a-z]+_[a-zA-Z0-9_-]{6,64}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "done_at": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "confirmed_at": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "auto_release_hours": {
+          "type": "number",
+          "minimum": 0
+        },
+        "dispute": {
+          "anyOf": [
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "pattern": "^[a-z]+_[a-zA-Z0-9_-]{6,64}$"
+                },
+                "version_id": {
+                  "type": "string",
+                  "pattern": "^[a-z]+_[a-zA-Z0-9_-]{6,64}$"
+                },
+                "reason": {
+                  "type": "string",
+                  "maxLength": 1000
+                },
+                "reason_label": {
+                  "type": "string",
+                  "maxLength": 1000
+                },
+                "detail": {
+                  "type": "string",
+                  "maxLength": 1000
+                },
+                "asked_amount": {
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 100000000
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "recommendation": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "action": {
+                      "enum": [
+                        "refund",
+                        "rework",
+                        "keep_deal"
+                      ]
+                    },
+                    "refund": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 100000000
+                    },
+                    "text": {
+                      "type": "string",
+                      "maxLength": 1000
+                    }
+                  },
+                  "required": [
+                    "action",
+                    "refund",
+                    "text"
+                  ]
+                },
+                "status": {
+                  "enum": [
+                    "open",
+                    "escalated",
+                    "resolved",
+                    "rework"
+                  ]
+                },
+                "provider_response": {
+                  "anyOf": [
+                    {
+                      "enum": [
+                        "accept",
+                        "reject"
+                      ]
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "provider_note": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "maxLength": 1000
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "evidence": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "by": {
+                        "enum": [
+                          "consumer",
+                          "provider"
+                        ]
+                      },
+                      "text": {
+                        "type": "string",
+                        "maxLength": 1000
+                      },
+                      "at": {
+                        "type": "integer",
+                        "minimum": 0
+                      }
+                    },
+                    "required": [
+                      "by",
+                      "text",
+                      "at"
+                    ]
+                  },
+                  "maxItems": 20
+                },
+                "created_at": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "resolved_at": {
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "simulation": {
+                  "const": true
+                }
+              },
+              "required": [
+                "id",
+                "version_id",
+                "reason",
+                "reason_label",
+                "detail",
+                "asked_amount",
+                "recommendation",
+                "status",
+                "provider_response",
+                "provider_note",
+                "evidence",
+                "created_at",
+                "resolved_at",
+                "simulation"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "rating": {
+          "anyOf": [
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "stars": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 5
+                },
+                "tags": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "maxLength": 1000
+                  }
+                },
+                "comment": {
+                  "type": "string",
+                  "maxLength": 1000
+                },
+                "created_at": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "reply": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "maxLength": 1000
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "reply_at": {
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "stars",
+                "tags",
+                "comment",
+                "created_at",
+                "reply",
+                "reply_at"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "maxLength": 1000
+          }
+        },
+        "reasons": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "no_show": {
+              "type": "string",
+              "maxLength": 1000
+            },
+            "unresolved_work": {
+              "type": "string",
+              "maxLength": 1000
+            },
+            "unapproved_charge": {
+              "type": "string",
+              "maxLength": 1000
+            }
+          },
+          "required": [
+            "no_show",
+            "unresolved_work",
+            "unapproved_charge"
+          ]
+        },
+        "simulation": {
+          "const": true
         }
       }
     },
@@ -1280,6 +1667,9 @@
               "type": "null"
             }
           ]
+        },
+        "demo_provider": {
+          "type": "boolean"
         }
       }
     },
@@ -1670,6 +2060,16 @@
             "$ref": "common.schema.json#/$defs/provider_version"
           },
           "maxItems": 30
+        },
+        "lifecycle": {
+          "anyOf": [
+            {
+              "$ref": "common.schema.json#/$defs/lifecycle"
+            },
+            {
+              "type": "null"
+            }
+          ]
         }
       }
     },

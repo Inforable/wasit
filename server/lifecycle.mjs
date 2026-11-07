@@ -39,8 +39,12 @@ export function createLifecycle({ store, now = Date.now, newId = defaultId, auto
   }
   async function context(db, dealId, { lock = false, actor, role, requireActive = true } = {}) {
     if (actor !== undefined) actorRole(actor, role);
-    if (lock) await db.query('UPDATE deals SET id=id WHERE id=$1', [dealId]);
-    const header = await first(db, 'SELECT d.*,r.user_id,b.provider_id,b.request_id AS linked_request_id FROM deals d JOIN requests r ON r.id=d.request_id JOIN branches b ON b.id=d.branch_id WHERE d.id=$1', [dealId]);
+    if (lock) {
+      const related=await first(db,'SELECT request_id FROM deals WHERE id=$1',[dealId]);
+      if(related)await db.query('UPDATE requests SET status=status WHERE id=$1',[related.request_id]);
+      await db.query('UPDATE deals SET id=id WHERE id=$1', [dealId]);
+    }
+    const header = await first(db, 'SELECT d.*,r.user_id,b.provider_id,b.request_id AS linked_request_id FROM deals d JOIN requests r ON r.id=d.request_id JOIN branches b ON b.id=d.branch_id WHERE d.id=$1 AND r.archived_at IS NULL', [dealId]);
     if (actor !== undefined) owns(header, actor, role);
     if (!header) throw fail(404, 'not_found', 'The agreement was not found.');
     if (header.linked_request_id !== header.request_id || !header.user_id) throw fail(409, 'invalid_transition', 'The agreement has an invalid request relationship.');

@@ -65,6 +65,8 @@ Recorded on 7 November 2026. Entries follow decision order; earlier timestamps a
 | R52 | Keep paid warranty upgrades and parts-only exclusions from becoming unconditional service promises; renew expired invitations only through an authenticated owner action. | Focused regressions and 219-test final suite pass; accepted history remains immutable. |
 | R53 | Rehearse the public journey with the new fast model and reconcile release evidence. | Nano-selected AC journey passes 12/12 stages, 52 checks and 65 HTTPS requests; no automatic fallback-model or latency guarantee is claimed. |
 
+| R54 | Publish and verify the complete corrective source release. | c06b0f0 is Ready in production; 219 tests and CI pass. Public Chrome verifies the topbar Nano choice and full-page one-question interview with preserved answers. |
+
 ## Open release gates
 
 - Neon Free is connected. The integrated public AC journey passed all twelve stages; new revisions receive a separate production browser check.

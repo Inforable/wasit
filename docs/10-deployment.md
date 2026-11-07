@@ -41,4 +41,6 @@ Static hosting, successful local tests and model credentials do not establish ho
 
 Verified integrated deployment: https://wasit-n6zas3fkz-fayadhs-projects-f3190830.vercel.app. The canonical project domain follows subsequent production releases.
 
-Latest verified public revision: 9815a42, with a full-page interview and three model options. A second public AC journey explicitly selecting Nano passes 12/12 stages, 52 checks and 65 HTTPS requests. Final conservative warranty and expired-invitation changes pass 219 local tests and are published in the next closing release. GitHub checks are green on 63a28c2 and 9815a42.
+Latest verified public revision: 9815a42, with a full-page interview and three model options. A second public AC journey explicitly selecting Nano passes 12/12 stages, 52 checks and 65 HTTPS requests. Final conservative warranty and expired-invitation changes pass 219 local tests and are included in the verified c06b0f0 source release. GitHub checks are green on 63a28c2, 9815a42 and c06b0f0.
+
+The c06b0f0 production deployment is Ready at the canonical URL. A real Chrome check against public production verifies Light welcome, persisted profile setup, three topbar model options, explicit Nano save, the full-page one-question interview, preserved Back/Next answers, private-cap review, mobile bounds and no runtime exceptions. The deployment is https://wasit-rgqtcl8ut-fayadhs-projects-f3190830.vercel.app. [Closing CI run](https://github.com/Inforable/wasit/actions/runs/42358494015) completed successfully.

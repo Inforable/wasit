@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { ChevronRight, Clapperboard, Cpu, LogOut, MapPin, Moon, PanelLeft, Settings, SlidersHorizontal, Sun, UserRound } from 'lucide-react';
 import { WasitMark, Wordmark } from './WasitMark.jsx';
+import TopbarModel from './TopbarModel.jsx';
 import { HistoryDrawer } from './HistoryDrawer.jsx';
 import { initials } from '../lib/format.js';
 import { useTheme } from '../lib/theme.js';
@@ -12,7 +13,7 @@ export function ThemeControl() {
   return <button className="icon-btn" onClick={() => setTheme(dark ? 'light' : 'dark')} aria-label={dark ? 'Use light theme' : 'Use dark theme'}>{dark ? <Sun size={18} /> : <Moon size={18} />}</button>;
 }
 
-function AccountMenu({ session, profile, onNavigate, onLogout }) {
+function AccountMenu({ session, profile, onNavigate, onLogout, processingPaused, onPauseProcessing }) {
   const [open, setOpen] = useState(false), [busy, setBusy] = useState(false), [error, setError] = useState('');
   const root = useRef(null), trigger = useRef(null);
   const name = profile?.display_name || session?.user?.display_name || 'Demo customer';
@@ -31,11 +32,10 @@ function AccountMenu({ session, profile, onNavigate, onLogout }) {
   </div>}</div>;
 }
 
-export function AppShell({ aiMode, children, activeId, activeDealId, api, session, profile, onNavigate, onLogout }) {
+export function AppShell({ aiMode, children, activeId, activeDealId, api, session, profile, onNavigate, onLogout, processingPaused, onPauseProcessing }) {
   const [open, setOpen] = useState(false), close = useCallback(() => setOpen(false), []);
-  const displayMode = /ai available|rules fallback/i.test(aiMode ?? '') ? 'AI ready' : /offline.*rules/i.test(aiMode ?? '') ? 'Wasit ready' : aiMode;
   return <div className="shell"><header className="shell-header" inert={open}>
-    <button className="brand" onClick={() => onNavigate('/')} aria-label="Wasit home"><WasitMark size={30} /><span className="brand-stack"><Wordmark size={21} /><span className="brand-mode"><span className="live-dot" style={{ width: 5, height: 5 }} />{displayMode || 'Checking the server…'}</span></span></button>
+    <div className="brand"><button className="brand-home" onClick={() => onNavigate('/')} aria-label="Wasit home"><WasitMark size={30} /></button><span className="brand-stack"><button className="brand-home" onClick={() => onNavigate('/')} aria-label="Wasit home"><Wordmark size={21} /></button><TopbarModel api={api} requestId={activeId} processingPaused={processingPaused} onPauseProcessing={onPauseProcessing} /></span></div>
     <div className="header-actions"><button className="icon-btn" onClick={() => setOpen(true)} aria-label="Open history" aria-expanded={open}><PanelLeft size={18} strokeWidth={1.75} /></button><ThemeControl /><button className="icon-btn" onClick={() => onNavigate('/settings')} aria-label="Settings"><Settings size={18} strokeWidth={1.75} /></button><AccountMenu session={session} profile={profile} onNavigate={onNavigate} onLogout={onLogout} /></div>
   </header><main className="shell-main" inert={open}>{children}</main><HistoryDrawer open={open} onClose={close} onNavigate={onNavigate} api={api} actorId={session?.actor_id} activeId={activeId} activeDealId={activeDealId} /></div>;
 }

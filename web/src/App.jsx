@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useRef, useState } from 'react';
+import { lazy, Suspense, useCallback, useEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { ArrowRight } from 'lucide-react';
 import { usePath, navigate } from './lib/router.js';
@@ -37,10 +37,9 @@ function ConsumerApplication({ path, initiallyInApp = false }) {
   const state = useSession();
   const { session, profile, profileLoading, refreshProfile, api, bootstrap, logout, loading } = state;
   const [welcomed, setWelcomed] = useState(() => seenWelcome() || path !== '/' || initiallyInApp);
-  const [aiMode, setAiMode] = useState(''), [entryError, setEntryError] = useState(null), [launching, setLaunching] = useState(false);
+  const [entryError, setEntryError] = useState(null), [launching, setLaunching] = useState(false);
   const reduce = useReducedMotion(), launchTimer = useRef(null), first = useRef(true);
   const common = { ...state, onNavigate: navigate };
-  useEffect(() => { if (!session) return; const controller = new AbortController(); api('/api/health', { signal: controller.signal }).then((value) => setAiMode(value.ai_mode)).catch((error) => { if (error.name !== 'AbortError') setAiMode('Server unavailable'); }); return () => controller.abort(); }, [api, session?.actor_id]);
   useEffect(() => () => clearTimeout(launchTimer.current), []);
   const begin = async () => {
     try { sessionStorage.setItem('wasit.welcome', '1'); } catch {}
@@ -54,6 +53,9 @@ function ConsumerApplication({ path, initiallyInApp = false }) {
   const launch = () => { clearTimeout(launchTimer.current); setLaunching(true); launchTimer.current = setTimeout(() => setLaunching(false), reduce ? 200 : 1250); };
   const finishSetup = () => { refreshProfile().catch(() => {}); if (!/^\/(?:requests|r|deals|deal)\//.test(path)) navigate('/'); };
   const request = path.match(/^\/(?:requests|r)\/([^/]+)(?:\/(compare|lock))?$/), deal = path.match(/^\/(?:deals|deal)\/([^/]+)(?:\/(check))?$/);
+  const [pausedRequest,setPausedRequest]=useState(null);
+  const pauseProcessing=useCallback(paused=>setPausedRequest(paused?request?.[1]??null:null),[request?.[1]]);
+  const processingPaused=Boolean(request&&pausedRequest===request[1]);
   const isAccount = path === '/account', readyProfile = Boolean(profile?.location_label), profileFailure = state.profileError;
   let phase, node;
   if (path === '/welcome' || (!welcomed && path === '/')) {
@@ -76,11 +78,11 @@ function ConsumerApplication({ path, initiallyInApp = false }) {
     else if (path === '/settings/models') screen = <AIModelSettings {...common} />;
     else if (path === '/settings') screen = <SettingsHub profile={profile} session={session} onNavigate={navigate} />;
     else if (path === '/demo') screen = <ConsumerDemoControls {...common} fullPage defaultOpen />;
-    else if (request) screen = <ConsumerRoom key={request[1]} requestId={request[1]} initialTab={request[2] ? 'compare' : 'live'} {...common} />;
+    else if (request) screen = <ConsumerRoom key={request[1]} requestId={request[1]} initialTab={request[2] ? 'compare' : 'live'} processingPaused={processingPaused} {...common} />;
     else if (deal) screen = <AgreementScreen key={deal[1]} dealId={deal[1]} {...common} initialSection={deal[2] === 'check' ? 'bill' : undefined} onBack={() => navigate('/')} />;
     else if (path === '/' || path === '/request') screen = <ConsumerRequest {...common} onLaunch={launch} />;
     else screen = <section className="page screen-enter"><h1 tabIndex={-1}>Page not found</h1><Cta onClick={() => navigate('/')}>Back to app</Cta><button className="text-link" onClick={() => navigate('/welcome')}>Back to welcome</button></section>;
-    node = <AppShell key={session.actor_id} aiMode={aiMode} activeId={request?.[1]} activeDealId={deal?.[1]} api={api} session={session} profile={profile} onNavigate={navigate} onLogout={logout}><div key={path} style={{ display: 'flex', flexDirection: 'column', flex: 1 }}><RouteView viewKey={path}>{screen}</RouteView></div></AppShell>;
+    node = <AppShell key={session.actor_id} processingPaused={processingPaused} onPauseProcessing={pauseProcessing} activeId={request?.[1]} activeDealId={deal?.[1]} api={api} session={session} profile={profile} onNavigate={navigate} onLogout={logout}><div key={path} style={{ display: 'flex', flexDirection: 'column', flex: 1 }}><RouteView viewKey={path}>{screen}</RouteView></div></AppShell>;
   }
   useEffect(() => {
     window.scrollTo({ top: 0 });

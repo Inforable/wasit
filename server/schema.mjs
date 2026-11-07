@@ -1,4 +1,6 @@
 export const TABLES = {
+  accounts: { actor_id: 'TEXT PRIMARY KEY', email: 'TEXT NOT NULL UNIQUE', display_name: 'TEXT NOT NULL', password_salt: 'TEXT NOT NULL', password_hash: 'TEXT NOT NULL', created_at: 'INTEGER NOT NULL', updated_at: 'INTEGER NOT NULL' },
+  auth_attempts: { key: 'TEXT PRIMARY KEY', attempts: 'INTEGER NOT NULL DEFAULT 0', window_started: 'INTEGER NOT NULL', blocked_until: 'INTEGER NOT NULL DEFAULT 0' },
   tasks: { id: 'TEXT PRIMARY KEY', request_id: 'TEXT NOT NULL', branch_id: 'TEXT', kind: 'TEXT NOT NULL', source_key: 'TEXT NOT NULL', generation: 'INTEGER NOT NULL DEFAULT 0', status: "TEXT NOT NULL DEFAULT 'pending'", lease_token: 'TEXT', lease_until: 'INTEGER', due_at: 'INTEGER NOT NULL DEFAULT 0', payload_json: 'TEXT', created_at: 'INTEGER', updated_at: 'INTEGER', attempts: 'INTEGER NOT NULL DEFAULT 0' },
   sessions: { id: 'TEXT PRIMARY KEY', actor_id: 'TEXT', csrf_hash: 'TEXT', created_at: 'INTEGER', expires_at: 'INTEGER', generation: 'INTEGER NOT NULL DEFAULT 0' },
   deals: { id: 'TEXT PRIMARY KEY', request_id: 'TEXT', branch_id: 'TEXT', quote_revision: 'INTEGER', provider_label: 'TEXT', active_version_id: 'TEXT', pending_version_id: 'TEXT', created_at: 'INTEGER' },

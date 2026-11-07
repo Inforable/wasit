@@ -176,6 +176,26 @@ export function createAuth({
     res.setHeader('Set-Cookie', cookie(token));
     return reply(201, { actor_id, csrf_token: csrf });
   }
+  async function bootstrapActor(req) {
+    configured();requireOrigin(req);
+    if(header(req,'authorization'))throw fail(403,'wrong_role','Open a customer session separately from the provider link.');
+    const contentType=header(req,'content-type')?.split(';')[0].trim().toLowerCase();
+    if(contentType!=='application/json')throw fail(400,'invalid_payload','Send a JSON request body.');
+    return (await consumerSession(req))?.actor??null;
+  }
+  function prepareConsumerSession(req,actorId) {
+    configured();
+    if(typeof actorId!=='string'||!/^consumer_[a-zA-Z0-9_-]{6,64}$/.test(actorId))throw fail(400,'invalid_payload','The account identity is invalid.');
+    const token=opaque(),csrf=csrfFor(token),created=now(),old=cookieValue(req,cookieName);
+    return {
+      actor_id:actorId,csrf_token:csrf,
+      async save(tx) {
+        if(old)await tx.query('DELETE FROM sessions WHERE id=$1',[hash(old)]);
+        await tx.query('INSERT INTO sessions(id,actor_id,csrf_hash,created_at,expires_at,generation) VALUES($1,$2,$3,$4,$5,$6)',[hash(token),actorId,hash(csrf),created,created+SESSION_TTL_MS,0]);
+      },
+      setCookie:res=>res.setHeader('Set-Cookie',cookie(token)),
+    };
+  }
   async function me({ req }) {
     configured();
     if (header(req, 'authorization')) {
@@ -183,7 +203,9 @@ export function createAuth({
       return { user: { id: actor.actor_id, role: actor.role, branch_id: actor.branch_id } };
     }
     const session = await consumerSession(req);
-    return { user: session ? { id: session.actor.actor_id, role: 'consumer' } : null };
+    if(!session)return {user:null};
+    const account=await first('SELECT display_name,email FROM accounts WHERE actor_id=$1',[session.actor.actor_id]);
+    return { user: { id: session.actor.actor_id, role: 'consumer',...(account?{display_name:account.display_name,email:account.email}:{}) } };
   }
   async function logout({ req, res, body }) {
     requireJsonOrEmpty(req, body);
@@ -200,5 +222,5 @@ export function createAuth({
     ['GET', linkRoute, ({ req, params }) => getProviderLink(req, params[0], params[1])],
     ['POST', linkRoute, ({ req, params, body }) => { requireJsonOrEmpty(req, body); return issueProviderLink(req, params[0], params[1]); }],
   ];
-  return { routes, requireConsumer, ownRequest, ownDeal, ownVersion, requireProvider, mintProviderGrant, getProviderLink, issueProviderLink, cookieName };
+  return { routes, requireConsumer, ownRequest, ownDeal, ownVersion, requireProvider, mintProviderGrant, getProviderLink, issueProviderLink, cookieName,bootstrapActor,prepareConsumerSession };
 }

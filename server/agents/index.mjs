@@ -1,7 +1,7 @@
 import {randomBytes} from 'node:crypto';
 import {createStructuredRuntime,unavailableVision,ModelError} from './runtime.mjs';
 import {formatRequest} from '../formatter.mjs';
-import {extractQuotedFacts} from '../quote-service.mjs';
+import {extractQuotedFacts,validateQuotedFacts} from '../quote-service.mjs';
 import {scriptedReply} from '../providers.mjs';
 import {catalog,detectCategory,normalizeItem} from '../catalog.mjs';
 import {parseAmounts} from '../money.mjs';
@@ -48,7 +48,7 @@ export async function createAgentRuntime(options={}) {
     if(/ignore\s+(?:(?:all|previous|prior)\s+)*instructions|abaikan\s+(?:(?:semua|instruksi sebelumnya)\s+)*instruksi|system prompt|you are an ai/i.test(message.text))throw new ModelError('untrusted_instruction','Provider instructions are not quotation facts.');
     const book=catalog(job_public.category);
     const extracted=await structured({role:'extractor',name:'wasit_extract',schema:schemas.extractor,
-      system:SOURCE_RULES+' Extract only atomic item-price statements. Every line must quote an exact snippet from this message and use its message ID. A price must belong to the same atomic item; never borrow another item price. Included/free is zero only when explicitly stated. Unknown prices stay null. Confirm schedule only when explicitly available. Use the catalog units. Do not convert diagnosis or optional work into required work.',
+      system:SOURCE_RULES+' Extract only atomic item-price statements. Every line must quote an exact snippet from this message and use its message ID. A price must belong to the same atomic item; never borrow another item price. Included/free is zero only when affirmatively stated, never when negated or conditional. Not included, not free, tidak termasuk and tidak gratis mean unknown cost unless an explicit positive fee is quoted. Unknown prices stay null. Confirm schedule only when explicitly available. Use the catalog units. Do not convert diagnosis or optional work into required work.',
       user:JSON.stringify({message:{id:message.id,text:message.text},job_public:publicJob(job_public),catalog:book.items.map(item=>({id:item.id,label:item.label,kind:item.kind,units:item.units})),previous_quote:previous_quote??null}),
     });
     const verified=extractQuotedFacts({message,job:job_public}).lines;
@@ -56,6 +56,7 @@ export async function createAgentRuntime(options={}) {
       const candidate=extracted.lines.find(value=>value.item_code===line.item_code&&value.unit===line.unit);
       return !candidate||(line.kind!=='unknown'&&(candidate.kind==='unknown'||candidate.unit_price!==line.unit_price||candidate.quantity!==line.quantity));
     }))throw new ModelError('model_incomplete_facts','The model omitted an explicit provider item or lost a source-verified price.');
+    if(validateQuotedFacts({extraction:extracted,message,job:job_public}).rejected.length)throw new ModelError('model_incomplete_facts','The model changed an item meaning or used an unverified source.');
     return extracted;
   }:null;
   async function formatter(input,context={}) {

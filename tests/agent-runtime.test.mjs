@@ -159,3 +159,10 @@ test('model explanation cannot invent a saving or rank claim',async()=>{
   const result=await agents.explain({card:{reason:'Complete scope costs are available.',quoted_total:113000}});
   assert.equal(result.engine,'rules');assert.equal(result.sentence,'Complete scope costs are available.');assert.ok(result.rejected);
 });
+
+test('model extraction cannot reinterpret a negative fee as included zero',async()=>{
+ const message={id:'msg_negativefee01',text:'Not free transport'};
+ const facts=extractQuotedFacts({message,job});facts.lines[0].kind='included';facts.lines[0].unit_price=0;facts.lines[0].source.snippet='free transport';
+ const agents=await createAgentRuntime({env:ENV,fetchImpl:async()=>completed(facts)});
+ await assert.rejects(agents.extractor({message,job_public:job}),{code:'model_incomplete_facts'});
+});

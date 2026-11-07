@@ -11,12 +11,28 @@ const injection = (text) => /ignore(?:\s+(?:all|previous|prior))*\s+instructions
 const clean = (text) => String(text).trim().replace(/\s+/g, ' ');
 const escape = (text) => text.replace(/[.*+?^$\{\}()|[\]\\]/g, '\\$&');
 
+const inclusionWords = /\b(?:included|including|free|termasuk|gratis|no\s+(?:extra\s+|additional\s+)?charge|tanpa\s+biaya)\b/i;
+export function hasDeniedInclusion(text) {
+  const statement=String(text).toLowerCase().replace(/[\u2018\u2019]/g,"'").replace(/\bnot\s+only\b/g,'also').replace(/\bno\s+(?:extra\s+|additional\s+)?charge\b/g,'free').replace(/\btanpa\s+biaya(?:\s+tambahan)?\b/g,'free');
+  return /\b(?:not|never|no longer|isn't|isnt|aren't|arent|wasn't|wasnt|won't|wont|cannot|can't|cant|tidak|tak|bukan|belum|nggak|enggak|gak|ga|tdk|blm)(?:\s+[\w'-]+){0,5}\s+(?:included|including|free|termasuk|gratis)\b/i.test(statement)||/\b(?:excluded|excluding|excludes|exclude|charged separately|separate charge|additional charge|extra charge|biaya tambahan|bayar terpisah|dikenakan biaya|di luar|diluar)\b/i.test(statement);
+}
+export function isExplicitlyIncluded(text) {
+  return inclusionWords.test(String(text))&&!hasDeniedInclusion(text)&&!/\b(?:if|unless|jika|kalau|apabila|conditional)\b/i.test(String(text));
+}
+function quotedAmount(text) {
+  const amounts=parseAmounts(text);
+  if(amounts.length!==1)return null;
+  if(/\b(?:not|bukan|tidak|belum)\s*(?:rp\.?\s*)?$/i.test(String(text).slice(0,amounts[0].index)))return null;
+  if(hasDeniedInclusion(text)&&(amounts[0].value===0||/\b(?:in|dalam|dari|of)\s*(?:the\s+(?:price|total)\s*)?$/i.test(String(text).slice(0,amounts[0].index))))return null;
+  return amounts[0].value;
+}
+
 export function atomicStatements(text, category) {
   const result = [];
-  for (const clause of String(text).split(/\n|[;!?]|,\s+|\.\s+/)) {
+  for (const clause of String(text).split(/\n|[;!?]|\.\s+/)) {
     const matches = [];
     for (const item of catalog(category).items) {
-      for (const keyword of new Set([...item.keywords, item.label, item.id])) {
+      for (const keyword of new Set([...item.keywords, item.label, item.id,...(item.kind==='included'&&item.id!=='alat_bahan'?['inspection','pemeriksaan']:[])])) {
         const pattern = new RegExp('\\b' + escape(keyword) + '\\b', 'gi');
         for (const match of clause.matchAll(pattern)) matches.push({ start: match.index, end: match.index + match[0].length, item });
       }
@@ -51,10 +67,10 @@ export function extractQuotedFacts({ message, job }) {
   for (const { item, text } of atomicStatements(message.text, job.category)) {
     if (injection(text)) continue;
     const amounts = parseAmounts(text).map((a) => a.value);
-    const included = /\b(?:included|including|free|termasuk|gratis)\b/i.test(text);
+    const included = isExplicitlyIncluded(text);
     const terms = quantityAndUnit(text, item, job);
     let kind = item.kind === 'addon' ? 'optional' : 'fixed';
-    let price = amounts.length === 1 ? amounts[0] : null;
+    let price = quotedAmount(text);
     if (included && (amounts.length === 0 || amounts.every((amount) => amount === 0))) { kind = 'included'; price = 0; }
     if (price == null || !terms) { kind = 'unknown'; price = null; }
     lines.push({
@@ -81,14 +97,14 @@ export function extractQuotedFacts({ message, job }) {
 function sourceMatches(line, message, job) {
   if (injection(message.text)) return false;
   if (line.source?.message_id !== message.id || typeof line.source.snippet !== 'string' || !message.text.includes(line.source.snippet)) return false;
-  const parts = atomicStatements(line.source.snippet, job.category).filter((part) => part.item.id === line.item_code && !injection(part.text));
+  const parts = atomicStatements(message.text, job.category).filter((part) => part.item.id === line.item_code && !injection(part.text) && (part.text.includes(line.source.snippet)||line.source.snippet.includes(part.text)));
   return parts.some(({ item, text }) => {
     const terms = quantityAndUnit(text, item, job);
     if (!terms || terms.quantity !== line.quantity || terms.unit !== line.unit) return false;
     const amounts = parseAmounts(text).map((amount) => amount.value);
     if (line.kind === 'unknown') return line.unit_price === null;
-    if (line.kind === 'included') return line.unit_price === 0 && /\b(?:included|including|free|termasuk|gratis)\b/i.test(text) && amounts.every((value) => value === 0);
-    return amounts.length === 1 && amounts[0] === line.unit_price;
+    if (line.kind === 'included') return line.unit_price === 0 && isExplicitlyIncluded(text) && amounts.every((value) => value === 0);
+    return quotedAmount(text) !== null && quotedAmount(text) === line.unit_price;
   });
 }
 
@@ -129,6 +145,15 @@ export function createQuoteService({ store, now = Date.now, newId = id, extracto
     const row = await first(db, 'SELECT data_json FROM quotes WHERE branch_id=$1 ORDER BY version DESC LIMIT 1', [branchId]);
     if(!row)return null;
     const quote=JSON.parse(row.data_json),branch=await first(db,'SELECT pending_question FROM branches WHERE id=$1',[branchId]);
+    const zeros=(quote.lines??[]).filter(line=>line.unit_price===0);
+    if(zeros.length){
+      const sources=(await db.query("SELECT id,text FROM messages WHERE branch_id=$1 AND sender='provider'",[branchId])).rows;
+      const invalid=new Set(zeros.filter(line=>{const message=sources.find(value=>value.id===line.source?.message_id);return !message||!sourceMatches(line,message,quote);}).map(line=>line.id));
+      if(invalid.size){
+        quote.lines=quote.lines.map(line=>invalid.has(line.id)?{...line,kind:'unknown',unit_price:null,condition:'Confirm this cost with the provider.'}:line);
+        quote.status='needs_detail';quote.fixed_total=null;quote.unresolved=[...new Set([...(quote.unresolved??[]),...quote.lines.filter(line=>invalid.has(line.id)).map(line=>line.item_code==='transport'?'transport':line.item_code===catalog(quote.category).baseItem?'base_price':'scope')])];
+      }
+    }
     if(branch?.pending_question){quote.status='needs_detail';quote.fixed_total=null;quote.unresolved=[...new Set([...(quote.unresolved??[]),'scope'])];}
     return quote;
   }

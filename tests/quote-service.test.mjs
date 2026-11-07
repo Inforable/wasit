@@ -1,7 +1,12 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import {allowedBuyerActions} from '../server/buyer-policy.mjs';
+import {createBackend} from '../server/app.mjs';
+import {createAppHandler} from '../server/http.mjs';
+import {createServer} from 'node:http';
+import {once} from 'node:events';
 import { openStore } from '../server/store.mjs';
-import { createQuoteService, extractQuotedFacts, validateQuotedFacts } from '../server/quote-service.mjs';
+import { createQuoteService, extractQuotedFacts, validateQuotedFacts, isExplicitlyIncluded } from '../server/quote-service.mjs';
 import { readFixture, createContractValidator } from '../scripts/contracts.mjs';
 
 const validate=await createContractValidator();
@@ -80,4 +85,46 @@ test('an explicit sourced optional price cannot be silently downgraded to unknow
  const facts=extractQuotedFacts({message:msg,job});
  const checked=validateQuotedFacts({extraction:{lines:facts.lines.map(line=>({...line,kind:'unknown',unit_price:null}))},message:msg,job});
  assert.ok(checked.rejected.length);
+});
+
+test('negated inclusion in both languages is unknown and an explicit positive fee remains payable',()=>{
+ for(const text of ['Transport is not free','Transport is not included','Transport is never free',"Transport isn't free",'Transport tidak gratis','Transport tidak termasuk','Transport belum termasuk','Transport bukan gratis','Transport nggak gratis','Transport ga gratis','Transport excluded','Transport charged separately','Transport free only if approved','Transport is not free Rp0','Transport is not included in Rp100.000']){
+  const result=extractQuotedFacts({message:message(text),job}),line=result.lines.find(value=>value.item_code==='transport');assert.ok(line,text);assert.equal(line.kind,'unknown',text);assert.equal(line.unit_price,null,text);assert.equal(isExplicitlyIncluded(text),false,text);
+ }
+ for(const text of ['Inspection is not included','Inspection belum termasuk','Inspection is excluded']){const line=extractQuotedFacts({message:message(text),job}).lines.find(value=>value.item_code==='cek_freon');assert.equal(line.kind,'unknown',text);assert.equal(line.unit_price,null,text);}
+ for(const text of ['Transport is free','Transport termasuk','Transport gratis','Transport is not only included but free','Transport at no additional charge','Transport tanpa biaya tambahan']){const line=extractQuotedFacts({message:message(text),job}).lines.find(value=>value.item_code==='transport');assert.equal(line.kind,'included',text);assert.equal(line.unit_price,0,text);}
+ for(const text of ['Transport is not free, Rp20.000','Transport tidak gratis, Rp20.000','Transport is not included: Rp20.000']){const line=extractQuotedFacts({message:message(text),job}).lines.find(value=>value.item_code==='transport');assert.equal(line.kind,'fixed',text);assert.equal(line.unit_price,20000,text);}
+});
+
+test('source verification rejects invented zero and snippets that remove a negation',()=>{
+ for(const text of ['Transport is not free','Not free transport','Inspection is not included']){
+  const msg=message(text),line=extractQuotedFacts({message:msg,job}).lines[0];
+  for(const snippet of [text,text.startsWith('Not ')?text.slice(4):text])for(const kind of ['included','fixed']){
+   const bad={...line,kind,unit_price:0,source:{message_id:msg.id,snippet}};
+   const checked=validateQuotedFacts({extraction:{lines:[bad]},message:msg,job});assert.equal(checked.lines.length,0,text+' '+snippet);assert.ok(checked.rejected.length);
+  }
+ }
+});
+
+test('HTTP provider correction invalidates a prior free quote and prevents selection or unsupported counter',async t=>{
+ const store=await openStore({sqliteFile:':memory:',databaseUrl:'',production:false}),origin='http://localhost:5180',at=1794012900000;
+ const app=await createBackend({store,env:{},agents:{},now:()=>at,auth:{secure:false,allowedOrigins:[origin],publicOrigin:origin}});
+ const server=createServer(createAppHandler({routes:app.routes,distDir:'dist'})).listen(0,'127.0.0.1');await once(server,'listening');t.after(async()=>{await new Promise(resolve=>server.close(resolve));await store.close();});
+ const base='http://127.0.0.1:'+server.address().port,boot=await fetch(base+'/api/demo/session',{method:'POST',headers:{Origin:origin,'Content-Type':'application/json'},body:'{}'}),session=await boot.json(),cookie=boot.headers.get('set-cookie').split(';')[0];
+ const send=async(path,{method='GET',body,token}={})=>{const res=await fetch(base+path,{method,headers:{Origin:origin,'Content-Type':'application/json',...(token?{Authorization:'Bearer '+token}:{Cookie:cookie,'X-CSRF-Token':session.csrf_token})},...(body?{body:JSON.stringify(body)}:{})});return {status:res.status,body:await res.json()};};
+ await store.query('INSERT INTO requests(id,user_id,job_json,status,created_at) VALUES($1,$2,$3,$4,$5)',[job.id,session.actor_id,JSON.stringify(job),'negotiating',at]);
+ const provider=(await store.query("SELECT * FROM providers WHERE category='ac_service' AND persona='human' LIMIT 1")).rows[0];assert.ok(provider);
+ await store.query("INSERT INTO branches(id,request_id,provider_id,mode,wasit_mode,status,created_at) VALUES($1,$2,$3,'human','customer','processing',$4)",['branch_negation01',job.id,provider.id,at]);
+ const grant=await app.auth.mintProviderGrant('branch_negation01'),token=grant.token;
+ const submit=async(text,key)=>{const sent=await send('/api/provider/branch_negation01/messages',{method:'POST',token,body:{text,client_message_id:key}});assert.equal(sent.status,200,JSON.stringify(sent.body));await send('/api/requests/'+job.id+'/process',{method:'POST',body:{max_steps:2}});return (await send('/api/requests/'+job.id)).body;};
+ let snapshot=await submit('AC cleaning Rp90.000; transport included; inspection included; '+job.schedule_label,'negative_initial01');let quote=snapshot.branches.find(value=>value.id==='branch_negation01').quote;assert.equal(quote.status,'ready');const initial=structuredClone(quote);
+ snapshot=await submit('Transport is not free; inspection is not included','negative_update01');quote=snapshot.branches.find(value=>value.id==='branch_negation01').quote;assert.equal(quote.status,'needs_detail');assert.equal(quote.fixed_total,null);for(const item of ['transport','cek_freon']){const line=quote.lines.find(value=>value.item_code===item);assert.equal(line.kind,'unknown');assert.equal(line.unit_price,null);}
+ const policy=allowedBuyerActions({job,quote,branch:{status:'processing'}});assert.ok(!policy.allowed_actions.includes('counter'));assert.ok(!policy.allowed_actions.includes('counter_terms'));assert.equal(policy.available_terms.length,0);
+ assert.equal((await send('/api/requests/'+job.id+'/deals',{method:'POST',body:{branch_id:'branch_negation01',quote_revision:quote.revision}})).status,422);
+ const persisted=JSON.parse((await store.query('SELECT data_json FROM quotes WHERE id=$1',[initial.id])).rows[0].data_json);assert.deepEqual(persisted,initial);
+ const legacy={...initial,id:'quote_legacynegative01',revision:quote.revision+1,lines:initial.lines.map(line=>line.item_code==='transport'||line.item_code==='cek_freon'?{...line,source:quote.lines.find(value=>value.item_code===line.item_code).source}:line)};
+ await store.query('INSERT INTO quotes(id,branch_id,request_id,version,data_json,status,created_at) VALUES($1,$2,$3,$4,$5,$6,$7)',[legacy.id,'branch_negation01',job.id,legacy.revision,JSON.stringify(legacy),'ready',at]);
+ snapshot=(await send('/api/requests/'+job.id)).body;const checkedLegacy=snapshot.branches.find(value=>value.id==='branch_negation01').quote;assert.equal(checkedLegacy.status,'needs_detail');assert.equal(checkedLegacy.fixed_total,null);assert.equal((await send('/api/requests/'+job.id+'/deals',{method:'POST',body:{branch_id:'branch_negation01',quote_revision:legacy.revision}})).status,422);
+ assert.equal(JSON.parse((await store.query('SELECT data_json FROM quotes WHERE id=$1',[legacy.id])).rows[0].data_json).fixed_total,90000,'legacy history is not rewritten');
+ snapshot=await submit('Transport is not free, Rp20.000; inspection included','negative_priced01');quote=snapshot.branches.find(value=>value.id==='branch_negation01').quote;assert.equal(quote.status,'ready');assert.equal(quote.fixed_total,110000);assert.equal(quote.lines.find(value=>value.item_code==='transport').unit_price,20000);
 });

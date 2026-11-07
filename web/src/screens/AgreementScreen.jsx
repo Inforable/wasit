@@ -58,7 +58,13 @@ export function AgreementScreen({ dealId, api = defaultApi, session, initialDeal
   const getProviderInvite = async () => {
     if (busyRef.current || !deal) return;
     busyRef.current = true; setBusy(true); setError(null);
-    try { const invite = await api('/api/requests/' + encodeURIComponent(deal.request_id) + '/branches/' + encodeURIComponent(deal.branch_id) + '/link'); if (alive.current) setProviderInvite(invite.provider_url); }
+    try {
+      const path = '/api/requests/' + encodeURIComponent(deal.request_id) + '/branches/' + encodeURIComponent(deal.branch_id) + '/link';
+      let invite;
+      try { invite = await api(path); }
+      catch (failure) { if (failure.status !== 409 || failure.code !== 'provider_link_unavailable') throw failure; invite = await api(path, { method: 'POST', body: {} }); }
+      if (alive.current) setProviderInvite(invite.provider_url);
+    }
     catch (failure) { if (alive.current) setError(failure); }
     finally { busyRef.current = false; if (alive.current) setBusy(false); }
   };

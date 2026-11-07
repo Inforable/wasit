@@ -1,8 +1,17 @@
-﻿const mentionsWarranty = /\b(?:warranty|garansi)\b/i;
+const mentionsWarranty = /\b(?:warranty|garansi)\b/i;
 const untrustedInstruction = /ignore(?:\s+(?:all|previous|prior))*\s+instructions|abaikan (?:semua )?instruksi|system prompt|you are an ai/i;
 const uncertain = /\b(?:if|unless|conditional|could|would|might|maybe|possibly|subject to|provided that|depending|depends|up to|at most|at least|between|or|jika|kalau|apabila|bila|mungkin|tergantung|hingga|sampai|atau|business days|working days|hari kerja)\b/i;
 const none = /\b(?:no|without|zero)\s+(?:service\s+)?(?:warranty|garansi)\b|\b(?:warranty|garansi)\s*(?:is\s*)?(?:not\s+(?:offered|provided|included|available|covered)|does\s+not\s+apply|none|nil|nihil|tidak\s+(?:ada|tersedia|ditanggung|berlaku))\b|\b(?:tidak\s+ada|tanpa)\s+garansi\b|\bnot\s+covered\s+by\s+(?:the\s+|a\s+)?warranty\b/i;
 const deniedDuration = /\b(?:not|never|isn't|isnt|bukan|tidak|tak|belum)\b(?:\s+[\w'-]+){0,4}\s+\d{1,4}\s*-?\s*(?:days?|hari)\b/i;
+function extraWarrantyCost(clause) {
+  const amounts = [...clause.matchAll(/\b(?:rp\.?|idr|rupiah)\s*([\d.,]+)/gi)].map(match => Number(match[1].replace(/[.,]/g, '')));
+  if (amounts.some(amount => !Number.isFinite(amount) || amount > 0)) return true;
+  if (/\b(?:not|tidak|bukan|belum)\s+(?:free|included|gratis|termasuk)\b/i.test(clause)) return true;
+  if (amounts.length && amounts.every(amount => amount === 0)) return false;
+  const remaining = clause.replace(/\b(?:no\s+(?:(?:additional|extra)\s+)?(?:charge|cost|fee)s?|free\s+of\s+charge|tanpa\s+biaya(?:\s+tambahan)?)\b/gi, ' ');
+  return /\b(?:extra|additional|separate|paid|payable|surcharge|fees?|costs?|charge|charged|bayar|berbayar|biaya|tambahan|terpisah)\b/i.test(remaining);
+}
+const limitedCoverage = /\b(?:parts?|spare|refrigerant|compressor|capacitor|materials?|consumables?|suku\s+cadang|komponen|freon|kapasitor|bahan)\b/i;
 const unknown = mentioned => ({ mentioned, warranty_days: null, warranty_source: null });
 
 /** Preserve an exact provider statement; uncertain duration or coverage never becomes a benefit. */
@@ -13,9 +22,9 @@ export function extractWarrantyFact(message) {
   const clauses = text.split(/\n|[;!?]|\.\s+/), values = [];
   for (let index = 0; index < clauses.length; index++) {
     const clause = clauses[index]; if (!mentionsWarranty.test(clause)) continue;
-    if (uncertain.test(clause) || deniedDuration.test(clause) || /^(?:\s*only\s+)?\s*(?:if|unless|provided|jika|kalau|apabila)\b/i.test(clauses[index + 1] ?? '') || /\bno\s+warranty\s+(?:extension|extensions|upgrade)\b/i.test(clause)) return unknown(true);
+    if (extraWarrantyCost(clause) || uncertain.test(clause) || deniedDuration.test(clause) || /^(?:\s*only\s+)?\s*(?:if|unless|provided|jika|kalau|apabila)\b/i.test(clauses[index + 1] ?? '') || /\bno\s+warranty\s+(?:extension|extensions|upgrade)\b/i.test(clause)) return unknown(true);
     const durations = [...clause.matchAll(/(?<![\d.,-])\b(\d{1,4})\s*-?\s*(?:days?|hari)\b/gi)].map(match => Number(match[1]));
-    if (none.test(clause)) { if (durations.some(days => days !== 0)) return unknown(true); values.push(0); }
+    if (none.test(clause)) { if (limitedCoverage.test(clause)) return unknown(true); if (durations.some(days => days !== 0)) return unknown(true); values.push(0); }
     else { if (!durations.length) return unknown(true); values.push(...durations); }
   }
   if (!values.length || new Set(values).size !== 1 || !Number.isInteger(values[0]) || values[0] < 0 || values[0] > 365) return unknown(true);

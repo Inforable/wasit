@@ -2,3 +2,26 @@
 .fu-progress{font-size:11px;color:var(--muted);margin:0 0 17px}.fu-progress>div{height:3px;border-radius:4px;background:var(--line,#e2e5eb);overflow:hidden;margin-top:8px}.fu-progress i{display:block;height:100%;background:var(--brand,#4f46e5);transition:width .2s}.fu-step-actions{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;margin:18px 0}.fu-step-actions button{font-size:11px}@media(prefers-reduced-motion:reduce){.fu-progress i{transition:none}}
 
 .followup .chip,.fu-step-actions button{min-height:44px}.followup .fu-input{font-size:16px;min-height:44px}
+.clarification-page.page{padding:6px 20px max(32px,env(safe-area-inset-bottom))}
+.clarification-page .followup.inline.fu-page{width:100%;padding:0;margin:0;border:0;border-radius:0;background:transparent;box-shadow:none}
+.fu-page .fu-page-back{display:inline-flex;align-items:center;gap:9px;min-height:44px;padding:0;margin:0 0 20px;background:none;border:0;color:var(--ink-soft);font:inherit;font-size:14px;cursor:pointer}
+.fu-page .fu-head{display:block}.fu-page .fu-head h1{margin:0;font-size:28px;line-height:1.2;letter-spacing:-.9px;font-weight:750;color:var(--ink)}.fu-page .fu-head h1:focus{outline:none}
+.fu-page .fu-intro{margin:14px 0 22px;font-size:14px;line-height:1.75;color:var(--muted)}
+.fu-page .fu-quote{margin:0 0 24px;padding:15px 16px;border-radius:18px;background:var(--subtle);font-size:14px;line-height:1.65;color:var(--muted);overflow-wrap:anywhere}
+.fu-page .fu-progress{margin:0 0 24px;font-size:12px;line-height:1.5;font-weight:650;color:var(--muted)}
+.fu-page .fu-progress>div{height:5px;margin-top:8px;border-radius:8px;background:var(--line)}
+.fu-page .fu-q{margin:0}.fu-page .fu-q legend{display:flex;align-items:center;flex-wrap:wrap;gap:8px;width:100%;margin:0;padding:0;font-size:18px;line-height:1.45;font-weight:700;color:var(--ink)}
+.fu-page .fu-number{display:none}.fu-page .fu-optional{display:inline-flex;align-items:center;margin:0;padding:4px 8px;border-radius:999px;background:var(--brand-soft);color:var(--brand);font-size:10px;line-height:1.4;font-weight:700;letter-spacing:.2px}
+.fu-page .fu-hint{margin:11px 0 17px;font-size:13px;line-height:1.65;color:var(--muted)}
+.fu-page .fu-chips{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.fu-page .fu-chips .chip{display:flex;align-items:center;justify-content:center;gap:7px;min-width:0;min-height:56px;padding:12px 9px;border:1px solid var(--line);border-radius:16px;background:var(--surface);color:var(--muted);font-size:14px;line-height:1.4;text-align:center;white-space:normal;box-shadow:none;transition:border-color .15s,background .15s}
+.fu-page .fu-chips .chip:last-child:nth-child(odd){grid-column:1/-1}
+.fu-page .fu-chips .chip[aria-pressed=true]{border-color:var(--brand);background:var(--brand-soft);color:var(--brand);box-shadow:inset 0 0 0 .5px var(--brand);font-weight:650}
+.fu-page .fu-chips .chip svg{width:16px;height:16px;flex-shrink:0}.fu-page .fu-input{margin-top:12px;padding:12px 14px;color:var(--ink);background:var(--surface)}
+.fu-page .fu-step-actions{margin:20px 0 0;gap:9px;min-height:0}.fu-page .fu-step-actions:empty{display:none}
+.fu-page .fu-step-actions button{font-size:12px;line-height:1.4}.fu-page .cta{width:100%;min-height:56px;margin-top:26px;border-radius:16px;font-size:16px}
+.fu-page .fu-foot{margin:13px 5px 0;font-size:11px;line-height:1.7;color:var(--muted)}
+.fu-page .fu-review{margin:0;border-radius:18px}.fu-page .fu-review h3{font-size:17px}.fu-page .fu-review>p{font-size:13px;line-height:1.6}
+.fu-page button:focus-visible,.fu-page input:focus-visible{outline:3px solid var(--brand);outline-offset:3px}
+@media(min-width:600px){.clarification-page.page{padding-left:24px;padding-right:24px}.fu-page .fu-head h1{font-size:30px}.fu-page .fu-intro{font-size:15px}.fu-page .fu-chips .chip{min-height:60px}}
+@media(prefers-reduced-motion:reduce){.fu-page .fu-chips .chip{transition:none}}

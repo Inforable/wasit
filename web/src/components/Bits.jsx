@@ -1,3 +1,4 @@
+import { Component, useState } from 'react';
 import { MessageCircle, Phone, MessagesSquare, AlertTriangle, ShieldCheck } from 'lucide-react';
 import { rp, initials, avatarBg } from '../lib/format.js';
 
@@ -25,12 +26,13 @@ export function ChannelBadge({ channel, small = false }) {
   );
 }
 
-export function Avatar({ name, size = 64 }) {
-  return (
-    <span className="avatar" style={{ width: size, height: size, borderRadius: size * 0.31, fontSize: size * 0.34, background: avatarBg(name) }} aria-hidden="true">
-      {initials(name)}
-    </span>
-  );
+const PHOTO_CATEGORIES = new Set(['ac_service','washer','plumbing','electrical','cleaning']);
+export function Avatar({ name, size = 64, category }) {
+  const src = PHOTO_CATEGORIES.has(category) ? '/providers/' + category + '.webp' : null;
+  const [failed, setFailed] = useState(null);
+  return <span className="avatar" style={{ width:size,height:size,borderRadius:size*0.31,fontSize:size*0.34,background:avatarBg(name),overflow:'hidden' }} aria-hidden="true">
+    {src && failed!==src ? <img src={src} alt="" width={size} height={size} loading="lazy" decoding="async" fetchPriority="low" onError={()=>setFailed(src)} style={{width:'100%',height:'100%',objectFit:'cover',borderRadius:'inherit'}}/> : initials(name)}
+  </span>;
 }
 
 export function FairRangeBar({ range, value, label = 'Reference range' }) {
@@ -65,7 +67,7 @@ export function Flag({ flag }) {
   );
 }
 
-export function Safety({ children = 'Penyedia simulasi · tanpa pembayaran' }) {
+export function Safety({ children = 'Demo providers · simulated payments' }) {
   return (
     <p className="safety">
       <ShieldCheck size={13} /> {children}
@@ -87,4 +89,17 @@ export function Highlighted({ text, amounts = [] }) {
   }
   parts.push(text.slice(last));
   return parts;
+}
+
+export function Pending({ error, children = 'Loading...' }) {
+  return <div className="page pending-page">{error ? <p className="notice" role="alert">{String(error.message ?? error)}</p> : <p className="pending-note" role="status">{children}</p>}</div>;
+}
+export class Boundary extends Component {
+  constructor(props) { super(props); this.state = { err: null }; }
+  static getDerivedStateFromError(err) { return { err }; }
+  componentDidCatch(err, info) { console.error(err, info?.componentStack); }
+  render() {
+    if (!this.state.err) return this.props.children;
+    return <div className="page pending-page"><p className="notice" role="alert">This view could not be opened.</p><p className="pending-note">Your saved requests and agreements remain available. Reload to try again.</p><Cta onClick={() => window.location.reload()}>Reload Wasit</Cta></div>;
+  }
 }

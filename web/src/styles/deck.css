@@ -1,4 +1,3 @@
-
 .deck-top { display: flex; align-items: center; justify-content: space-between; }
 .deck-title { font-size: 26px; line-height: 1.3; letter-spacing: -0.6px; font-weight: 750; margin: 6px 0 4px; }
 .deck-sub { font-size: 12px; color: #858b94; line-height: 1.6; margin: 0; }
@@ -57,7 +56,7 @@
 .bubble.out { align-self: flex-end; background: var(--brand-soft); border-bottom-right-radius: 6px; color: var(--ink-soft); }
 .bubble.in { align-self: flex-start; background: var(--surface); border: 1px solid var(--line); border-bottom-left-radius: 6px; }
 .bubble .who { display: block; font-size: 9px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: #9aa0a8; margin-bottom: 3px; }
-.bubble mark { background: #fff1b8; color: inherit; border-radius: 4px; padding: 0 2px; }
+.bubble mark { background: #fff1b8; color: #3b2c00; font-weight: 650; border-radius: 4px; padding: 0 2px; } 
 .back-hint { flex: none; margin: 0 16px 14px; padding: 10px 12px; font-size: 11px; text-align: center; color: #858c95; background: var(--subtle); border-radius: 12px; border: 0; }
 
 
@@ -80,3 +79,29 @@
 .empty-deck { text-align: center; padding: 28px 22px; background: var(--surface); border: 1px solid var(--line); border-radius: 26px; box-shadow: var(--shadow-panel); }
 .empty-deck h2 { margin: 12px 0 8px; font-size: 20px; }
 .empty-deck p { font-size: 13px; color: var(--muted); line-height: 1.7; margin: 0 0 18px; }
+
+
+.offer-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin: 14px 0 10px; }
+.offer-toolbar .deck-count { margin: 0; text-align: left; }
+.offer-toolbar .chip { min-height: 36px; font-size: 12px; }
+.offer-list { display: flex; flex-direction: column; gap: 12px; }
+.offer { border-radius: 24px; border: 1px solid var(--line); background: linear-gradient(180deg, var(--surface), var(--subtle)); box-shadow: 0 10px 26px #26427312; overflow: hidden; }
+.offer-head { display: grid; grid-template-columns: 44px minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 14px 16px; background: radial-gradient(circle at 85% 0%, var(--brand-tint) 0%, transparent 60%), linear-gradient(155deg, var(--surface), var(--subtle)); border-bottom: 1px solid var(--line); }
+.offer-head .rank-badge { position: static; }
+.offer-id { min-width: 0; }
+.offer-id .card-name { font-size: 17px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.offer-id .card-seller { margin: 2px 0 0; }
+.offer-body { padding: 14px 16px 16px; }
+.offer-body .price { font-size: 30px; }
+.offer-compare { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin: 2px 0 4px; }
+.offer-compare > span:not(.pill) { display: flex; flex-direction: column; }
+.offer-compare small { font-size: 10px; color: var(--muted); }
+.offer-compare b { font-size: 19px; font-weight: 750; font-variant-numeric: tabular-nums; letter-spacing: -0.02em; }
+.offer-compare b.was { color: var(--muted); text-decoration: line-through; }
+.offer-compare > svg { color: var(--muted-2); margin-top: 10px; flex: none; }
+.offer-actions { display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: center; margin-top: 14px; }
+.offer-actions .btn-secondary { min-height: 48px; font-size: 13px; }
+.offer-actions .cta { min-height: 48px; width: auto; padding: 0 26px; }
+.offer-details { margin-top: 14px; display: flex; flex-direction: column; gap: 10px; animation: screen-in 240ms var(--ease-spring) both; }
+.offer-details .bubbles { max-height: 220px; overflow-y: auto; overscroll-behavior: contain; }
+.omit-line b { color: var(--warning); font-weight: 700; }

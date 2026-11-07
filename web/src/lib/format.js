@@ -10,7 +10,7 @@ const AVATARS = [
   ['#2A9566', '#1F7A4D'], ['#BE185D', '#9D174D'],
 ];
 export function avatarBg(seed = '') {
-  let hash = 0;
+  let hash = 7;
   for (const char of seed) hash = (Math.imul(hash, 31) + char.charCodeAt(0)) >>> 0;
   return `linear-gradient(155deg, ${AVATARS[hash % AVATARS.length].join(', ')})`;
 }

@@ -1,0 +1,37 @@
+[
+  {
+    "category": "ac_service",
+    "path": "/providers/ac_service.webp",
+    "description": "Illustrative air-conditioner technician cleaning a wall-mounted unit.",
+    "synthetic": true,
+    "prompt": "Use case: photorealistic-natural. Asset type: square service-category photo used inside a rounded-square provider avatar on a bright home-services website. Create a SINGLE 1:1 square documentary-style photograph, crisp natural texture, soft bright daylight, warm white and pale neutral contemporary Jakarta home interior, restrained indigo accents. One fictional adult Indonesian service professional wearing clean unbranded indigo workwear. Realistic anatomy and hands. Center the person, tool and service action so they remain recognizable in a small square crop. Friendly competent candid mood, not a studio headshot. Clearly illustrative synthetic demo imagery, not an identifiable real company or person. NO text, lettering, logos, watermarks, brand marks, collage or split panels. Opaque background.\nScene: an adult male air-conditioner technician cleaning a white wall-mounted split AC with its front cover open; visible filter grille, a small cleaning brush and microfiber cloth. Medium-close view with technician face and raised working hands, AC and tool action centrally framed; white wall, tidy daylight apartment. Safe routine cleaning, no exposed electrical wiring."
+  },
+  {
+    "category": "washer",
+    "path": "/providers/washer.webp",
+    "description": "Illustrative appliance technician inspecting a front-loading washing machine.",
+    "synthetic": true,
+    "prompt": "Use case: photorealistic-natural. Asset type: square service-category photo used inside a rounded-square provider avatar on a bright home-services website. Create a SINGLE 1:1 square documentary-style photograph, crisp natural texture, soft bright daylight, warm white and pale neutral contemporary Jakarta home interior, restrained indigo accents. One fictional adult Indonesian service professional wearing clean unbranded indigo workwear. Realistic anatomy and hands. Center the person, tool and service action so they remain recognizable in a small square crop. Friendly competent candid mood, not a studio headshot. Clearly illustrative synthetic demo imagery, not an identifiable real company or person. NO text, lettering, logos, watermarks, brand marks, collage or split panels. Opaque background.\nScene: an adult male appliance technician crouched beside an unplugged white front-loading washing machine, carefully inspecting the lower service panel with a screwdriver. Washer round door, technician face and hands clearly visible in the central square composition; bright tidy laundry corner, no visible brand."
+  },
+  {
+    "category": "plumbing",
+    "path": "/providers/plumbing.webp",
+    "description": "Illustrative plumber checking the pipe joint beneath a kitchen sink.",
+    "synthetic": true,
+    "prompt": "Use case: photorealistic-natural. Asset type: square service-category photo used inside a rounded-square provider avatar on a bright home-services website. Create a SINGLE 1:1 square documentary-style photograph, crisp natural texture, soft bright daylight, warm white and pale neutral contemporary Jakarta home interior, restrained indigo accents. One fictional adult Indonesian service professional wearing clean unbranded indigo workwear. Realistic anatomy and hands. Center the person, tool and service action so they remain recognizable in a small square crop. Friendly competent candid mood, not a studio headshot. Clearly illustrative synthetic demo imagery, not an identifiable real company or person. NO text, lettering, logos, watermarks, brand marks, collage or split panels. Opaque background.\nScene: an adult male plumber crouched at an open kitchen-sink cabinet, checking the clean P-trap pipe joint with an adjustable wrench. White sink edge and pipework visible, technician face and hands in the central composition; bright tidy neutral-tile kitchen, realistic professional maintenance."
+  },
+  {
+    "category": "electrical",
+    "path": "/providers/electrical.webp",
+    "description": "Illustrative electrician checking an unpowered outlet with a multimeter.",
+    "synthetic": true,
+    "prompt": "Use case: photorealistic-natural. Asset type: square service-category photo used inside a rounded-square provider avatar on a bright home-services website. Create a SINGLE 1:1 square documentary-style photograph, crisp natural texture, soft bright daylight, warm white and pale neutral contemporary Jakarta home interior, restrained indigo accents. One fictional adult Indonesian service professional wearing clean unbranded indigo workwear. Realistic anatomy and hands. Center the person, tool and service action so they remain recognizable in a small square crop. Friendly competent candid mood, not a studio headshot. Clearly illustrative synthetic demo imagery, not an identifiable real company or person. NO text, lettering, logos, watermarks, brand marks, collage or split panels. Opaque background.\nScene: an adult male electrician checking a visibly powered-off detached wall-outlet faceplate on a clean work area with a multimeter and insulated hand tool. Safe unenergized demonstration, protective work gloves, no live exposed conductor or sparks. Face, multimeter and hands centrally framed in a bright neutral home interior, no readable display text."
+  },
+  {
+    "category": "cleaning",
+    "path": "/providers/cleaning.webp",
+    "description": "Illustrative home-cleaning professional wiping a table with a microfiber cloth.",
+    "synthetic": true,
+    "prompt": "Use case: photorealistic-natural. Asset type: square service-category photo used inside a rounded-square provider avatar on a bright home-services website. Create a SINGLE 1:1 square documentary-style photograph, crisp natural texture, soft bright daylight, warm white and pale neutral contemporary Jakarta home interior, restrained indigo accents. One fictional adult Indonesian service professional wearing clean unbranded indigo workwear. Realistic anatomy and hands. Center the person, tool and service action so they remain recognizable in a small square crop. Friendly competent candid mood, not a studio headshot. Clearly illustrative synthetic demo imagery, not an identifiable real company or person. NO text, lettering, logos, watermarks, brand marks, collage or split panels. Opaque background.\nScene: an adult female home-cleaning professional wiping a pale wooden table with a teal microfiber cloth, clean indigo work shirt and simple protective gloves. Face, wiping hand and cloth centrally composed, bright sunlit tidy living room with soft white walls and subtle indoor plant in the background, natural candid motion."
+  }
+]

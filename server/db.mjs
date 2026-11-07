@@ -33,6 +33,9 @@ export function openDb(file = ':memory:') {
       }
     }
     db.exec(`
+      CREATE UNIQUE INDEX IF NOT EXISTS quote_source_replay ON quotes(branch_id,source_message_id);
+      CREATE UNIQUE INDEX IF NOT EXISTS task_replay_key ON tasks(request_id,branch_id,kind,source_key);
+      CREATE INDEX IF NOT EXISTS tasks_claimable ON tasks(status,due_at,lease_until);
       CREATE UNIQUE INDEX IF NOT EXISTS deal_per_request ON deals(request_id);
       CREATE UNIQUE INDEX IF NOT EXISTS version_number_per_deal ON agreement_versions(deal_id, number);
       CREATE UNIQUE INDEX IF NOT EXISTS one_active_version ON agreement_versions(deal_id) WHERE status='active';

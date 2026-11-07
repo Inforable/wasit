@@ -1,4 +1,5 @@
 export const TABLES = {
+  tasks: { id: 'TEXT PRIMARY KEY', request_id: 'TEXT NOT NULL', branch_id: 'TEXT', kind: 'TEXT NOT NULL', source_key: 'TEXT NOT NULL', generation: 'INTEGER NOT NULL DEFAULT 0', status: "TEXT NOT NULL DEFAULT 'pending'", lease_token: 'TEXT', lease_until: 'INTEGER', due_at: 'INTEGER NOT NULL DEFAULT 0', payload_json: 'TEXT', created_at: 'INTEGER', updated_at: 'INTEGER', attempts: 'INTEGER NOT NULL DEFAULT 0' },
   sessions: { id: 'TEXT PRIMARY KEY', actor_id: 'TEXT', csrf_hash: 'TEXT', created_at: 'INTEGER', expires_at: 'INTEGER', generation: 'INTEGER NOT NULL DEFAULT 0' },
   deals: { id: 'TEXT PRIMARY KEY', request_id: 'TEXT', branch_id: 'TEXT', quote_revision: 'INTEGER', provider_label: 'TEXT', active_version_id: 'TEXT', pending_version_id: 'TEXT', created_at: 'INTEGER' },
   agreement_versions: {
@@ -26,7 +27,7 @@ export const TABLES = {
     seed_version: 'TEXT', updated_by: 'TEXT', updated_at: 'INTEGER',
   },
   requests: {
-    id: 'TEXT PRIMARY KEY', parent_id: 'TEXT', user_id: 'TEXT', request_text: 'TEXT',
+    id: 'TEXT PRIMARY KEY', parent_id: 'TEXT', user_id: 'TEXT', request_text: 'TEXT', input_json: 'TEXT', generation: 'INTEGER NOT NULL DEFAULT 0', archived_at: 'INTEGER',
     status: 'TEXT', job_json: 'TEXT', questions_json: 'TEXT', weights_json: 'TEXT',
     formatter_by: 'TEXT', fair_range_json: 'TEXT', scenario_id: 'TEXT', manual_for: 'TEXT',
     timeout_ms: 'INTEGER', accepted_quote_id: 'TEXT', error: 'TEXT', created_at: 'INTEGER',
@@ -46,7 +47,7 @@ export const TABLES = {
     intent: 'TEXT', text: 'TEXT', sender: 'TEXT', engine: 'TEXT', client_message_id: 'TEXT', amounts_json: 'TEXT', honesty_json: 'TEXT', created_at: 'INTEGER',
   },
   quotes: {
-    id: 'TEXT PRIMARY KEY', branch_id: 'TEXT', request_id: 'TEXT', version: 'INTEGER',
+    id: 'TEXT PRIMARY KEY', branch_id: 'TEXT', request_id: 'TEXT', version: 'INTEGER', source_message_id: 'TEXT',
     data_json: 'TEXT', status: 'TEXT', flags_json: 'TEXT', reasons_json: 'TEXT',
     comparable_json: 'TEXT', created_at: 'INTEGER',
   },
@@ -79,7 +80,7 @@ export const TABLES = {
     note: 'TEXT', version_id: 'TEXT', created_at: 'INTEGER',
   },
   disputes: {
-    id: 'TEXT PRIMARY KEY', deal_id: 'TEXT', reason: 'TEXT', detail: 'TEXT',
+    id: 'TEXT PRIMARY KEY', deal_id: 'TEXT', version_id: 'TEXT', reason: 'TEXT', detail: 'TEXT',
     asked_amount: 'INTEGER', recommendation_json: 'TEXT', status: 'TEXT',
     prev_status: 'TEXT', provider_response: 'TEXT', provider_note: 'TEXT',
     evidence_json: 'TEXT', created_at: 'INTEGER', resolved_at: 'INTEGER',

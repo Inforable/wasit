@@ -1,20 +1,20 @@
 # Backend tickets — Wasit 4.1
 
-Owner: A. Status reflects foundation work only. Done means tested implementation; Partial never means the business endpoint is complete. Production runs on Vercel with an external persistent database; local SQLite supports development and invariant tests.
+Owner: A. Done means tested implementation. Partial identifies a remaining acceptance gate; production availability is recorded separately. Production runs on Vercel with an external persistent database; local SQLite supports development and invariant tests.
 
 | Ticket | Status | Scope / acceptance |
 |---|---|---|
 | BE-01 | Done | Bootstrap HTTP/DB/UI, errors, migrations, static SPA and health; tests/build pass. |
-| BE-02 | Partial | Persistent production store, sessions/CSRF, owner checks, provider bearer/expiry. Local tables and client hooks exist; production adapter and auth endpoints remain. |
+| BE-02 | Partial | SQLite/PostgreSQL ports, sessions/CSRF, owner checks, branch bearer/expiry and reset-safe token issuance are implemented and tested. Neon Free provisioning and production persistence verification remain. |
 | BE-03 | Done | Five service catalogs, units, money/WIB parsing and request formatter. English chip answers round-trip; maximum budget explicitly confirmed. |
-| BE-04 | Todo | Provider directory, consent, area/availability, private branches and idempotent messages. Provider payload is an allowlist. |
+| BE-04 | Done | Provider directory, consent, area/availability, private branches and idempotent messages. Provider payload is an allowlist. |
 | BE-05 | Partial | Quote revisions, provenance and quoted totals. Schema/fixtures exist; extraction pipeline, source validation and pricing service remain. |
 | BE-06 | Done | Comparison groups and preference ranking. Required costs cannot be unknown; only equivalent scopes are ranked; optional estimates excluded. |
 | BE-07 | Todo | Request orchestration, takeover, finish, event snapshots and serverless-safe task processing. Persist jobs/leases; GET never triggers model mutations. |
 | BE-08 | Partial | Versioned agreements and two-party acceptance. Local immutable terms/acceptance constraints and public digest utility exist; transactional service/routes remain. |
 | BE-09 | Todo | Bill checks, cumulative quantities, changes and explicit budget increase. Pending/rejected proposal preserves active agreement. |
 | BE-10 | Todo | Simulation ledger bound to versions, topups, completion and release. No real payments; idempotent money actions. |
-| BE-11 | Todo | Provider price list/profile, ratings and business feedback. Provider prices never become the reference price book. |
+| BE-11 | Done | Provider price list/profile, ratings and business feedback. Provider prices never become the reference price book. |
 | BE-12 | Todo | Disputes/evidence/reviews with role checks and explicit simulation policy. No invented refund guarantees. |
 | BE-13 | Todo | Reference price data, source/date/unit quality and optional planning estimates. No effect on committed totals, counter cites or budget eligibility. |
 | BE-14 | Todo | Demo scenarios/reset with per-session generation, task cancellation and token rotation; never reset another session. |
@@ -30,3 +30,5 @@ Common acceptance: integer Rupiah; public provider projection; source-bound fact
 - BE-03: seven offline test groups pass; five schema-valid categories, money/WIB, explicit budget and English clarification.
 - BE-06 / AG-03: thirteen tests pass for comparable ranking, latest revision, authorized citations, privacy and model fallback.
 - Combined verification with foundation/storage: 50 tests passed. HTTP request orchestration remains BE-07.
+
+- BE-02/04/11: auth eight HTTP/storage groups and provider communications twenty groups pass. Grants are hash-only, branch-bound and revoked by owner reset; own-price/profile/ratings/feedback omit competitor and private-budget data.

@@ -4,7 +4,7 @@
 
 JSON Schema 2020-12 defines payload shape. Domain code additionally verifies arithmetic, source/item association, ownership, comparison equivalence, budget acknowledgement and state transitions. Schema-valid does not mean the application works.
 
-The initial foundation implements GET /api/health and static UI only. Business endpoints below are target contracts assigned to tickets, not routes already available. Unknown API paths return JSON 404.
+The application implements the business endpoints below and validates request bodies against local schemas. Hosted availability additionally requires configured authentication and external persistent storage. Unknown API paths return JSON 404.
 
 ## Conventions
 
@@ -34,7 +34,7 @@ shared/contracts.d.ts gives internal type hints. It is not an automatic typechec
 The fixture manifest is tests/fixtures/manifest.json; model selectors use <role>.model.schema.json.
 All schema IDs are local resolver identities, not network dependencies.
 
-## API targets
+## Implemented API contracts
 
 | Method / route | Principal | Body selector / behavior |
 |---|---|---|
@@ -59,8 +59,7 @@ All schema IDs are local resolver identities, not network dependencies.
 | POST /api/deals/:id/bill-checks | consumer + CSRF | api:check_bill |
 | POST /api/demo/reset | owner + CSRF | api:reset; cancels only own persisted tasks/resources |
 
-Profile/directory, provider price list, lifecycle, reviews/disputes, demo settings and OCR add their typed
-payloads with the corresponding ticket before those routes are implemented. No generic unvalidated object is a finished API contract.
+Additional implemented routes include GET /api/catalog, GET /api/providers, owner request history and planning scenarios; owner takeover/say; provider profile/prices/ratings/feedback; consumer payment/confirmation/disputes/evidence/reviews; provider completion/dispute responses/evidence/review replies; demo scenarios and explicit simulated-provider actions. Each mutating role action has its own strict body selector. POST /api/deals/:id/bill-preview returns an editable image-reading draft and requires configured OpenAI support; it never checks or approves a bill automatically.
 
 ## Invariants
 
@@ -93,5 +92,5 @@ Model call sequencing and reset checks must hold across instances.
 413 oversized body, 422 budget/source/scope/quantity rejection, 429 rate limit, 503 unavailable.
 Model timeout normally produces fallback, not a generic 503.
 
-The HTTP foundation currently uses bad_json/bad_path/not_found/forbidden/too_large/ui_not_built/internal_error.
+The HTTP layer also uses bad_json/bad_path/not_found/forbidden/too_large/ui_not_built/internal_error.
 Preserve clients' structured error handling when adding business codes.

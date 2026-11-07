@@ -1,49 +1,42 @@
-# Deployment — Wasit
+# Deployment - Wasit
 
-## Target
+Production URL: https://wasit-id.vercel.app. Hosting uses Vercel and a free project subdomain; no domain purchase is required.
 
-Hosting: Vercel. Production domain: https://wasit-id.vercel.app (free subdomain).
-Initial release serves the English Wasit shell, component gallery and /api/health.
-Business actions remain disabled until their tickets and persistent-storage gate are complete.
+The current published build includes the customer/provider frontend and business API. GET /api/health reports configured model capability. Production business actions require a shared PostgreSQL database. Until that is provisioned, authenticated business routes return storage_not_configured with HTTP 503. This is separate from an unknown API route, which returns JSON 404.
 
-## Persistence
+Local development uses SQLite and is available at http://localhost:5180 with the API at http://127.0.0.1:3301. The development supervisor watches backend modules. A stale process must be restarted after changing the supervisor or environment file.
 
-Vercel does not guarantee a persistent local filesystem for SQLite writes.
-Use an external transactional database for agreements, acceptances, accounts and jobs.
-Local SQLite remains for development/invariant tests; /tmp is not production persistence.
-This boundary follows [Vercel's SQLite guidance](https://vercel.com/kb/guide/is-sqlite-supported-in-vercel).
+## Production configuration
 
-Persist job generation/deadlines/leases. Run bounded processing through authenticated mutating requests
-or a durable worker. GET polling never creates tasks. Do not rely on process-local locks, timers or queues
-across Vercel instances. The production database adapter belongs to BE-02.
+- DATABASE_URL or POSTGRES_URL: transactional PostgreSQL connection.
+- WASIT_SESSION_SECRET: private random secret of at least 32 bytes.
+- WASIT_PUBLIC_ORIGIN: https://wasit-id.vercel.app.
+- WASIT_ALLOWED_ORIGINS: explicit production origins.
+- OPENAI_API_KEY: server secret only.
+- OPENAI_MODEL: configured text model; OPENAI_MODEL_SUPPORT can select the image model.
+- OPENAI_REASONING_EFFORT: configured per the selected model.
+- WASIT_MODEL_DAILY_CALL_LIMIT: defaults to 500 attempts per UTC day across the shared store. Exhausted capacity uses rules or manual bill entry.
 
-## Configuration
+Session and model secrets are configured in Vercel. They are not frontend environment variables and are excluded from Git. OpenAI account access and a bounded live test were verified. Model calls retain independent validation, deadlines and fallback.
 
-vercel.json builds Vite into dist and routes /api to api/index.js.
-The serverless handler imports no local SQLite bootstrap.
-Node 22 runtime; frontend/API share the same origin.
-Model keys and production session secrets belong in Vercel environment settings, never the client build.
-No secrets are required for the foundation-only release.
+Functions use the Singapore region to match the intended database region. Local SQLite, process memory and /tmp are not production persistence. This follows [Vercel's SQLite guidance](https://vercel.com/kb/guide/is-sqlite-supported-in-vercel).
 
-## Release checks
+## Database provisioning gate
 
-- npm.cmd run check passes.
-- Home and /components open; first visit is Light.
-- /api/health returns JSON; unknown API paths return JSON 404.
-- SPA deep links return the app and built assets load.
-- Business forms do not submit to fake fixture endpoints.
-- Production URL and wasit.app certificate/DNS are checked separately.
-- Custom domain attachment does not prove DNS ownership/activation.
+The intended integration is Neon Free, plan free_v3, region sin1. No paid plan is authorized.
 
-## Recorded release state
+Vercel enforces human acceptance of marketplace terms. Its agent CLI refuses to accept those terms even with account-owner authorization. An operator must run once in an interactive terminal:
 
-Verified production URL: https://wasit-id.vercel.app
-Provider deployment: https://wasit-eehq1u1au-fayadhs-projects-f3190830.vercel.app
-Project: wasit. The free production domain is registered and verified on the project and follows production releases.
+```powershell
+vercel integration accept-terms neon --scope fayadhs-projects-f3190830
+```
 
-Live checks passed: home, /components, SPA deep link, /api/health JSON, unknown API JSON 404, compiled JS/CSS.
-Local verification: 16 contract fixtures, 27 tests and production build passed.
-Document and application commits: a8c7e64 and 247ba58. Deployment configuration is committed separately.
-No production database is provisioned by the foundation release. BE-02 remains the gate for transactional production features.
+After acceptance, provisioning and environment connection can continue automatically. No Neon resource is currently provisioned. A database connection must be tested before transactional production readiness is marked complete.
 
-The requested custom domain was replaced by the free address at the user's direction; no domain purchase is needed.
+## Release verification
+
+Check the canonical URL without an authenticated Vercel browser session. Verify home/deep links/assets, Light default, health and unknown API errors. Then verify real session creation, owner-only history, a human provider link, bilateral versions, bill checks, simulated ledger actions and reset across separate requests.
+
+Static hosting, successful local tests and model credentials do not establish hosted database readiness. Long preview URLs can remain protected while the canonical production domain is public. Deployment protection has not been disabled.
+
+Latest published deployment before the shared-flow update: https://wasit-91eg0lakv-fayadhs-projects-f3190830.vercel.app. The canonical project domain follows subsequent production releases.

@@ -46,16 +46,13 @@ Owner mengintegrasikan hasil, menjalankan pemeriksaan relevan dan menyelesaikan 
 Status: Todo → Doing → Ready for integration → Done.
 Partial berarti fondasi sebagian tersedia; tidak dihitung sebagai fitur terintegrasi.
 
-## Status fondasi aktual
+## Status integrasi aktual
 
-- BE-01 Done: HTTP/SQLite bootstrap, errors/static/health, migration tests.
-- FE-01 Done: shell, token/style, brand, helper API/router/viewport, Light default dan gallery.
-- FE-02 Partial: primitive presentasi tersedia; fitur dan binding layar belum lengkap.
-- BE-02/05/08 Partial: schema/fixture, local DB constraints dan helper tersedia; service bisnis/auth/store produksi belum ada.
-- AG-02/06 Partial: kontrak model/event ada; adapter model/orchestrator belum ada.
-- BE-16 Done untuk deployment fondasi: wasit-id.vercel.app terverifikasi publik. Business persistence tetap BE-02.
+Backend request, quote, comparison, versioned agreement, bill, lifecycle and simulation services are implemented and tested. Named accounts and private profiles are implemented; hosted persistence remains open under BE-02. Runtime OpenAI adapters have actual live-test evidence in addition to mocked boundary tests.
 
-Status detail dicatat pada tiket; jangan menandai semua fitur Done hanya karena fixture valid.
+Consumer/provider/agreement screens have real Chrome verification. Shared shell, history, onboarding and motion are being aligned with the specified interaction contract; unfinished frontend gates remain explicit in their tickets. One integrator owns shared contracts/API while delegated agents own isolated modules.
+
+The public UI/API release is available at https://wasit-id.vercel.app. Production transactions still require completed Neon acceptance/provisioning and hosted checks. Local success is not production database evidence.
 
 ## Bukti Codex
 

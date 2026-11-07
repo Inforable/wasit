@@ -1,56 +1,17 @@
-# Foundation — Wasit 4.1
+# Foundation - Wasit 4.1
 
-## Run
+Run `npm.cmd ci`, `npm.cmd run dev` and `npm.cmd run check`. The development UI uses port 5180 and the API uses port 3301. A production build can also be served with `npm.cmd start`.
 
-```powershell
-npm.cmd ci
-npm.cmd run dev
-npm.cmd run check
-```
+Implemented services include five-category request formatting, provider discovery and private messaging, source-checked quote revisions, comparison and negotiation, immutable agreement versions, bilateral acceptance, bill checks, simulated settlement, disputes and reviews. HTTP endpoints use persistent authentication, exact-origin CSRF checks and branch-bound provider bearer tokens.
 
-UI: http://localhost:5180. API: http://127.0.0.1:3301.
-Build then npm.cmd start serves static UI and API in one local process.
+Local SQLite supports development and invariant tests. The production PostgreSQL adapter pins each transaction to one client. Production requires DATABASE_URL or POSTGRES_URL; there is no local-file fallback. Tasks, deadlines, generations and leases are persisted. Reads never initiate negotiation or create ledger entries.
 
-## Available
+The frontend includes customer request/clarification, live conversations, comparison, agreement history and changes, bill confirmation, provider inbox/business tools, simulated settlement and disputes/reviews. Light is the default. Theme choices, core styles and shared components remain consistent across screens.
 
-- Node 22 ESM, table router, structured English errors, JSON limits, static SPA and health.
-- Local SQLite additive migrations, version/acceptance immutability, unique active/proposal/role and message replay indexes.
-- publicTerms allowlist, stable canonical JSON, public digest and committed-only arithmetic.
-- Schema 2020-12 for quotes/comparison/agreements and model/API selectors; 16 deterministic fixtures.
-- Consumer CSRF and provider bearer client boundaries, router, currency/avatar helpers and viewport.
-- Wasit styles/brand/primitives, Light by default, dark option, reduced motion and /components gallery.
-- CI: contract fixtures + meaningful unit/DB/HTTP tests + production build.
-- Vercel serverless adapter without opening a local DB file.
+Optional OpenAI adapters use locally resolved structured schemas, independent source checks, a bounded configurable timeout, shared model leases and explicit rules fallback. Bill images remain editable drafts that require customer confirmation. Model credentials belong only in server environment settings.
 
-The HTTP application implements health only; business routes remain in tickets.
-Database primitives do not implement acceptance authorization, activation services or provider discovery.
-Model schema is not a connected model. Fixture evaluation is not a live-business-flow result.
+A owns server/domain/storage/shared contracts. B owns frontend and runtime adapters. Delegated implementation may cover both streams while a single integrator owns shared files. Routes return data or reply(status,data); clients preserve separate cookie/CSRF and bearer boundaries.
 
-## Module ownership and interfaces
+Verification includes contract fixtures, domain and storage tests, authenticated HTTP flows across all five categories, and real Chrome checks for independent roles, versions, bills, retries, disputes and 390px layouts. Test reports distinguish synthetic data, mocked transport and live model results.
 
-A owns server routes/storage/domain, agreement helpers and shared contracts.
-B owns web, component bindings, LLM adapters and model extraction.
-Internal interfaces use shared/contracts.d.ts; public payloads use the schema registry.
-createAppHandler(options) is reusable without a listening socket; createAppServer wraps it locally.
-Route handlers return data or reply(status,data). SSE is not required for the first release.
-
-createApi accepts getCsrfToken/onUnauthorized. createProviderApi accepts getBearerToken,
-uses Authorization Bearer and omits consumer cookies. Tokens remain in memory.
-Provider clients are restricted to local /api/provider/ paths.
-
-## Verification scope
-
-Contract tests validate positive/negative shapes, unknown vs zero, quoted-vs-optional arithmetic,
-public digests/privacy and v1/v2 fixture consistency.
-SQLite tests verify additive migrations and structural invariants.
-HTTP tests verify errors, body limits, SPA fallback and path containment.
-API-helper tests verify auth headers and cookie boundaries.
-
-These are foundation checks. They do not yet prove application-level ownership,
-two-party activation, runtime model provenance or cross-instance production transactions.
-
-## Vercel persistence
-
-Deployment serves the UI and health; request actions are unavailable.
-Local SQLite is a development adapter. Production transactional features require a shared external store
-and persisted tasks/leases. Do not write a database under /tmp and claim agreement persistence.
+The public foundation URL is https://wasit-id.vercel.app. Full production transactions remain gated by actual external-database provisioning and hosted checks. A successful local run or static deployment does not establish that gate.

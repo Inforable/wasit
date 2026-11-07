@@ -29,9 +29,9 @@ Common acceptance: integer Rupiah; public provider projection; source-bound fact
 
 - BE-03: seven offline test groups pass; five schema-valid categories, money/WIB, explicit budget and English clarification.
 - BE-06 / AG-03: thirteen tests pass for comparable ranking, latest revision, authorized citations, privacy and model fallback.
-- Combined verification with foundation/storage: 50 tests passed. HTTP request orchestration remains BE-07.
+- Historical foundation/storage verification: 50 tests passed. Request orchestration and authenticated HTTP coverage have since been implemented.
 
 - BE-02/04/11: auth eight HTTP/storage groups and provider communications twenty groups pass. Grants are hash-only, branch-bound and revoked by owner reset; own-price/profile/ratings/feedback omit competitor and private-budget data.
 - BE-05/08/09: quote provenance/replay tests and nine agreement/bill service groups pass, including concurrent acceptance, explicit limit increase, source mismatch and cumulative bill quantity checks.
 - BE-10/12: lifecycle service and cross-service checks pass for version-bound simulated holds/topups/release/refunds, replays, disputes/evidence/reviews and blocked agreement changes after settlement or during disputes.
-- BE-07/14/15: persisted task/lease/reset tests and authenticated HTTP tests cover five categories, source-backed v1/v2, bills, stale versions, owner isolation and provider-token revocation. Full local suite: 144 tests passed on 7 November 2026; real browser role flows are recorded separately. Production PostgreSQL verification remains BE-02.
+- BE-07/14/15: persisted task/lease/reset tests and authenticated HTTP tests cover five categories, source-backed v1/v2, bills, stale versions, owner isolation and provider-token revocation. Full local suite: 174 tests passed on 7 November 2026; real browser role flows are recorded separately. Production PostgreSQL verification remains BE-02.

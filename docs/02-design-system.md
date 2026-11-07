@@ -57,7 +57,7 @@ dan terbaca sebagai **centang**: harga sudah diperiksa dan adil.
 
 ### 2.4 Kalimat
 
-- Pitch: *"Clear quotes. No surprise extras."*
+- Pitch: *"Better deals from local pros. No surprise extras."*
 - Penutup: *"Find your best deal, from the first quote to the agreed bill."*
 
 ## 3. Warna
@@ -340,14 +340,14 @@ The public entry and onboarding have no app chrome. The consumer app uses `.shel
 
 | Route | Behavior |
 |---|---|
-| `/welcome` | Always shows the centered public entry: Clear quotes. No surprise extras. Starting returns a saved profile to the app, or opens setup for an unsaved profile. Returning here never resets data or signs out. |
+| `/welcome` | Always shows the centered public entry: Better deals from local pros. No surprise extras. Starting returns a saved profile to the app, or opens setup for an unsaved profile. Returning here never resets data or signs out. |
 | `/` | First visit shows entry; after entry and profile setup it shows the app composer. `/home` replaces its URL with `/`. |
 | `/setup` | Two-step profile and three-factor priorities with total100 and optional locks. The quick demo profile remains available; email registration is optional. |
 | `/request` | New request composer within the shared shell. Rotating examples, presets, repeat last request and Enter submission remain available. Missing fields open an inline follow-up sheet. |
 | `/account` | Optional named sign-in/registration or account switching. A named account still completes its own profile. |
 | `/profile`, `/settings/priorities` | Edit the saved profile or priorities within the shell. `/settings/profile` replaces its URL with `/profile`; `/onboarding` with `/setup`. |
 | `/settings` | Profile and area, priorities, account, AI models and demo controls. Theme remains in the topbar. |
-| `/settings/models` | Two server-allowed model selectors for request/negotiation and bill images, explicit Save and Restore defaults. Preferences belong to the current actor and apply to new requests and new bill previews; existing requests retain their saved configuration. |
+| `/settings/models` | Two server-allowed model selectors for request/negotiation and bill images, explicit Save and Restore defaults. Preferences belong to the current actor and apply to new requests and new bill previews; existing requests retain their saved configuration unless their owner explicitly applies a request-level override in the negotiation room. |
 | `/demo` | Scenario and view controls. Back to app and Back to welcome are separate navigation actions. Fullscreen presentation can be entered and exited without resetting profile or route. Reset is a separate explicit action. |
 | `/requests/:id` | Live scoreboard and negotiation room; comparison appears after processing or explicit Compare navigation. |
 | `/requests/:id/compare` | Offer deck/table with item scope, committed quote total, unknown costs and ranking eligibility. |
@@ -363,7 +363,7 @@ Phase transitions use opacity0/scale0.97/blur4px to opacity1/scale1/blur0, exiti
 
 ## 10. Product language and truthful amounts
 
-All product UI, errors, comments and accessibility labels use English; the product name remains Wasit. The centered entry headline is **Clear quotes. No surprise extras.** Use short, concrete sentences and actionable errors.
+All product UI, errors, comments and accessibility labels use English; the product name remains Wasit. The centered entry headline is **Better deals from local pros. No surprise extras.** Use short, concrete sentences and actionable errors.
 
 | Label | Meaning |
 |---|---|
@@ -399,3 +399,7 @@ Preserve Rupiah formatting (`Rp238.000`), quantities and explicit units; show lo
 
 Header memakai sticky + blur 14 px. Jangan ada scroll horizontal; chip yang banyak dibungkus ke baris berikutnya, atau
 digulir dalam barisnya sendiri dengan padding 22 px.
+
+### Provider imagery
+
+Each of the fifteen seeded providers has a distinct, service-appropriate synthetic photo mapped by provider identity and category. Shared avatars preserve their dimensions and rounded shape. Images use local 384-pixel WebP, lazy loading, asynchronous decoding and a low fetch priority. The public welcome loads no provider images. Missing images and providers without an assigned photo show initials; no unrelated category photo is substituted. Prompt and synthetic-image records are stored in data/provider-images.json.

@@ -19,7 +19,7 @@ Implementation ownership: B scope, completed collaboratively with parallel agent
 | FE-13 | Done | Role-aware dispute/evidence/review/reply surfaces are connected. Browser verification covers accepted rework, held funds, one-time review and provider reply. |
 | FE-14 | Done | Five-category scenario cards, explicit owner reset, watch/story/presentation display tiles, keyboard controls, wide scoreboard/room layout and capability-aware fullscreen are implemented. Explicit app/welcome return preserves the session and data; labels stay honest. |
 | FE-15 | Partial | Default Light, dark/system choices, reduced motion, keyboard priority/room controls and mobile/desktop layouts are implemented. Current consumer flows pass 390px comparison and desktop composer/presentation overflow checks; agreement/provider pass mobile overflow. A complete keyboard and 44px touch-target audit across every role screen remains. |
-| FE-16 | Partial | Integrated English UI build and local browser flows pass. Hosted database availability, configured live model/image calls, public production smoke and a complete timed demo rehearsal still require verification. |
+| FE-16 | Partial | Integrated English UI build and local browser flows pass. Hosted PostgreSQL and the public HTTPS business journey now pass. The new interview/model controls need their final production browser check; broader live bill-image browser coverage and a complete timed demo rehearsal remain. |
 
 Unknown cost is never displayed as free. A pending version never replaces the active version in UI. Provider payloads and screens exclude customer spending limits, customer acceptance identifiers, internal events and competitor branches. Source messages retain the provider's original wording.
 
@@ -32,4 +32,4 @@ Unknown cost is never displayed as free. A pending version never replaces the ac
 
 - `node scripts/smoke-agreements.mjs`: 13 real Chrome checkpoints passed with separate customer/provider contexts. Covered bearer cleanup, lost-response replay, provider quote, two-party version activation, simulated payment/top-up, version 2, confirmed manual bill check, completion/release/review/reply, provider settings/feedback, 390px overflow, dispute evidence/accepted rework and no runtime exceptions.
 - Consumer welcome/request/compare and agreement/provider screenshots were opened for visual inspection. Browser outputs use isolated local SQLite storage and labeled demo data.
-- Live bill-image reading was not exercised with configured model credentials. Local results do not establish hosted PostgreSQL readiness, production deployment access or completion of a timed presentation rehearsal.
+- Live bill-image reading was not exercised with configured model credentials. Those local results alone do not establish hosted readiness; the later public HTTPS journey passes PostgreSQL business actions. A complete timed presentation rehearsal remains open.

@@ -2,7 +2,7 @@
 
 Production URL: https://wasit-id.vercel.app. Hosting uses Vercel and a free project subdomain; no domain purchase is required.
 
-The current published build includes the customer/provider frontend and business API. GET /api/health reports configured model capability. Production business actions require a shared PostgreSQL database. The earlier foundation release returned storage_not_configured until the database was provisioned; the integrated release is being redeployed and verified. This is separate from an unknown API route, which returns JSON 404.
+The current published build includes the customer/provider frontend and business API. GET /api/health reports configured model capability. Production business actions require a shared PostgreSQL database. The earlier foundation release returned storage_not_configured until the database was provisioned; the integrated release is now Ready and its public AC business journey passes. This is separate from an unknown API route, which returns JSON 404.
 
 Local development uses SQLite and is available at http://localhost:5180 with the API at http://127.0.0.1:3301. The development supervisor watches backend modules. A stale process must be restarted after changing the supervisor or environment file.
 
@@ -31,7 +31,7 @@ Vercel enforces human acceptance of marketplace terms. Its agent CLI refuses to 
 vercel integration accept-terms neon --scope fayadhs-projects-f3190830
 ```
 
-After acceptance, provisioning and environment connection can continue automatically. The Neon Free resource is provisioned and connected. A real PostgreSQL connection and migrations passed; cached cold migrations take approximately 0.2 seconds. Hosted transaction rehearsal remains the release gate.
+The operator has completed acceptance. The Neon Free resource is provisioned and connected. A real PostgreSQL connection and migrations passed; cached cold migrations take approximately 0.2 seconds. The hosted AC transaction rehearsal passed 12/12 stages, 52 invariant checks and 64 HTTPS requests, including separate v1/v2 funding, dispute/rework, release and resumed history.
 
 ## Release verification
 
@@ -39,4 +39,4 @@ Check the canonical URL without an authenticated Vercel browser session. Verify 
 
 Static hosting, successful local tests and model credentials do not establish hosted database readiness. Long preview URLs can remain protected while the canonical production domain is public. Deployment protection has not been disabled.
 
-Latest published deployment before the shared-flow update: https://wasit-91eg0lakv-fayadhs-projects-f3190830.vercel.app. The canonical project domain follows subsequent production releases.
+Verified integrated deployment: https://wasit-n6zas3fkz-fayadhs-projects-f3190830.vercel.app. The canonical project domain follows subsequent production releases.

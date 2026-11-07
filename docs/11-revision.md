@@ -17,7 +17,7 @@ Recorded on 7 November 2026. Entries follow decision order; earlier timestamps a
 | R09 | Preserve the established visual tokens, shared components and interaction rules. Remove source provenance from project code, comments, docs, names and commits. | Source scanning; shared component/style verification. |
 | R10 | Set Light as the first-visit theme. Dark and system preferences remain explicit choices. | Theme tests and actual Chrome checks under a dark operating-system preference. |
 | R11 | Publish early on Vercel and use a short free Wasit address. | https://wasit-id.vercel.app is the canonical project domain. |
-| R12 | Use external PostgreSQL for hosted transactions; retain SQLite for development and invariant tests. Persist tasks, deadlines, generations and leases. | Adapters and reset/concurrency tests implemented; hosted database provisioning remains open. |
+| R12 | Use external PostgreSQL for hosted transactions; retain SQLite for development and invariant tests. Persist tasks, deadlines, generations and leases. | Adapters and reset/concurrency tests implemented; Neon Free is now connected and the later public AC journey passes. |
 | R13 | Keep commits modular around coherent features and update tickets as work is verified. Proceed without per-ticket review after explicit authorization. | Documentation, foundation and domain commits; ticket verification logs. |
 | R14 | Move the public message toward finding the best deal, then adopt the final headline: Clear quotes. No surprise extras. | Earlier approved copy; updated by R41. |
 | R15 | Restore the headline to centered alignment. | Mobile and desktop screenshots inspected. |
@@ -49,10 +49,17 @@ Recorded on 7 November 2026. Entries follow decision order; earlier timestamps a
 
 | R41 | Adopt the approved home-services referee positioning, Better deals from local pros headline, explanatory paragraph and three benefits. Preserve centered entry layout and animations. | Welcome copy, page metadata and PRD updated; centered responsive checks pass at 320px, 390px and 1440px. |
 
+| R42 | Complete a real public production AC journey on connected Neon without direct state edits. | 12/12 stages, 52/52 checks and 64 HTTPS requests pass, including bilateral v1/v2 and simulated hold/top-up/release. |
+| R43 | Give each of the fifteen seeded providers its own service-appropriate photo. | Ten additional generated WebP assets; fifteen distinct local paths, lazy loading and initials fallback. |
+
+| R44 | Add request-specific negotiation model selection with explicit apply and an idle-safe pause of future automatic actions. | 22 focused backend/runtime checks, 16 contract fixtures and 11 browser checks pass; prior events and account defaults are preserved. |
+| R45 | Require the post-submit service interview to present one question per step, with Back/Next and preserved answers. | Backend/context validation passes; sequential UI correction is in progress. |
+| R46 | Correct negated free/included statements and audit private provider access and non-price negotiation terms. | Reported fee-negation bug and missing warranty preservation are being corrected with regression checks. |
+
 ## Open release gates
 
-- Neon Free terms have been accepted by the operator and the resource is connected. Hosted end-to-end verification follows the new deployment.
-- The prior public build returned storage_not_configured. Real database connectivity is now verified; the integrated public release is being redeployed.
+- Neon Free is connected. The integrated public AC journey passed all twelve stages; new revisions receive a separate production browser check.
+- The earlier storage_not_configured failure is resolved in the integrated public release; account/session and persisted business actions pass.
 - Shared UI/flow alignment, final accessibility checks and hosted end-to-end verification must finish before their tickets become Done.
 - Live-model results are limited to the recorded trial and synthetic bill fixture. Larger independent language and real-bill evaluation remain a quality limitation.
 

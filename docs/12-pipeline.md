@@ -1,6 +1,6 @@
 # Wasit customer journey: request to settled work
 
-Recorded on 7 November 2026. Wasit has **twelve customer stages, numbered 0?11**. The journey starts with a customer profile, helps the customer compare suitable offers, and ends with agreed work, an explicit bill/change decision, and a recorded outcome. Optional work stays outside the committed price until both parties approve a new agreement version.
+Recorded on 7 November 2026. Wasit has **twelve customer stages, numbered 0-11**. The journey starts with a customer profile, helps the customer compare suitable offers, and ends with agreed work, an explicit bill/change decision, and a recorded outcome. Optional work stays outside the committed price until both parties approve a new agreement version.
 
 The complete journey has been rehearsed through actual local HTTP for all five service categories. Two additional AC rehearsals used OpenAI with rules fallback. These are business-flow checks against synthetic providers and a simulated ledger; they are not evidence of real provider fulfillment, real payment processing or perfect model accuracy.
 
@@ -38,22 +38,22 @@ A missing reply, rejected model answer or incomplete price does not approve work
 
 ## Stage overview
 
-?Passed locally? below means the connected HTTP journey passed for AC service, washing-machine service, plumbing, electrical work and home cleaning. Hosted business stages remain blocked by persistent storage provisioning.
+The code status below describes implementation in the current working tree, separately from deployment and real-world availability. The connected local HTTP journey passed for all five categories. Neon Free is connected; the public production AC rehearsal passed all twelve stages. Pending revisions are identified explicitly.
 
-| # | Customer stage | What is implemented and checked | Remaining real-world gap |
-|---|---|---|---|
-| 0 | Profile | Private name, default area/category and price/schedule/trust weights. Demo sessions work; optional registration/login preserves identity and owned work. | Hosted persistence gate. Named email is not represented as verified. |
-| 1 | Request | A customer describes a service need. The request belongs to that customer and appears in their history. | Customer voice input is not connected. |
-| 2 | Format and clarify | Five supported categories; explicit location, schedule and maximum budget. Up to three questions at once. A repeated answer submission reuses the same owned child request. | Broader real-language coverage needs independent evaluation. |
-| 3 | Discover providers | Category, consent, distance/radius and opening-hour checks; at most five provider branches. | Directory businesses and reputation data are synthetic. |
-| 4 | Send private RFQs | Separate conversations; only service scope, area and schedule are sent. Human invitation links use a separate bearer role. | No live WhatsApp or voice transport. |
-| 5 | Negotiate | Ask missing costs, counter only from permitted facts/targets, ask permitted terms, or close. Customer takeover and explicit process calls control progress. | Actual commercial provider negotiations have not been measured. |
-| 6 | Build sourced quotes | Item, unit, quantity, price and exact provider message are checked. Missing or invalid terms remain unresolved; optional work is excluded from the fixed total. | Provider audio/image quotation extraction is not connected. |
-| 7 | Compare equivalent work | Complete quotes are grouped by equivalent scope, quantity, location and time. Customer priorities determine ranking. Advisory context and optional scenarios remain separate. | Price observations do not establish a final all-in market price; insufficient data remains visible. |
-| 8 | Choose | Current quotation, processed provider messages, scope, base quantity and appointment are checked again. Selection creates a draft. | Hosted rehearsal after storage is available. |
-| 9 | Book with bilateral version 1 | Submit, customer acceptance with private-cap acknowledgement, and provider acceptance of the same public terms. Version 1 becomes active; simulated funding is a separate action. | Real payment/escrow and commercial booking integration are outside the build. |
-| 10 | Check the on-site bill and agree changes | Manual or confirmation-only image preview, version-bound bill checks, explicit new-work proposal, sufficient new limit, bilateral version 2 and a separate top-up. Version 1 stays immutable. | Real bill-image coverage is unmeasured beyond a small synthetic image check. |
-| 11 | Complete, resolve and close feedback | Provider completion, customer confirmation, exact simulated release, settled review/provider reply, and version-bound dispute/evidence/rework paths. History resumes the final agreement. | No operational mediator or real settlement service. Recurring hosted auto-release execution is not deployed. |
+| # | Customer stage | Current code status | What is implemented and checked | Remaining real-world gap |
+|---|---|---|---|---|
+| 0 | Profile | Implemented - profile, account/session and ownership checks. | Private name, default area/category and price/schedule/trust weights. Demo sessions work; optional registration/login preserves identity and owned work. | Named email is not represented as verified. |
+| 1 | Request | Implemented - owned requests and history. | A customer describes a service need. The request belongs to that customer and appears in their history. | Customer voice input is not connected. |
+| 2 | Format and clarify | Implemented core; in progress - category-specific post-submit interview. | Five supported categories; explicit location, schedule and maximum budget. Up to three questions at once. A repeated answer submission reuses the same owned child request. | Broader real-language coverage needs independent evaluation. |
+| 3 | Discover providers | Implemented - bounded eligibility and discovery. | Category, consent, distance/radius and opening-hour checks; at most five provider branches. | Directory businesses and reputation data are synthetic. |
+| 4 | Send private RFQs | Implemented - private branch RFQs and invitation access. | Separate conversations; only service scope, area and schedule are sent. Human invitation links use a separate bearer role. | No live WhatsApp or voice transport. |
+| 5 | Negotiate | Implemented - request-specific model selection, idle-safe apply and preserved history. | Ask missing costs, counter only from permitted facts/targets, ask permitted terms, or close. Customer takeover and explicit process calls control progress. | Actual commercial provider negotiations have not been measured. |
+| 6 | Build sourced quotes | Implemented core; corrective work in progress - negated free/included statements. | Item, unit, quantity, price and exact provider message are checked. Missing or invalid terms remain unresolved; optional work is excluded from the fixed total. | Provider audio/image quotation extraction is not connected. |
+| 7 | Compare equivalent work | Implemented - equivalent-scope ranking and advisory separation. | Complete quotes are grouped by equivalent scope, quantity, location and time. Customer priorities determine ranking. Advisory context and optional scenarios remain separate. | Price observations do not establish a final all-in market price; insufficient data remains visible. |
+| 8 | Choose | Implemented - stale/source checks and draft creation. | Current quotation, processed provider messages, scope, base quantity and appointment are checked again. Selection creates a draft. | Public production AC selection/review passed; real commercial availability remains unmeasured. |
+| 9 | Book with bilateral version 1 | Implemented core; sourced warranty preservation is in progress. Bilateral activation and separate simulated hold pass. | Submit, customer acceptance with private-cap acknowledgement, and provider acceptance of the same public terms. Version 1 becomes active; simulated funding is a separate action. | Real payment/escrow and commercial booking integration are outside the build. |
+| 10 | Check the on-site bill and agree changes | Implemented - confirmed bill check, versioned changes and simulated top-up. | Manual or confirmation-only image preview, version-bound bill checks, explicit new-work proposal, sufficient new limit, bilateral version 2 and a separate top-up. Version 1 stays immutable. | Real bill-image coverage is unmeasured beyond a small synthetic image check. |
+| 11 | Complete, resolve and close feedback | Implemented manual close; partial - recurring hosted 72-hour release executor. | Provider completion, customer confirmation, exact simulated release, settled review/provider reply, and version-bound dispute/evidence/rework paths. History resumes the final agreement. | No operational mediator or real settlement service. Recurring hosted auto-release execution is not deployed. |
 
 ## What the customer does at each stage
 
@@ -93,6 +93,8 @@ Wasit can clarify missing costs, cite an eligible same-scope offer or an explici
 
 A clear provider question about an unknown brand/model, capacity, inverter, access/floor, photo, serial number or private budget pauses automatic replies. Taking over preserves the raw question; an explicit customer reply clears it, and handing control back resumes the policy. The pending question removes quotation readiness and blocks selecting or proposing changed work, while an already accepted agreement remains unchanged. Ordinary price-acceptance proposals do not trigger this pause.
 
+The negotiation room provides a request-level OpenAI model selector. Editing pauses new automatic actions while an in-flight action finishes; an explicit Apply changes future request actions only. The original configuration, earlier events, bill model and account defaults remain unchanged. Concurrency and revision conflicts keep the selected draft available for review.
+
 Progress is driven by authenticated, bounded POST processing. A page read does not run hidden negotiation. In the rehearsal, scripted branches finish their bounded turns and a virtual clock advances the unanswered human branch past its persisted ninety-second deadline.
 
 ### 6. Turn replies into trustworthy cost lines
@@ -118,6 +120,19 @@ The result is a draft containing fixed, included and optional lines. It is not y
 The customer submits the draft, reviews the exact terms and acknowledges their private limit. The provider separately accepts the same public terms. One acceptance alone does not activate the agreement.
 
 The accepted terms and their digest remain immutable. The provider projection excludes the private limit and acknowledgement. The rehearsal then holds the version-1 committed amount in the labeled simulation ledger and repeats the action to verify that funds are not counted twice.
+
+### Payment implementation status
+
+Payment is implemented as an explicitly labeled simulation. No real payment gateway, bank transfer or escrow custody is connected.
+
+| Payment step | Current code status | Behavior |
+|---|---|---|
+| Initial hold after bilateral v1 acceptance | Implemented; local and public AC journey verified | Explicit customer action records the committed amount once. Acceptance itself does not move funds. |
+| Additional funding after bilateral v2 acceptance | Implemented; local and public AC journey verified | A separate action records only the approved difference; retries do not duplicate the top-up. |
+| Completion and customer-confirmed release | Implemented; local and public AC journey verified | Provider marks the funded current version done; customer confirmation releases the exact amount once. |
+| Dispute and agreed rework | Implemented; local and public AC journey verified | Funds remain held while disputed; accepted rework requires renewed completion before release. |
+| Automatic release after 72 hours | Partial | Eligibility/settlement service exists; a recurring hosted executor is not deployed. Reads never trigger release. |
+| Real payment/escrow | Outside current product scope | No real money is held, transferred or charged. |
 
 ### 10. Check the bill, then agree version 2 if needed
 
@@ -154,6 +169,7 @@ The runner starts an isolated in-memory SQLite backend and uses actual HTTP, coo
 | Rules, five categories | 60/60 | 260/260 | 330 | 2.925 seconds |
 | OpenAI AC journey, first run | 12/12 | 52/52 | 64 | 46.479 seconds |
 | AC capped fallback rehearsal | 12/12 | 52/52 | 66 | 69.560 seconds |
+| Public production AC journey | 12/12 | 52/52 | 64 | 138.589 seconds, including real human-reply deadline |
 
 The five rules journeys also passed five owner-history isolation checks. Every journey reached bilateral v2, a funded change, dispute/rework, final release, review and provider reply. Passing workflow checks is not a claim of perfect extraction quality or production availability.
 
@@ -179,9 +195,9 @@ node --disable-warning=ExperimentalWarning --env-file=.env scripts/e2e-pipeline.
 
 ## Local versus hosted status
 
-The public UI is deployed. The latest read-only public check returned HTTP 200 for health with AI available and HTTP 503 `storage_not_configured` for the account route. Persistent hosted PostgreSQL remains the release gate for all customer business stages.
+The integrated public release is Ready at https://wasit-id.vercel.app. The current unauthenticated checks return HTTP 200 for the page, health with AI ready and session restoration; unknown API routes return JSON 404. Neon Free is provisioned and connected. A fresh isolated production AC journey passed persisted business actions, including login/profile, bilateral v1/v2 acceptance, bill checking, simulated hold/top-up, dispute/rework, exact release, review and resumed history. It performed 64 HTTPS requests and 52 invariant checks in 138.589 seconds, including the real human-reply deadline. Runtime models were configured; per-call token usage was not measured for this hosted run. The earlier storage_not_configured failure belongs to the previous deployment.
 
-Storage provisioning, secure deployment configuration and a real hosted multi-request rehearsal are **cross-cutting release requirements**, not additional customer stages. The local HTTP evidence above does not close that hosted gate or establish real PostgreSQL race/latency behavior.
+Storage provisioning, secure deployment configuration and a real hosted multi-request rehearsal are **cross-cutting release requirements**, not additional customer stages. The local HTTP evidence alone does not close hosted verification or establish real PostgreSQL race/latency behavior.
 
 The remaining commercial gaps are verified participating providers, actual communication transport, real payment/escrow, an operational dispute mediator and broader bill/language evidence. Browser layout verification is separate from this HTTP business rehearsal.
 

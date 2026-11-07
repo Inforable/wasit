@@ -42,6 +42,8 @@ All schema IDs are local resolver identities, not network dependencies.
 | POST /api/demo/session | origin-checked | api:empty → session_response, CSRF + HttpOnly cookie |
 | POST /api/requests | consumer + CSRF | api:create_request; missing hard facts produce clarification |
 | GET /api/requests/:id | owner | common:snapshot |
+| GET /api/requests/:id/models | owner | allowed models, current and original configuration, revision and active-task status |
+| PUT /api/requests/:id/models | owner + CSRF | api:update_request_model; future actions only; stale revision or active task returns 409 |
 | POST /api/requests/:id/clarify | owner + CSRF | canonical answers; one child per original clarification |
 | POST /api/requests/:id/process | owner + CSRF | claim/process bounded persisted task; GET never starts work |
 | POST /api/requests/:id/finish | owner + CSRF | finish available quotes without inventing missing data |
@@ -94,3 +96,9 @@ Model timeout normally produces fallback, not a generic 503.
 
 The HTTP layer also uses bad_json/bad_path/not_found/forbidden/too_large/ui_not_built/internal_error.
 Preserve clients' structured error handling when adding business codes.
+
+## Request review and model overrides
+
+The composer opts into confirm_details. The server supplies up to three category-specific scope questions per batch, followed by any missing essential facts. Quantity requires an exact value from 1 to 20. Optional context accepts only offered choices or Skip; it is saved as customer-reported context and is never a diagnosis. Only approved public context enters RFQs; the maximum budget remains private. The UI presents one question at a time.
+
+Per-request model changes retain model_config_json as the original snapshot and store an explicit revisioned override. Updates share the task/reset lock, reject active unexpired processing leases and record model_changed. The bill model and account defaults are separate. A changed model cannot rewrite earlier results or accepted terms.

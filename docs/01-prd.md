@@ -412,7 +412,7 @@ Verified locally on 7 November 2026 with the integrated HTTP application, an iso
 
 #### Implemented behavior
 
-The welcome headline is centered and reads **Clear quotes. No surprise extras.** Light is the initial theme. The request form supports all five service categories, location, WIB schedule, a private spending cap, a separately authorized negotiation target, and visible preference weights. Draft input survives navigation within the current browser session.
+The welcome headline is centered and reads **Better deals from local pros. No surprise extras.** Light is the initial theme. The request form supports all five service categories, location, WIB schedule, a private spending cap, a separately authorized negotiation target, and visible preference weights. Draft input survives navigation within the current browser session.
 
 English clarification answers produce a new child request without overwriting the original. The live room processes persisted work through authenticated POST requests and polls GET snapshots. Polling stops when unmounted. Customer takeover pauses agent chat; stable message identifiers protect retries. The customer can explicitly hand control back to Wasit.
 
@@ -529,8 +529,8 @@ The advisory book must not change provider quotes, comparison ranking, private-b
 
 Renewed local Chrome checks passed: 27 consumer flows, 13 agreement/provider flows, eight navigation/theme checks, six provider-question checks, five modal/focus checks, six model-settings checks, four returning-session checks, two provider-photo checks and four explicit acceptance-to-active checks. These are separate suites with overlapping behavior, not independent quality samples.
 
-A delayed-authentication probe kept the welcome usable while the session read was paused for five seconds. The welcome became visible in 849 ms. Initial JavaScript is approximately 385 KB, split from the earlier 506 KB. Five synthetic provider photos use 384-pixel WebP assets totaling approximately 106 KB and do not load on Welcome.
+A delayed-authentication probe kept the welcome usable while the session read was paused for five seconds. The welcome became visible in 849 ms. Initial JavaScript is approximately 385 KB, split from the earlier 506 KB. Fifteen seeded providers each have a distinct synthetic 384-pixel WebP photo, totaling approximately 341 KB. Images load lazily in provider contexts and do not load on Welcome; unknown providers retain initials.
 
 The full five-category HTTP journey passes 60/60 stages and 260/260 stage checks. Separate live OpenAI AC journeys each complete 12/12 stages, including a capped run that continues through verified rules after transport failures. No perfect-model-quality claim is made.
 
-Neon Free is provisioned and connected. Real PostgreSQL migrations and fresh pools pass; persisted revision caching reduces repeated cold migration work from approximately 6.5 seconds to approximately 0.2 seconds. Public transaction verification follows the integrated deployment.
+Neon Free is provisioned and connected. Real PostgreSQL migrations and fresh pools pass; persisted revision caching reduces repeated cold migration work from approximately 6.5 seconds to approximately 0.2 seconds. A fresh public production AC journey passed 12/12 stages and 52 checks through 64 HTTPS requests, including persistent identity/profile/history, bilateral v1/v2, simulated funding, dispute/rework and release.

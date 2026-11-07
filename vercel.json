@@ -15,10 +15,7 @@
   ],
   "functions": {
     "api/index.js": {
-      "includeFiles": [
-        "docs/contracts/**",
-        "data/reference-price-book.json"
-      ],
+      "includeFiles": "{docs/contracts/**,data/reference-price-book.json}",
       "maxDuration": 60
     }
   },

@@ -53,7 +53,7 @@ Partial berarti fondasi sebagian tersedia; tidak dihitung sebagai fitur terinteg
 - FE-02 Partial: primitive presentasi tersedia; fitur dan binding layar belum lengkap.
 - BE-02/05/08 Partial: schema/fixture, local DB constraints dan helper tersedia; service bisnis/auth/store produksi belum ada.
 - AG-02/06 Partial: kontrak model/event ada; adapter model/orchestrator belum ada.
-- BE-16 Partial sampai deployment dan DNS diverifikasi.
+- BE-16 Done untuk deployment fondasi: wasit-id.vercel.app terverifikasi publik. Business persistence tetap BE-02.
 
 Status detail dicatat pada tiket; jangan menandai semua fitur Done hanya karena fixture valid.
 

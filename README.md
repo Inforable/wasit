@@ -33,6 +33,8 @@ remain assigned to their tickets. Fixtures are never served as real customer req
 
 ## Deployment
 
+Live foundation: https://wasit-id.vercel.app
+
 Vercel serves the initial shell and health. Persistent business features require an external transactional database;
 the Vercel handler does not initialize a local SQLite file.
 

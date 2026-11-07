@@ -19,7 +19,7 @@ Owner: A. Status reflects foundation work only. Done means tested implementation
 | BE-13 | Todo | Reference price data, source/date/unit quality and optional planning estimates. No effect on committed totals, counter cites or budget eligibility. |
 | BE-14 | Todo | Demo scenarios/reset with per-session generation, task cancellation and token rotation; never reset another session. |
 | BE-15 | Todo | HTTP/DB integration: stale quote/version, replay, parallel acceptance, privacy, task timeout, five categories and ledger. |
-| BE-16 | Partial | Vercel adapter/config and initial release. Final live smoke test and custom-domain status must be recorded; production persistence is a separate release gate. |
+| BE-16 | Done | Initial Vercel foundation release: wasit-id.vercel.app is public and verified; UI, health, deep link, API 404 and assets pass. Business persistence remains BE-02. |
 
 Dependencies: BE-02/03 → BE-04/05 → BE-06/07 → BE-08 → BE-09 → BE-10/12. BE-11/13/14 can proceed behind fixed contracts. BE-15 grows at every gate. BE-16 initial publication does not imply transactional production readiness.
 

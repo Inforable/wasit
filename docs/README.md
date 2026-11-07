@@ -17,6 +17,6 @@ Product direction: compare and negotiate service offers, then control agreed cos
 | contracts/ | JSON Schema 2020-12 |
 | ../tests/fixtures/ | Validated comparison, negotiation and agreement examples |
 
-Done foundation: BE-01 and FE-01. Other partials are identified explicitly in tickets.
+Done foundation: BE-01 and FE-01. BE-16 initial publication is Done at https://wasit-id.vercel.app. Other partials are identified explicitly in tickets.
 A database table or schema is not a completed business flow.
 Read the PRD and ownership boundaries before starting feature branches.

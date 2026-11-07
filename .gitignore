@@ -8,3 +8,5 @@ results/
 *.log
 
 .vercel/
+.vercel
+.env*

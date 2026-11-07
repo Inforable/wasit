@@ -1,7 +1,3 @@
-> Visual dan komponen dipertahankan. Default Light; semua copy produk English. Harga utama adalah quoted total scope yang setara. Agreement memakai dua penerimaan versi; cek lokasi tidak menetapkan harga pengganti sepihak.
-
-> Implementasi produk menggunakan **English**, dengan nama **Wasit** tetap. Lihat [bahasa produk](09-product-language.md). Untuk urutan kerja dua orang, ikuti [rencana implementasi](07-two-person-plan.md).
-
 # Wasit: design system
 
 Untuk FE dan siapa pun yang mendesain layar. Semua nilai di sini sudah dipakai di prototipe dan terbukti bekerja di layar
@@ -61,8 +57,8 @@ dan terbaca sebagai **centang**: harga sudah diperiksa dan adil.
 
 ### 2.4 Kalimat
 
-- Pitch: *"Every fair price gets a referee."*
-- Penutup: *"A fair price, from the first quote to the final bill."*
+- Pitch: *"Clear quotes. No surprise extras."*
+- Penutup: *"Find your best deal, from the first quote to the agreed bill."*
 
 ## 3. Warna
 
@@ -262,7 +258,7 @@ Setiap komponen di bawah dipakai ulang di banyak layar. Bangun sekali, pakai di 
 | **Tombol sekunder** | Min-height 52, radius 15, border `--line`, latar `--surface`, teks ink 14/650 |
 | **Text link** | Brand 13/600, min-height 44. Varian `muted` |
 | **Back link** | Ikon ArrowLeft + teks ink-soft 13/500 |
-| **Icon button** | 38×38, radius 12, border, bayangan kecil |
+| **Icon button** | Shared border, radius12 and small shadow; interactive touch target at least44px. |
 | **Chip** | Min-height 40 (44 di layar sentuh), radius 24, border; `aria-pressed=true` → latar brand-soft, border brand, teks brand-lo 600. Bisa memuat ikon Check |
 | **Pill** | 11/650, radius 999. Varian brand, success, warning, danger. Bisa berisi titik berkedip (status live) |
 | **Segmented** | Grid 2 kolom, latar `--line-2`, padding 4, radius 14; tab aktif latar surface + bayangan. Dipakai: Papan skor / Ruang negosiasi, Kartu / Bandingkan |
@@ -278,10 +274,10 @@ Setiap komponen di bawah dipakai ulang di banyak layar. Bangun sekali, pakai di 
 
 | Komponen | Spesifikasi |
 |---|---|
-| **Mark + Wordmark** | Lihat 2.2–2.3. Header: mark 30 + wordmark 21 + baris mode AI di bawahnya (titik live 5 px + "Gemini · flash-lite" atau "Offline · rules") |
+| **Mark + Wordmark** | Header mark30 + wordmark21 with public readiness below: AI ready or Wasit ready. Actual engines remain attached to recorded events. |
 | **RefCard (kartu mini)** | Inline-flex, 11/650, padding 5/9/5/6, radius 9. Kiri: "kartu" 10×14 px miring −8° berisi ikon 9 px. Warna sesuai 3.4. Maks 2 per baris; sisanya "+N catatan lain di rincian" |
 | **Raised card** | 52×72 px, radius 8, bayangan, diangkat dengan spring. Dipakai di putusan cek lokasi |
-| **Engine chip** | 9/800 uppercase, "MODEL" (brand) atau "ATURAN" (abu-abu) |
+| **Engine chip** | Compact MODEL or RULES badge identifying the engine that produced the recorded event. |
 | **Ticker** | Angka Rupiah yang bergulir 500 ms |
 | **Fase** | 4 kolom (Pahami, Hubungi, Negosiasi, Nilai), batang 6 px: selesai = brand, aktif = brand-tint + batang berjalan, berikut = line-2. Label 10/650 |
 | **Fair range bar** | Track 8 px; zona wajar gradasi hijau transparan; penanda bulat 16 px border 3 px ink (merah kalau di luar). Kepala: "Kisaran wajar" + "Rp165.000 – Rp320.000". Di bawahnya catatan sumber 10,5 px |
@@ -297,7 +293,7 @@ Setiap komponen di bawah dipakai ulang di banyak layar. Bangun sekali, pakai di 
 | **Baris papan skor** | Grid `18px 38px 1fr auto`, padding 12, radius 18. Isi: posisi (atau "–"), avatar 38, nama + tag ORANG, baris status ("Agen: {keputusan}"), kartu mini atau chip "turun Rp12.000" (hijau, TrendingDown), lalu di kanan total (Ticker, abu-abu bila belum valid) dan pill status (Agen berpikir · Ronde 2 · Menunggu balasan · Waktu habis · Selesai). Belum membalas: tiga titik. Mengurut ulang dengan spring |
 | **Toast harga** | Pill hijau di atas layar: "Sejuk Prima turun Rp16.000", tampil 2,6 dtk, sekaligus diumumkan lewat aria-live |
 | **Trace item** | Ikon 24×24 radius 8 di garis waktu kiri. Meta: aktor tebal + "+3,1 dtk" + engine chip + nama penyedia (brand). Isi: judul 13 + detail 11,5 muted. Pesan keluar = gelembung brand-soft; pesan masuk = gelembung surface + border; sudut kiri atas 4 px. Gerbang diblokir dan flag: ikon merah/kuning |
-| **Thinking block** | Live: teks berkilau "Agen Wasit sedang berpikir" + tiga titik. Selesai: tombol pill brand-soft "🧠 Berpikir · 3,2 dtk · MODEL ⌄"; dibuka → daftar 2–4 langkah bernomor dengan garis kiri brand-line, lalu catatan kecil (model: "Ringkasan pertimbangan yang ditulis agen…"; aturan: "Langkah aturan yang benar-benar dijalankan."), lalu alasan dalam tanda kutip dan "→ keputusan" |
+| **Action summary** | A concise verified action, source and outcome with the actual model/rules engine. Expand to inspect cited inputs and gate results; never expose private reasoning. |
 | **Pemisah ronde** | "RONDE 1" 10/700 uppercase muted + garis |
 | **Chip penyedia** | Ikon kanal + nama depan; "Semua" di depan |
 | **Ke langkah terbaru** | Pill gelap mengambang di bawah tengah, muncul saat pengguna menggulir ke atas |
@@ -316,100 +312,70 @@ Setiap komponen di bawah dipakai ulang di banyak layar. Bangun sekali, pakai di 
 | **Tabel Bandingkan** | #, Penyedia, Total (termurah hijau tebal), Jadwal, Garansi, Kartu. Baris bisa diketuk untuk membuka kartu |
 | **Retry sheet** | Chip budget "Tetap Rp400.000 / +50rb → Rp450.000 / …" dan chip jadwal, lalu CTA "Minta Wasit mencari lagi" |
 
-### 8.5 Kesepakatan dan setelahnya
+### 8.5 Agreement and aftercare
 
-| Komponen | Spesifikasi |
+| Component | Contract |
 |---|---|
-| **Langkah checkout** | 4 lingkaran 24 px bernomor dengan garis penghubung |
-| **Tiket** | Pita kanal (gradasi kanal) + jadwal besar; header produk; stempel TERKUNCI hijau miring 8°; baris syarat; perforasi (garis putus + dua lubang setengah lingkaran); stub dengan kode 8 karakter besar dan hash lengkap kecil |
-| **Alat tiket** | Tiga tombol sekunder kecil: Tunjukkan ke teknisi · Kalender · Bagikan |
-| **Layar teknisi** | Layar penuh putih, teks hitam: "HARGA YANG SUDAH DISEPAKATI", nama 30, jadwal 18, daftar item 20 px dengan harga tebal, kode di bawah. Layar tetap menyala (Wake Lock), tutup dengan Esc atau X |
-| **Putusan cek** | Kartu diangkat + label kartu + putusan besar + item · harga; alasan; fair range tambahan; kotak "Balasan untuk teknisi" + tombol salin; sumber mono; CTA "Setujui · masuk tagihan Rp175.000" (dengan catatan bila beda dari yang diminta) |
-| **Riwayat cek** | Daftar bertumpuk, yang terbaru di atas, yang lama sedikit pudar; tag hijau "masuk tagihan Rp…" |
-| **Lifecycle** | Panel "Setelah booking": 5 langkah (Terkunci, Dibayar, Dikerjakan, Dikonfirmasi, Diulas) dengan lingkaran 24 px (selesai hijau ✓, aktif brand + cincin); tabel tagihan; baris dana "Ditahan Rp… · diteruskan Rp… · dikembalikan Rp…"; CTA sesuai status; tautan "Ada masalah? Ajukan sengketa" |
-| **Kotak sengketa** | Latar merah lembut (hijau kalau selesai atau kerja ulang): alasan, rekomendasi Wasit, status, lalu catatan bukti (garis kiri brand untuk konsumen, coral untuk penyedia) + form tambah catatan |
-| **Ulasan** | 5 bintang 44 px (`#F2B01E`), chip tag, komentar, CTA; balasan penyedia di kotak bergaris kiri coral |
+| Checkout | `.commerce`, `.cm-product`, `.cm-hero`, `.cm-info`, `.cm-price` and four `.cm-step` stages: Offer, Terms, Acceptance, Active. A selected quote remains a draft until both parties accept the same version. |
+| Agreement ticket | Channel band, product header, tilted AGREED stamp, itemized terms, perforation and eight-character code with full digest. Only the active immutable version supplies agreed prices. A pending change stays visibly separate. |
+| Ticket tools | Show technician, Calendar and Share. The technician view is a high-contrast full-screen portal with Escape/close, focus restoration and optional wake lock. Sharing excludes private spending limits. Calendar export requires a confirmed ISO slot. |
+| On-site check | Photo capture or manual item entry; extracted rows stay editable and require explicit confirmation. Raised green/red/yellow cards identify matches, already-included work or terms requiring review. No result replaces an agreed price automatically. |
+| Change proposal | Explicit item scope, quantity, unit, price and explanation. Submit, accept and reject operate on a named version. A change affects the payable amount only after both parties accept it. |
+| Lifecycle | `.lifecycle` with five stages: Accepted, Paid, Done, Confirmed, Reviewed. Show held, released, refunded and amount due separately. Payment simulation, disputes and recommendations are visibly labeled. |
+| Disputes and reviews | Evidence notes identify their author. Recommendations remain advisory until an accepted resolution. Finished jobs allow one consumer review and one provider reply. |
 
-### 8.6 Role dan penyedia
+### 8.6 Account and provider surfaces
 
-| Komponen | Spesifikasi |
+| Component | Contract |
 |---|---|
-| **Baris akun demo** | Avatar 36 (brand untuk konsumen, coral untuk penyedia) + nama 14 tebal + keterangan 11,5 + panah; min-height 56; sekali ketuk langsung masuk. Dikelompokkan dengan judul role + satu kalimat tugasnya |
-| **Menu akun** | Chip avatar 38 di header. Popover 300 px: siapa yang masuk, "Ganti akun demo" (daftar), Keluar (merah) |
-| **Tab penyedia** | Grid 4: Kotak masuk · Pekerjaan · Ulasan · Profil |
-| **Baris kotak masuk** | Ikon 34, ringkasan job, kecamatan · jadwal, pesan terakhir; pill hasil (Berjalan / Dipilih konsumen / Tidak dipilih / Selesai); border coral + "Wasit menunggu balasanmu" bila giliran penyedia; tag "KAMU YANG BALAS" |
-| **Penilaian untukmu** | Panel menempel di bawah baris: "peringkat 2 dari 3 · total sebanding Rp250.000", kartu mini, saran berbutir |
-| **Kartu pekerjaan** | Ringkasan + jadwal + kecamatan, pill status, tabel tagihan, tambahan (diminta vs disetujui + "Tolak tambahan"), baris dana, CTA "Tandai pekerjaan selesai", kotak sengketa (setuju / tolak + catatan), rating, kode |
-| **Profil usaha** | Kotak persetujuan (toggle + teks persetujuan + waktu; border hijau bila aktif), kecamatan basis, slider radius 1–40 km, chip hari, jam buka/tutup, lalu **Daftar harga**: harga jasa (dengan kisaran acuan), item termasuk, harga terendah (ikon EyeOff + "tidak pernah ditampilkan"), transport, toggle "Sebutkan harga tambahan" (mati → peringatan kartu kuning), garansi |
-| **Kartu direktori** | Avatar 40, nama, jasa · rating demo · ulasan Wasit, ikon MapPin basis · radius, ikon Clock jam buka, pill "9 km · menjangkau" (hijau) / "18,8 km · di luar area" (abu) |
+| Account chip | Avatar in the topbar opens the existing account popover. Profile, priorities, optional named account and sign out are keyboard accessible. No fabricated account roster or shared demo password. |
+| Provider entry | `/provider/:branch#token=...` consumes the invitation fragment into memory and removes it from the address bar. The page has no consumer shell or consumer history. |
+| Provider chat | `.page.provider`, `.provider-head`, `.provider-job`, `.p-tabs`, `.thread`, `.bubbles`, `.bubble`, `.composer` and `.send`. Enter sends, Shift+Enter adds a line, composition is respected and retries reuse the same message ID. |
+| Provider work | Only its own branch, versions, funds, disputes, reviews and business settings are available. Consumer budgets and other branches' raw messages are excluded. |
+| Business and feedback | Existing `.job-card`, `.rev-summary` and `.rev-list` wrappers retain the shared typography, buttons and spacing. Editable service area, consent and price items use the provider API. |
 
-## 9. Layar
+## 9. Routes, shell and interactions
 
-Semua layar memakai header aplikasi: mark + wordmark + mode AI di kiri; di kanan riwayat (khusus konsumen), pengaturan,
-dan chip akun.
+The public entry and onboarding have no app chrome. The consumer app uses `.shell`, a sticky `.shell-header`, `.brand-stack`, `.header-actions` and `.shell-main`. Topbar controls are History, Sun/Moon theme, Settings and Account. Light is the default. Theme switching belongs in the topbar; Settings contains no appearance control.
 
-### 9.1 Umum
-
-| Layar | Isi |
+| Route | Behavior |
 |---|---|
-| **Sambutan** (sekali per sesi) | Latar gradasi lembut dengan blob dan grid tipis, halo logo bernapas, judul dengan kilau, satu tombol masuk |
-| **Masuk** | Judul "Masuk ke Wasit", kalimat penjelas, grup Konsumen (Rani, Budi), grup Penyedia jasa (5 akun), pemisah "atau masuk dengan akun", form akun + kata sandi (dengan lihat/sembunyikan), catatan "Akun fiktif untuk demo. Kata sandi semua akun: wasit-demo" |
-| **Pengaturan** | Daftar hub. Konsumen: Profil & area, Prioritas, Direktori penyedia. Penyedia: Profil usaha, Pekerjaan. Keduanya: Tampilan (Light / Dark / System), Kontrol demo, Keluar |
-| **Kontrol demo** | Kembali; judul; kalimat sesuai role; baris "Ganti peran untuk demo" (chip akun); tile mesin agen; toggle Tonton / Presentasi / Cerita (konsumen saja; penyedia melihat penjelasan); hint pintasan; chip jasa (yang punya skenario saja); chip kelompok; kartu skenario (ID, jasa, "Demo utama", jumlah penyedia, judul, ringkasan, kotak "Yang diharapkan", tombol Jalankan); naskah demo yang bisa dilipat; kotak Reset (konsumen saja) |
+| `/welcome` | Always shows the centered public entry: Clear quotes. No surprise extras. Starting returns a saved profile to the app, or opens setup for an unsaved profile. Returning here never resets data or signs out. |
+| `/` | First visit shows entry; after entry and profile setup it shows the app composer. `/home` replaces its URL with `/`. |
+| `/setup` | Two-step profile and three-factor priorities with total100 and optional locks. The quick demo profile remains available; email registration is optional. |
+| `/request` | New request composer within the shared shell. Rotating examples, presets, repeat last request and Enter submission remain available. Missing fields open an inline follow-up sheet. |
+| `/account` | Optional named sign-in/registration or account switching. A named account still completes its own profile. |
+| `/profile`, `/settings/priorities` | Edit the saved profile or priorities within the shell. `/settings/profile` replaces its URL with `/profile`; `/onboarding` with `/setup`. |
+| `/settings` | Profile and area, priorities, account, AI models and demo controls. Theme remains in the topbar. |
+| `/settings/models` | Two server-allowed model selectors for request/negotiation and bill images, explicit Save and Restore defaults. Preferences belong to the current actor and apply to new requests and new bill previews; existing requests retain their saved configuration. |
+| `/demo` | Scenario and view controls. Back to app and Back to welcome are separate navigation actions. Fullscreen presentation can be entered and exited without resetting profile or route. Reset is a separate explicit action. |
+| `/requests/:id` | Live scoreboard and negotiation room; comparison appears after processing or explicit Compare navigation. |
+| `/requests/:id/compare` | Offer deck/table with item scope, committed quote total, unknown costs and ranking eligibility. |
+| `/deals/:id` | Versioned checkout or active agreement ticket, payment simulation, disputes, reviews and history. |
+| `/deals/:id/check` | Editable bill check and explicit change proposal, with a Back to agreement action. Provider updates require an explicit processing action. |
+| `/provider/:branch` | Private provider surface; no consumer shell. |
 
-### 9.2 Konsumen
+Legacy `/r/:id` and `/deal/:id` aliases replace their URL with canonical request/deal paths. Browser Back and direct links preserve the session and selected resource. Unknown routes offer Back to app and Back to welcome rather than silently discarding a resource.
 
-| Layar | Isi |
+History uses the existing left drawer markup: `.drawer-backdrop`, `.drawer`, `.drawer-head`, `.drawer-new`, `.drawer-list`, `.history-row`. It reads only the signed-in actor's request summaries; each row opens its request or agreement. Loading, empty and error states remain distinct. The drawer is portaled to the document body so its fixed position remains correct on long pages and animated phases. Escape, backdrop, keyboard focus containment, inert background and focus restoration are required. New request closes the drawer and opens the composer without deleting history.
+
+Phase transitions use opacity0/scale0.97/blur4px to opacity1/scale1/blur0, exiting at opacity0/scale1.02/blur6px; duration460ms with easing[0.22,1,0.36,1]. Reduced-motion users skip the transform/blur transition. Welcome takeover is720ms, launch whistle1250ms and raised verdict cards use the shared spring animation. Header, drawer, account menu, bottom sheets, offer cards, ticket and provider chat retain their shared class structure instead of separate page-specific visual systems.
+
+## 10. Product language and truthful amounts
+
+All product UI, errors, comments and accessibility labels use English; the product name remains Wasit. The centered entry headline is **Clear quotes. No surprise extras.** Use short, concrete sentences and actionable errors.
+
+| Label | Meaning |
 |---|---|
-| **Setup** (bila belum ada profil) | Progres 2 langkah. 1: "Pakai profil demo", nama, HP, kota → kecamatan, patokan, catatan privasi. 2: tiga slider prioritas (total 100, bisa dikunci) + ringkasan batang |
-| **Beranda** | Orb dengan mark, sapaan; kotak prompt (judul kecil, textarea dengan contoh yang berganti tiap 3,2 dtk, info lokasi default, chip contoh dua baris, "Ulangi permintaan terakhir", CTA "Kirim ke Wasit"); safety line. Kalau ada yang kurang → **sheet pertanyaan lanjutan** di atas beranda |
-| **Peluit** | Overlay 1,2 dtk setelah kirim |
-| **Papan skor** (`/r/:id`) | Banner skenario; eyebrow live + jam berjalan; judul status; ringkasan job; fase; keterangan cerita; baris mesin + "mode tonton"; segmented Papan skor / Ruang negosiasi (+ jumlah keputusan); daftar baris; catatan; "Selesaikan sekarang"; setelah selesai CTA "Lihat penawaran". **Mode presentasi:** dua panel (5:7), ruang negosiasi digulir sendiri |
-| **Ruang negosiasi** | Chip penyedia; tautan "Buka chat sebagai {penyedia}" + "QR untuk HP"; "Tampilkan semua langkah (N)"; panel ambil alih; trace dengan pemisah ronde; tombol ke langkah terbaru |
-| **Deck** (`/r/:id`) | Kembali; judul; ringkasan + bobot; preset prioritas; segmented Kartu / Bandingkan; hitungan "Penawaran 1 / 3"; tumpukan kartu; tombol bulat; hint geser; "Tidak masuk peringkat (N)"; "Tidak ada yang pas? Cari lagi dengan batas lain". Kosong: ilustrasi + "Cari lagi" + kembalikan yang terakhir |
-| **Kunci** (`/r/:id/lock`) | Header produk; langkah checkout; centang harga tambahan; ringkasan; CTA kunci |
-| **Tiket** (`/deal/:id`) | Pita kanal; tiket; alat tiket; riwayat cek; **panel Setelah booking**; "Mulai permintaan baru" |
-| **Cek di lokasi** (`/deal/:id/check`) | Kembali; judul "Teknisi minta tambahan?"; preset skenario (kotak gelap); tombol Foto tagihan (dengan model saja) → baris tercentang → "Nilai N baris"; chip item dari katalog jasa ini; input bebas; harga + chip cepat; CTA "Minta putusan Wasit"; putusan; riwayat |
-| **Tidak ada yang cocok / terhenti** | Ikon, judul, alasan per penyedia, sheet Cari lagi (inline), "Atau tulis kebutuhan baru" |
-| **Direktori** (`/direktori`) | Kembali; judul; penjelasan + jumlah yang belum setuju; chip jasa; kartu direktori; safety [A] |
-| **Riwayat** (drawer kiri) | Judul + jumlah; "Permintaan baru"; baris dengan ikon status (terkunci hijau, gagal abu-abu) |
+| Quoted total | Explicit committed item prices plus transport for the comparable quoted scope. Optional work and estimates are excluded. |
+| Agreed total | Total from the active version accepted by both parties. |
+| Not quoted | A missing value; never display a fabricated zero. |
+| Reference range | Advisory published prices for explicitly comparable item, unit and scope; show insufficient data when evidence is inadequate. |
+| Proposed change | Pending terms that do not yet replace the active agreement. |
+| Payment simulation | Demonstration ledger actions without an actual external transfer. |
+| Held, released, refunded | Separate version-bound ledger amounts. |
 
-### 9.3 Penyedia
-
-| Layar | Isi |
-|---|---|
-| **Kotak masuk** (`/p`) | Tab; eyebrow nama; judul; penjelasan privasi + "N menunggu balasanmu"; kosong → arahkan ke Kontrol demo; baris kotak masuk + penilaian untukmu; safety "Simulasi · tanpa WhatsApp sungguhan" |
-| **Chat** (`/p/c/:id`) | Kembali ke kotak masuk; nama + avatar; ringkasan job; toggle "Balas manual"; gelembung (kamu kanan, Wasit kiri); contoh balasan; composer (Enter kirim) |
-| **Pekerjaan** (`/p/jobs`) | Tab; judul; kartu pekerjaan |
-| **Ulasan** (`/p/reviews`) | Tab; ringkasan skor (angka besar + jumlah ulasan + skor kepercayaan dan asalnya); daftar ulasan (bintang, tag, komentar, waktu) + form balas atau balasan |
-| **Profil usaha** (`/p/profile`) | Tab; kotak persetujuan; area dan jam; Simpan; **Daftar harga**; Simpan daftar harga |
-| **Chat via tautan** (`/provider/:id?t=`) | Halaman tanpa header untuk HP (QR), isi sama dengan Chat |
-
-## 10. Bahasa UI
-
-- **Bahasa Indonesia santai-sopan.** Konsumen disapa "kamu". Agen menyapa penyedia "Kak".
-- Kalimat pendek, satu ide per kalimat. Hindari jargon (pakai "total sebanding", bukan "TCO").
-- **Angka:** `Rp238.000`, ringkas `Rp238rb` / `Rp1,5jt`, desimal koma (`3,2 dtk`, `18,8 km`). Waktu WIB: `Sabtu, 7 Nov 08.00–12.00`.
-
-**Istilah tetap:**
-
-| Istilah | Arti |
-|---|---|
-| Total sebanding | Jasa + transport + perkiraan tambahan |
-| Kisaran wajar | Batas bawah–atas yang dianggap wajar |
-| Kartu kuning / merah | Perhatian / pelanggaran |
-| Gerbang kejujuran | Cek angka sebelum pesan dikirim |
-| Ruang negosiasi | Tampilan jejak |
-| Agen Wasit | Agen pembeli |
-| Kesepakatan terkunci | Syarat yang sudah dikunci |
-| Cek di lokasi | Penilaian tagihan di rumah pelanggan |
-| Dana ditahan / diteruskan / dikembalikan | Status uang |
-| Sengketa | Keberatan setelah bayar |
-
-- **Label kejujuran:** "simulasi", "data demo", "asumsi tim [A]", "ditulis model", "langkah aturan".
-- **Error:** jelaskan apa yang terjadi dan apa yang bisa dilakukan. Contoh: "Server tidak bisa dihubungi", "Ambil alih dulu
-  sebelum mengirim pesan".
-- **Kosong:** selalu beri langkah berikutnya, misalnya "Jalankan skenario dari Kontrol demo".
+Preserve Rupiah formatting (`Rp238.000`), quantities and explicit units; show local schedules in WIB. Public readiness can say AI ready or Wasit ready. Recorded events still identify their actual model/rules engine. An action summary shows verified inputs, gates and results; never expose private chain-of-thought. Missing sources, unavailable photo reading and stale-version conflicts explain a concrete next step.
 
 ## 11. Aksesibilitas
 

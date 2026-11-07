@@ -1,309 +1,198 @@
-# Wasit business and AI pipeline
+# Wasit customer journey: request to settled work
 
-Status recorded on 7 November 2026. This document explains the current pipeline, the state of every stage, the additional cost-agreement features, and the difference between tested local behavior and a hosted release.
+Recorded on 7 November 2026. Wasit has **twelve customer stages, numbered 0?11**. The journey starts with a customer profile, helps the customer compare suitable offers, and ends with agreed work, an explicit bill/change decision, and a recorded outcome. Optional work stays outside the committed price until both parties approve a new agreement version.
 
-The main promise is **Clear quotes. No surprise extras.** Wasit helps a customer compare equivalent work, negotiate within explicit instructions, agree on immutable terms, and approve changes before extra work becomes payable.
+The complete journey has been rehearsed through actual local HTTP for all five service categories. Two additional AC rehearsals used OpenAI with rules fallback. These are business-flow checks against synthetic providers and a simulated ledger; they are not evidence of real provider fulfillment, real payment processing or perfect model accuracy.
 
-## 1. Status conventions
+## The flow
 
-- **Done locally:** implemented behavior has relevant domain, HTTP or browser evidence. This does not imply a real provider, real payment or hosted database.
-- **Partial:** code exists, but an integration, scheduled executor, visual check or hosted check remains.
-- **Blocked externally:** a required external account/service step is unavailable to the running agent.
-- **Outside scope:** intentionally excluded from the approved build; it is not an unfinished promise.
+[Open the flow diagram directly](12-pipeline.svg)
 
-Current release gate: the public UI and API are deployed, OpenAI credentials are configured, and local login works. Hosted business routes require PostgreSQL. Neon Free still requires human marketplace acceptance and provisioning. Until that gate is complete, production business actions return HTTP 503 with storage_not_configured.
+![Wasit end-to-end customer journey](12-pipeline.svg)
 
-The current shared-screen alignment is being verified separately from business logic. Older browser results remain historical evidence; renewed flow checks are required for changed screens.
-
-## 2. End-to-end flow
+If the Markdown viewer does not render diagrams, the SVG link above opens directly without an extension.
 
 ```mermaid
-flowchart TD
-  W[Welcome] --> A[0 Session, account and profile]
-  A --> R[1 Service request]
-  R --> F[2 Formatter and clarification]
-  F -->|Needs facts| Q[Canonical follow-up answers]
-  Q --> F
-  F -->|Ready| D[3 Eligible provider directory]
-  D --> B[4 Private RFQ branches]
-  B --> X[5 Source-checked quote extraction]
-  X --> N[6 Bounded buyer negotiation]
-  N -->|Provider replies| X
-  N --> C[7 Equivalent-scope comparison]
-  X --> P[8 Advisory price context and optional scenarios]
-  P -. Context only .-> C
-  C --> S[9 Review selected quote and draft]
-  S --> V[10 Submit and accept version 1]
-  V -->|Both roles accept| T[Active agreement]
-  T --> I[11 Bill preview and check]
-  I -->|New work needs approval| U[12 Version 2 proposal]
-  U -->|Both roles accept| T
-  T --> L[13 Simulated funding and completion]
-  L --> E[14 Review or dispute and evidence]
-  H[15 History, demo and navigation] -. Resume own records .-> R
-  H -. Resume own records .-> T
-  Z[16 Hosted persistence and release gate] -. Required for hosted stages .-> A
+flowchart LR
+  P0[0 Profile] --> P1[1 Request]
+  P1 --> P2[2 Format and clarify]
+  P2 -->|Missing facts| Q[Customer answers]
+  Q --> P2
+  P2 --> P3[3 Discover providers]
+  P3 --> P4[4 Private RFQs]
+  P4 --> P5[5 Negotiate]
+  P5 --> P6[6 Source-backed quotes]
+  P6 -->|Clarify or counter| P5
+  P6 --> P7[7 Compare equivalent work]
+  P7 --> P8[8 Choose]
+  P8 --> P9[9 Bilateral booking v1]
+  P9 --> P10[10 On-site bill and changes]
+  P10 -->|New work| V2[Both accept v2 and fund difference]
+  V2 --> P10
+  P10 --> P11[11 Complete, release and review]
+  P11 -->|Unresolved work| D[Evidence and provider response]
+  D -->|Agreed rework| P11
 ```
 
-A rejection, fallback or incomplete quote does not authorize extra work. Selecting a provider does not activate an agreement. Reading a bill does not approve it. An active version changes only after both roles accept the same new version.
+A missing reply, rejected model answer or incomplete price does not approve work. Choosing a quote creates a draft. An agreement becomes active only after both roles accept it. A new active version is funded separately.
 
-## 3. Stage overview
+## Stage overview
 
-| Stage | Purpose | Implementation and evidence | Remaining gate |
+?Passed locally? below means the connected HTTP journey passed for AC service, washing-machine service, plumbing, electrical work and home cleaning. Hosted business stages remain blocked by persistent storage provisioning.
+
+| # | Customer stage | What is implemented and checked | Remaining real-world gap |
 |---|---|---|---|
-| 0 | Session, named account and profile | Done locally: opaque sessions, registration/login, scrypt, account switching, private profile and weights. Eighteen account/auth HTTP checks pass; renewed browser onboarding runs. | Hosted PostgreSQL and final shared-flow release. |
-| 1 | Request composer | Done locally: free text, examples, repeat-last, service/location/time, private cap, optional authorized target and priorities. | Final visual comparison and hosted request creation. |
-| 2 | Formatter and follow-up | Done locally: five-category job, English canonical answers, explicit hard facts, one owned clarification child and replay handling. | Broader real-language coverage remains a quality limit. |
-| 3 | Provider discovery | Done locally: category, consent, area/radius and opening-hour overlap; at most five branches. | Directory contains synthetic demo businesses, not verified commercial supply. |
-| 4 | Private RFQ and chat | Done locally: scoped RFQ, private branches, idempotent messages, expiring human invitation, QR/link and timeout. | Hosted human-link test after database provisioning. |
-| 5 | Quote extraction and source checks | Done locally: revisions, integer prices, exact sources, quantities/units, withdrawal/invalidation and model fallback. | Larger independent message set; no unsupported-unit inference. |
-| 6 | Buyer negotiation | Done locally: code-computed actions/citations, bounded rounds, template-rendered outgoing text and provider simulation. | Real commercial negotiation is not claimed. |
-| 7 | Comparison and explanation | Done locally: equivalent groups, complete required costs, weighted ranking, reasons and exclusions. | Renewed score/deck visual checks and hosted smoke. |
-| 8 | Reference context and planning | Done locally: sourced observations, quality thresholds, exact-scope lookup and one optional item per scenario. | Most reference groups correctly have insufficient evidence. |
-| 9 | Selection and draft review | Done locally: current eligible revision, no unprocessed provider change, private spending limit and immutable draft. | Final four-step review visual check. |
-| 10 | Bilateral version activation | Done locally: explicit submission, two role acceptances, digest, stale/replay protection and atomic activation. | Hosted cross-request verification. |
-| 11 | Bill preview and checking | Done locally: editable image draft, explicit confirmation, active-version check and cumulative line quantities. One synthetic three-line image was read in a live test. | Real-bill quality is not established. |
-| 12 | Additional work and version 2 | Done locally: selected-provider sources, explicit lines/limit, pending version, both acceptances and unchanged history. | Hosted stale/concurrent checks. |
-| 13 | Simulated funding, work and release | Done locally for hold/top-up/refund, provider completion and customer release. Due-settlement service is tested. | A recurring 72-hour settlement executor is not deployed; reads never release funds. |
-| 14 | Disputes, evidence and reviews | Done locally: version-bound dispute, explicit provider response, rework/refund simulation, review and one reply. | No real mediator or real payment processor is connected. |
-| 15 | History, demo and route UX | Partial: owner history, canonical routes, welcome return, separate reset, presentation controls and shared-shell alignment are implemented; renewed browser checks continue. | Complete the combined route, keyboard, viewport and visual audit. |
-| 16 | Production hosting and persistence | Partial: Vercel public UI/API and server secrets configured. | Neon acceptance/provisioning, live PostgreSQL verification and hosted end-to-end rehearsal. |
+| 0 | Profile | Private name, default area/category and price/schedule/trust weights. Demo sessions work; optional registration/login preserves identity and owned work. | Hosted persistence gate. Named email is not represented as verified. |
+| 1 | Request | A customer describes a service need. The request belongs to that customer and appears in their history. | Customer voice input is not connected. |
+| 2 | Format and clarify | Five supported categories; explicit location, schedule and maximum budget. Up to three questions at once. A repeated answer submission reuses the same owned child request. | Broader real-language coverage needs independent evaluation. |
+| 3 | Discover providers | Category, consent, distance/radius and opening-hour checks; at most five provider branches. | Directory businesses and reputation data are synthetic. |
+| 4 | Send private RFQs | Separate conversations; only service scope, area and schedule are sent. Human invitation links use a separate bearer role. | No live WhatsApp or voice transport. |
+| 5 | Negotiate | Ask missing costs, counter only from permitted facts/targets, ask permitted terms, or close. Customer takeover and explicit process calls control progress. | Actual commercial provider negotiations have not been measured. |
+| 6 | Build sourced quotes | Item, unit, quantity, price and exact provider message are checked. Missing or invalid terms remain unresolved; optional work is excluded from the fixed total. | Provider audio/image quotation extraction is not connected. |
+| 7 | Compare equivalent work | Complete quotes are grouped by equivalent scope, quantity, location and time. Customer priorities determine ranking. Advisory context and optional scenarios remain separate. | Price observations do not establish a final all-in market price; insufficient data remains visible. |
+| 8 | Choose | Current quotation, processed provider messages, scope, base quantity and appointment are checked again. Selection creates a draft. | Hosted rehearsal after storage is available. |
+| 9 | Book with bilateral version 1 | Submit, customer acceptance with private-cap acknowledgement, and provider acceptance of the same public terms. Version 1 becomes active; simulated funding is a separate action. | Real payment/escrow and commercial booking integration are outside the build. |
+| 10 | Check the on-site bill and agree changes | Manual or confirmation-only image preview, version-bound bill checks, explicit new-work proposal, sufficient new limit, bilateral version 2 and a separate top-up. Version 1 stays immutable. | Real bill-image coverage is unmeasured beyond a small synthetic image check. |
+| 11 | Complete, resolve and close feedback | Provider completion, customer confirmation, exact simulated release, settled review/provider reply, and version-bound dispute/evidence/rework paths. History resumes the final agreement. | No operational mediator or real settlement service. Recurring hosted auto-release execution is not deployed. |
 
-## 4. Detailed stages
+## What the customer does at each stage
 
-### Stage 0 - Enter a private workspace
+### 0. Set a profile
 
-**Input:** an existing session, explicit demo-session action, or named registration/login. A profile contains display_name, location_label, default_category and three weights: price, slot and trust.
+Welcome leads to profile setup before the in-app composer. The customer provides a display name and service area and can select a default category and priorities. Registration is optional; a demo session is sufficient to begin. When a demo customer registers, their existing identity, profile and requests are retained.
 
-**Process:** the server creates or rotates an opaque cookie and a corresponding CSRF token. Named passwords use salted scrypt; normalized email is unique. Persistent attempt limits apply to authentication. Registration can adopt the customer's current unlinked demo actor so that their own work is preserved. Switching accounts invalidates the previous cookie and loads the new actor's records.
+The runner saves a profile, optionally registers, logs out and logs back in, then verifies that the same customer and profile return. It creates a different owner for each service journey.
 
-**Output and storage:** sessions, accounts, profiles and auth_attempts. Profile GET returns null until setup is actually saved; registration alone does not pretend onboarding is complete.
+### 1. Describe the need
 
-**Boundary:** provider access uses its own branch bearer context and a chrome-less screen. It does not receive the customer's cookie, spending limits, account email or history.
+The customer writes a natural-language request. Their maximum budget stays private. An approximate amount is not silently treated as a spending limit, and a target can be used publicly only with explicit permission.
 
-### Stage 1 - Describe the service
+The rehearsal deliberately starts with a category and an incomplete description, so the next stage must ask for hard facts instead of inventing them.
 
-**Input:** everyday Indonesian or English text, optionally supported by visible form choices. The current categories are AC service, washing-machine service, plumbing, electrical service and home cleaning.
+### 2. Confirm missing facts
 
-**Process:** the composer preserves the draft, supports examples and repeat-last, and collects the maximum budget explicitly. A preferred target becomes a public negotiation citation only with target_authorized=true. Saved location and priorities can prefill; a saved service suggestion must not silently override a different explicit service in the request text.
+The formatter creates a structured job or asks for missing location, appointment and maximum budget. The customer supplies the answers. A clarified request is a new child of the original; retrying the same clarification does not create duplicate children.
 
-**Output:** create_request input. The cap and target are separate values. An approximate amount is not silently converted into a hard spending cap.
+The job becomes ready only after the required facts are explicit. The runner verifies an explicit cap and an unauthorized-by-default public target.
 
-### Stage 2 - Format and clarify
+### 3. Find suitable providers
 
-**Input:** request text, supplied fields and canonical follow-up answers.
+Wasit selects providers that offer the category, consent to requests and match the requested service area and opening hours. Each selected provider gets its own branch. A contact cap bounds the search.
 
-**Process:** deterministic parsers establish category, scope, units, location, schedule/window, private cap, target and weights. An optional model may suggest only independently supported facts. Missing or ambiguous facts create clear follow-up questions rather than invented values.
+The rehearsal checks the branches against the category directory and includes one human invitation branch alongside labeled simulated providers. Directory eligibility does not claim that a real technician has accepted a job.
 
-**Output and storage:** a ready job or needs_clarification request with questions. Clarification creates one owned child request and preserves the original. Replaying the same clarification returns that child.
+### 4. Ask each provider privately
 
-**Boundary:** schedule labels use English and WIB; stored times are epoch milliseconds or the designated ISO window. Money is integer Rupiah. Model output never authorizes a target.
+The RFQ states the service, quantity, area, appointment and required cost details. It excludes the customer's identity and private spending limit. A provider sees only its own conversation and public agreement information.
 
-### Stage 3 - Discover eligible providers
+The runner opens the separate human invitation through HTTP, checks the private-data projection and confirms that its bearer cannot enter the customer's request route. The unanswered human branch later follows the timeout path.
 
-**Input:** a ready job.
+### 5. Negotiate within the customer's authority
 
-**Process:** check category, explicit consent, service radius and opening hours against the requested window. Results are bounded to at most five providers. Synthetic scripted scenarios are visibly labeled and can use explicit demo discovery behavior.
+Wasit can clarify missing costs, cite an eligible same-scope offer or an explicitly authorized target, ask an allowed term once, or close. The server computes what is allowed and renders factual outgoing text. The customer can take over a conversation without the agent guessing personal or technical facts.
 
-**Output and storage:** eligible providers, skipped reasons and persisted discovery work. The current seed has two script personas and one human-playable business per category.
+A clear provider question about an unknown brand/model, capacity, inverter, access/floor, photo, serial number or private budget pauses automatic replies. Taking over preserves the raw question; an explicit customer reply clears it, and handing control back resumes the policy. The pending question removes quotation readiness and blocks selecting or proposing changed work, while an already accepted agreement remains unchanged. Ordinary price-acceptance proposals do not trigger this pause.
 
-**Boundary:** the provider's private floor and price list belong to that provider. They are not a market-price reference book or a competitor's evidence. Seed ratings and geometry remain labeled demo assumptions.
+Progress is driven by authenticated, bounded POST processing. A page read does not run hidden negotiation. In the rehearsal, scripted branches finish their bounded turns and a virtual clock advances the unanswered human branch past its persisted ninety-second deadline.
 
-### Stage 4 - Open private RFQ branches
+### 6. Turn replies into trustworthy cost lines
 
-**Input:** the eligible providers and public job fields.
+Each line retains a provider message ID and exact source snippet. Item, supported unit, quantity and price must agree with that source. An included item costs zero only when the provider says so. Unknown fees stay unknown.
 
-**Process:** create one branch per provider and send a scoped RFQ with category, work, quantity, location and schedule. The RFQ omits the private cap and customer account identity. Message retries use a stable client_message_id and store one message.
+The runner checks source ownership and arithmetic for every quotation. Fixed totals include the quoted fixed scope only; possible refills, parts or other optional work are not automatically added. A changed but invalid item statement cannot preserve a stale ready price.
 
-A human branch has a 32-byte-strength secret grant, stored as a hash with a nonce/expiry. Its invitation uses a URL fragment, then memory and Authorization: Bearer; the fragment is removed. GET link reads an existing grant; an explicit owner action can rotate it. Reset revokes it.
+### 7. Compare what is actually comparable
 
-**Output:** private branch chats with script/model/human labels. The human response deadline is persisted at 90 seconds. A user can take over one branch and later return control to Wasit.
+A customer compares complete equivalent work. A cheaper quote for fewer units or a different appointment cannot win the requested scope by accident. Scores use the customer's price, schedule and trust priorities.
 
-**Outside scope:** real WhatsApp transport and phone calls. A displayed communication label does not establish either integration.
+Published price context and optional-cost planning help the customer ask better questions. They do not change ranking, diagnose a fault, authorize extra work or increase the customer's cap. The rehearsal reads both views and verifies that the comparison remains unchanged.
 
-### Stage 5 - Extract a source-checked quote
+### 8. Choose a quote and inspect the draft
 
-**Input:** one provider message from the authorized branch.
+The customer selects a branch and exact quote revision. The service checks ownership, category/scope, base quantity, appointment, arithmetic and pending provider messages again. Posting an ID directly cannot bypass those checks.
 
-**Process:** associate each catalog item with its own atomic text, quantity, unit, price and exact source snippet. Verify that source_message_id belongs to the same provider branch. The server rejects cross-item price borrowing, unsupported units, conflicting prices and instruction attacks.
+The result is a draft containing fixed, included and optional lines. It is not yet a booking, an accepted change or a payment.
 
-The quote distinguishes fixed, included, optional and unknown. Included means explicitly zero; unknown remains null. A newly mentioned item's invalid terms cannot keep its old ready price. A withdrawn appointment invalidates the earlier appointment confirmation. Untrusted message content cannot be hidden by a model returning a shorter, clean-looking snippet.
+### 9. Book version 1 with both parties
 
-**Output and storage:** immutable historical quote rows with increasing revisions, a source-message processing marker and a latest quote state: ready, needs_detail or over_budget. Processing the same source again returns its existing quote revision.
+The customer submits the draft, reviews the exact terms and acknowledges their private limit. The provider separately accepts the same public terms. One acceptance alone does not activate the agreement.
 
-**Boundary:** the base quantity must match the requested quantity. Required unresolved work never becomes a comparable zero-cost offer. Previously accepted agreement terms remain unchanged even when a later quote is different.
+The accepted terms and their digest remain immutable. The provider projection excludes the private limit and acknowledgement. The rehearsal then holds the version-1 committed amount in the labeled simulation ledger and repeats the action to verify that funds are not counted twice.
 
-### Stage 6 - Negotiate within explicit instructions
+### 10. Check the bill, then agree version 2 if needed
 
-**Input:** source-checked own quote, comparable current alternatives, branch counters and the customer's instructions.
+At the site, the customer confirms manually entered rows or an editable image-reading preview. A bill check compares the rows with the active version and can flag an increased price, a charge for an included item or unapproved new work. Repeated quantities are aggregated before comparison.
 
-**Process:** code computes allowed actions and exact available citation amounts. The model can choose an allowed action; it does not invent the outgoing amount. Code renders the final text.
+In every category, the rehearsal checks a changed bill against v1, rejects extra work under an insufficient old cap, and submits an explicit sufficient new cap with a provider-sourced optional item. Version 1 stays active until both parties accept version 2. Its old terms and digest are preserved.
 
-- ask_detail: a supported unresolved detail, with at most three automatic clarifications.
-- counter: at most one price counter, using a current equivalent competitor quote or an explicitly authorized target.
-- counter_terms: at most one permitted terms request, such as waiving a quoted transport charge.
-- close: stop automatic negotiation and pass the actual available information to the customer.
+Version 2 does not fund itself. The runner rejects completion before top-up, rejects a bill tied to the old active version, checks the approved v2 bill, and pays the precise difference once.
 
-The provider simulation sees its own price list/floor, public job and approved terms only. It does not see the customer's cap or other branches.
+| Rehearsed category | v1 committed total | Explicit old cap | v2 committed total | Separate top-up |
+|---|---:|---:|---:|---:|
+| AC service | Rp120,000 | Rp160,000 | Rp340,000 | Rp220,000 |
+| Washing-machine service | Rp180,000 | Rp230,000 | Rp480,000 | Rp300,000 |
+| Plumbing | Rp150,000 | Rp200,000 | Rp250,000 | Rp100,000 |
+| Electrical work | Rp160,000 | Rp210,000 | Rp320,000 | Rp160,000 |
+| Home cleaning | Rp230,000 | Rp280,000 | Rp430,000 | Rp200,000 |
 
-**Output:** one validated decision, an honest rules/model engine, source IDs and a persisted next task. Locked agreements do not restart negotiation or alter accepted work.
+These are synthetic rehearsal offers, not market reference prices. Every demonstrated new total exceeds the original cap; the new limit is an actual increase.
 
-### Stage 7 - Compare equivalent offers
+### 11. Finish, resolve a problem and record the outcome
 
-**Input:** current quotes and the request weights.
+The provider marks the funded current version complete. Reading the agreement keeps funds held. Customer confirmation releases the exact simulated amount once; retries do not duplicate the release.
 
-**Process:** require complete costs for the requested scope and a confirmed schedule. Group only equivalent category, scope, quantity/unit signature, location and appointment window. Exclude incomplete, over-budget or different-scope quotes with a reason.
+The same rehearsal includes an unresolved-work branch before final settlement: the customer opens a dispute, adds evidence, and cannot release funds while the dispute is open. The simulated provider accepts rework. Funds stay held, completion must be marked again, and only then does the customer confirm release.
 
-The quoted total sums explicit fixed work and fees; optional work never enters ranking as if ordered. A weighted score uses price, schedule fit and trust signals. Demo trust inputs remain labeled assumptions. A model explanation may select only server-supported wording.
+A settled review and provider reply are saved. The customer's history resumes the correct v2 agreement and its released lifecycle. The current history row reports the agreement state as `locked`; the resumed agreement supplies the settled outcome. It is not described as a released-history status that the row does not yet expose.
 
-**Output:** comparison groups, ranked cards, score parts, reasons and exclusions. View-order controls are not permission to fabricate a better score or conceal incomplete costs.
+## Actual end-to-end evidence
 
-### Stage 8 - Show advisory price context and optional scenarios
+The runner starts an isolated in-memory SQLite backend and uses actual HTTP, cookies, CSRF and separate provider actions. It does not edit agreement/payment tables to force the business outcome, use another customer's records, reset other users, or call a model in rules mode.
 
-**Input:** an exact reference query or an explicit optional line from the selected quote.
+| Recorded run | Connected stages | Stage invariants | HTTP requests | Observed interval |
+|---|---:|---:|---:|---:|
+| Rules, five categories | 60/60 | 260/260 | 330 | 2.925 seconds |
+| OpenAI AC journey, first run | 12/12 | 52/52 | 64 | 46.479 seconds |
+| AC capped fallback rehearsal | 12/12 | 52/52 | 66 | 69.560 seconds |
 
-**Process:** source observations carry publisher, URL, collection date, item, unit and narrow scope. A band needs at least five valid observations from at least three distinct publishers. Starting prices, broad ranges, bundled services, unknown units and contradictory observations are excluded.
+The five rules journeys also passed five owner-history isolation checks. Every journey reached bilateral v2, a funded change, dispute/rework, final release, review and provider reply. Passing workflow checks is not a claim of perfect extraction quality or production availability.
 
-The current collection has 13 observations across five categories. Only the narrow standard 0.5-1 PK residential AC base-cleaning item has five suitable publisher observations. Its Rp75,000/unit observation band does not establish transport or an all-in final bill. Other groups remain insufficient_data.
+The first AC run made sixteen OpenAI calls: one formatter, five provider simulations, five extractions and five buyer decisions. All sixteen returned completed HTTP 200 responses. Its recorded events used twelve model engines and six rules engines; rules still own arithmetic and agreement/payment decisions.
 
-Planning shows one quoted optional item at a time: quoted total plus its explicit quantity times unit price. It does not assign a probability, add every optional item together as necessary work, establish a diagnosis, approve work, change ranking or raise the private cap.
+A separate eight-attempt run exercised timeout, transport failure and credit-cap continuation. Two requests completed, one was aborted at the model deadline, and five had transport errors. The persisted model-attempt counter reached 8/8. The journey still completed through verified rules fallback, recording one model event, thirty-one rules events, six rules quote fallbacks and eleven explicit rejection events. The formatter also retained rules with one rejection event.
 
-### Stage 9 - Select an eligible quote and review a draft
+Across both live rehearsals, the authorized additional cap was **24 network attempts**. Completed responses reported **8,752 input tokens and 2,058 output tokens**, totaling **10,810 tokens**. Usage for failed/aborted requests was unavailable; no claim is made that those attempts were unbilled. No non-OpenAI provider was used.
 
-**Input:** branch_id and quote_revision from the current comparison.
+Reproduce the rules journey with:
 
-**Process:** ownership, category, scope, unit count, appointment and actual arithmetic are rechecked at the service boundary. A caller cannot bypass comparison exclusions by posting an ID directly. A newer unprocessed provider message blocks selection until it is checked.
+```sh
+node --disable-warning=ExperimentalWarning scripts/e2e-pipeline.mjs
+```
 
-**Output:** a draft agreement with immutable terms, a public digest and a private spending limit. Selection does not submit, accept, fund or confirm the agreement.
+An explicitly authorized live run uses the ignored environment file:
 
-The shared review flow shows the service, exact included/fixed/optional work, schedule/location and the customer's explicit acceptance controls.
+```sh
+node --disable-warning=ExperimentalWarning --env-file=.env scripts/e2e-pipeline.mjs --live
+```
 
-### Stage 10 - Activate version 1
+`--call-cap=8` runs the same AC journey with a smaller model-attempt ceiling. The hard maximum is 24. Reports are written to ignored `results/pipeline-e2e-rules.json` and `results/pipeline-e2e-live.json`; the initial sixteen-call trace was preserved as `results/pipeline-e2e-live-first.json`. Reports contain stage matrices, exact invariant flags, latencies, HTTP totals, actual engine counts and sanitized model usage. They contain no passwords, cookies, invitation tokens or authorization headers.
 
-**Input:** version_id, terms_digest, expected_active_version_id and role-appropriate acceptance data.
+## Local versus hosted status
 
-**Process:** submit the draft, then record independent consumer and provider acceptances for that same digest. The consumer acknowledges the exact private limit. The provider receives public terms and boolean acceptance flags, not that limit or the consumer actor ID.
+The public UI is deployed. The latest read-only public check returned HTTP 200 for health with AI available and HTTP 503 `storage_not_configured` for the account route. Persistent hosted PostgreSQL remains the release gate for all customer business stages.
 
-**Output and storage:** one active version only after both acceptances. Replays do not duplicate acceptance. Stale digest/version, wrong actor or a conflicting transition is rejected. Public terms exclude private acknowledgement fields.
+Storage provisioning, secure deployment configuration and a real hosted multi-request rehearsal are **cross-cutting release requirements**, not additional customer stages. The local HTTP evidence above does not close that hosted gate or establish real PostgreSQL race/latency behavior.
 
-The ticket exposes the active public agreement, version history and integrity digest. Share/show-technician views use public agreed information.
+The remaining commercial gaps are verified participating providers, actual communication transport, real payment/escrow, an operational dispute mediator and broader bill/language evidence. Browser layout verification is separate from this HTTP business rehearsal.
 
-### Stage 11 - Read and check the on-site bill
+## Bounded execution and authority appendix
 
-**Input:** manually entered bill rows or a supported bill image.
-
-**Process:** OpenAI image reading is an editable preview. Check file type/size, image signature and structured output. The customer must confirm every label, quantity, unit and amount before submitting bill-checks. An unreadable image uses manual entry; it does not fill a price from agreement text.
-
-The bill check is bound to the expected active version. It aggregates repeated item/unit quantities before comparing them, so splitting an extra quantity across rows cannot evade the check. Included work cannot silently acquire a price.
-
-**Output and storage:** check rows, submitted total and per-line results. The check does not change an agreement, approve a line, create a payment or turn a source-free claim into a provider quote.
-
-The live vision evidence is one independently labeled synthetic three-line image. It is not a general real-bill accuracy claim.
-
-### Stage 12 - Propose and activate version 2
-
-**Input:** a message from the selected provider, explicit quoted candidate lines, current active version and an explicit spending_limit.
-
-**Process:** validate the selected provider's exact sources and supported optional-work candidates. Preserve version 1 while the new draft/pending version is reviewed. If the new committed total exceeds the old cap, the customer explicitly supplies and acknowledges a sufficient new cap.
-
-Example: version 1 commits Rp110,000 under a Rp250,000 cap. A quoted optional Rp150,000 item would make Rp260,000. It is not approved until a new sufficient limit and both role acceptances activate version 2.
-
-**Output:** an active new version after two acceptances; the old version becomes superseded but its terms and acceptances remain immutable. Rejecting the proposal preserves the current active version. A budget increase alone never authorizes work.
-
-### Stage 13 - Simulate funding and work completion
-
-**Input:** an active agreement and an explicit expected_active_version_id.
-
-**Process:** hold the committed amount in the simulation ledger. If a later active version increases the total, show the additional amount due and require a separate top-up. New acceptance is not a payment. Provider completion requires the current version to be funded; customer confirmation releases its simulated funds.
-
-The settlement service checks eligibility after 72 hours only for completed work with no unresolved dispute or pending change. It is tested, but a recurring hosted executor is not currently deployed. A read-only GET never releases funds.
-
-**Output and storage:** version-bound hold, topup, release or refund entries plus funded/done version references. Repeated actions do not duplicate ledger entries. Archived requests reject service mutations even if HTTP authorization happened before reset.
-
-**Outside scope:** transferring or holding real money, digital-wallet processing and escrow guarantees.
-
-### Stage 14 - Handle a problem and close feedback
-
-**Input:** a specific active version, dispute reason, optional requested amount and evidence.
-
-**Process:** the customer opens a version-bound dispute. Both roles can add evidence within the allowed state; the provider explicitly responds to the proposed simulated outcome. Supported policy can return held funds for a no-show, request rework, or retain the active agreement against an unapproved charge. A disagreement is shown as escalated; it does not claim an operational mediator.
-
-Rework retains funds and requires a new completion. Reviews are allowed once after settlement, with one provider reply. A provider sees only its own reviews and quote-completeness feedback.
-
-**Output:** a preserved dispute/evidence history, explicit simulation state and a review tied to the settled work. No arbitrary refund percentage or real-money outcome is invented.
-
-### Stage 15 - Resume, retry, demo and navigate
-
-**Input:** the signed-in actor and an explicit route/action.
-
-**Process:** owner-only history resumes requests or agreements. Returning to Welcome is navigation, not a reset. Reset archives only the current actor's requests, advances their generations, cancels their tasks and revokes their grants; it does not delete immutable agreements or reset another actor.
-
-Demo controls start labeled synthetic scenarios. Presentation mode has an explicit exit and preserves simulation labels. A retry changes the request through a visible action; it does not quietly overwrite a selected agreement.
-
-| Route | Purpose |
-|---|---|
-| /welcome | Always reopen the first public welcome screen. |
-| / or /home | Enter the application composer after setup. |
-| /setup | Save profile and priorities through the two-step setup. |
-| /account | Optional named sign-in or registration. |
-| /profile and /settings/profile | Edit the private profile. |
-| /settings and /settings/priorities | Settings and saved priority controls. |
-| /demo | Demo controls with clear return to Home or Welcome. |
-| /requests/:id and /requests/:id/compare | Process, inspect sources and compare offers. |
-| /deals/:id | Review or show the active agreement and history. |
-| /deals/:id/check | Bill and additional-work checks. |
-| /provider/:branch | Separate branch-authorized provider view. |
-
-Legacy compatible paths are normalized with replaceState. Browser Back follows real navigation history. Opening Welcome, settings or demo does not implicitly log out, delete a profile or accept a version.
-
-### Stage 16 - Publish and verify hosted behavior
-
-**Input:** a reviewed build, server-side secrets and a shared transactional database.
-
-**Process:** deploy Vite and the Node API to Vercel. Use PostgreSQL for persistent business state and the Singapore function/database region. The API must not fall back to SQLite or a temporary file in production.
-
-OpenAI key/model access is verified and kept server-side. Neon remains on the authorized Free plan. Marketplace terms require a human operator; the service explicitly refuses acceptance performed by an agent.
-
-**Release evidence required:** public URL without Vercel login, session creation, owner history, separate human provider access, sourced quotes, bilateral versions, bill checks, ledger idempotence, reset/restart behavior and real PostgreSQL transactions across requests.
-
-Public HTML, a healthy liveness endpoint and a local passing suite do not close this hosted gate.
-
-## 5. Persistent execution and model controls
-
-The request task path is discover -> rfq -> reply/timeout -> quote -> decide -> send -> quote, followed by evaluation. Work is advanced through a bounded authenticated POST process call or an explicit worker. GET polling returns snapshots only.
-
-Tasks persist request generation, source key, status, due time, lease token, lease expiry and attempts. A source key prevents duplicate work. At most two tasks run globally and one task runs per branch. Expired claims recover; completed work is not replayed as a new message or quote. Failed work is bounded, and reset/finish/takeover cancels the appropriate pending work.
-
-Models have a separate shared cap of two in-flight calls. The default deadline is 12 seconds, configurable up to 20 seconds; leases last two seconds longer. Short roles have smaller output budgets. There are no automatic model retries.
-
-A shared UTC daily cap defaults to 500 model attempts. It is checked transactionally before network use. Exhaustion or invalid budget state produces rules/manual fallback. Model timeouts are presented as a clear continuation message instead of a raw machine error.
-
-Stored events retain engine, sources and validation evidence. Public screens show concise action summaries and facts; hidden model reasoning and private diagnostics are not displayed.
-
-## 6. Data and authority map
-
-| Data | Authority and purpose |
-|---|---|
-| accounts, sessions, profiles, auth_attempts | Customer identity/session, private defaults and login limits. |
-| providers, provider_prices | Demo/provider consent, area/hours and own private price settings. |
-| requests, branches, messages | Owned work, isolated conversations and exact original statements. |
-| quotes | Historical source-checked revisions; current readiness and processed message marker. |
-| tasks, settings | Persisted sequencing, generations, leases, model concurrency and daily credit control. |
-| deals, agreement_versions, acceptances | Selected immutable terms and explicit role decisions. |
-| bill_checks | Version-bound checks; not approvals or payments. |
-| deal_state, payments | Labeled simulated funding/completion and idempotent ledger. |
-| disputes, ratings | Version-bound evidence, simulated outcomes and settled-work feedback. |
-| events | Short factual action/engine/source history. |
-| reference-price survey/book | Advisory published observations with independent provenance and quality limits. |
-
-The server owns arithmetic, source association, authorization, cap acknowledgement and state transitions. A model, browser checkbox or price-reference band cannot override those rules.
-
-## 7. Verification and remaining work
-
-Actual evidence includes five-category HTTP negotiation, source/item/quantity rejection, immutable terms, independent acceptances, v1/v2, cumulative bill quantities, ledger replay, archive/reset races, private provider projections, opaque authentication, model timeouts/fallback and account isolation.
-
-The bounded live OpenAI trial made 30 actual calls and used 17,842 tokens. The original 20-message model extraction run scored 16/20; the original rules regression scored 18/20. The observed defects led to additional source checks and focused regressions. These results are preserved rather than reported as perfect model quality.
-
-Browser verification covers consumer, agreement and provider flows in isolated local sessions. Shared layouts and navigation are undergoing renewed checks after alignment. The final pass must include first-run/re-entry, Welcome return after demo, history, named-account switching, separate provider role, keyboard/focus, 390px and desktop, reduced motion, source details, changes, disputes and replay safety.
-
-The open production work is external PostgreSQL provisioning and actual hosted rehearsal. Real commercial provider onboarding, real payments, WhatsApp/voice transport and services beyond the five catalog categories remain outside the approved build.
+- The customer owns the request, private cap, public-target permission, version acceptance, bill confirmation and review. A model cannot supply those permissions.
+- Provider statements own quoted prices and optional-work candidates. Exact source, unit and quantity checks precede ranking or agreement creation.
+- The server owns eligibility, arithmetic, version/digest matching, both role acceptances and the simulation ledger. Accepted versions and acceptances are immutable.
+- Tasks persist source keys, request generation, deadlines and leases. At most two tasks run globally and one per branch. Expired claims recover; archive/reset prevents late mutations. A task lease lasts 45 seconds.
+- A human reply deadline is persisted at 90 seconds. The runner advances an injected clock for this case; the reported seconds are not a real ninety-second waiting trial.
+- Model calls have a separate shared concurrency cap of two. The current default deadline is 12 seconds, configurable up to 20 seconds, with leases lasting two seconds longer. There are no automatic model retries.
+- Production model attempts have a shared persisted daily cap, default 500 per UTC day. The live runner uses its own smaller persisted cap before network use.
+- A completed funded version can qualify for simulated release after 72 hours without an unresolved dispute or pending change. The explicit settlement service exists; a recurring hosted executor is not deployed. GET requests never settle money.
+- Advisory reference bands need the same item, unit and narrow scope, with at least five accepted observations from three publishers. Missing evidence remains insufficient data; it is not filled from synthetic offers.

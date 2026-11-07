@@ -38,11 +38,19 @@ Recorded on 7 November 2026. Entries follow decision order; earlier timestamps a
 | R30 | Bound model credit use with a shared UTC daily attempt cap and fail-closed budget records. | Default 500 attempts/day; concurrency and counter tests pass. |
 | R31 | Replace raw model error codes with clear fallback messages, allow a bounded 12-second default deadline and reduce output budgets for short roles. | Corrective change after an observed model_timeout; no automatic retries. |
 | R32 | Add a numbered pipeline document with every business/AI stage, outputs, persistence, safeguards and separate local/UI/hosted status. | 12-pipeline.md records the active pipeline and actual remaining gates. |
+| R33 | Simplify the public engine status to AI ready while retaining factual per-action engine evidence. | Public health copy updated; technical fallback codes are not primary navigation copy. |
+| R34 | Keep theme switching in the topbar and remove the settings-page theme control. | Shared shell adjustment and browser verification. |
+| R35 | Add one-provider chat, customer-perspective speaker labels and explicit hard-fact questions that pause the agent. | Real question, takeover, reply and handback checks pass; no invented facts. |
+| R36 | Allow per-actor OpenAI choices in Settings and freeze the request configuration at creation. | Model API/router and six browser settings checks pass; server keys stay private. |
+| R37 | Add synthetic service photos with explicit lazy loading and initials fallback. | Five WebP images total about 106 KB; Welcome loads zero provider images. |
+| R38 | Correct welcome visibility, avoid blocking font CSS, split heavy routes, restore sessions in one read and bind both local loopbacks. | Welcome visible in 849 ms with delayed authentication; local requests now 4-41 ms. |
+| R39 | Provision and connect Neon Free after human acceptance; cache schema revisions across cold instances. | Real PostgreSQL connectivity/migrations pass; cached opens approximately 0.2 seconds. |
+| R40 | Make the next provider acceptance action visible above the agreement after customer acceptance. | Four focused demo/human acceptance-to-active browser checks pass; no auto-accept. |
 
 ## Open release gates
 
-- Neon Free marketplace terms require a human operator. The service explicitly refuses acceptance by an AI agent. No paid database plan is authorized.
-- The current public API returns storage_not_configured until the external database is provisioned. Public UI/health availability and local login success do not imply production transaction readiness.
+- Neon Free terms have been accepted by the operator and the resource is connected. Hosted end-to-end verification follows the new deployment.
+- The prior public build returned storage_not_configured. Real database connectivity is now verified; the integrated public release is being redeployed.
 - Shared UI/flow alignment, final accessibility checks and hosted end-to-end verification must finish before their tickets become Done.
 - Live-model results are limited to the recorded trial and synthetic bill fixture. Larger independent language and real-bill evaluation remain a quality limitation.
 

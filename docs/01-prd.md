@@ -508,3 +508,14 @@ The generated book counts the 13 admitted rows. The eight pre-aggregation exclus
 `data/reference-price-survey.json` passes the survey contract. `data/reference-price-book.json` was generated using `node scripts/build-price-book.mjs data/reference-price-survey.json data/reference-price-book.json`: 13 accepted observations, nine groups, one group meeting the minimum of five prices and three publishers. Its top-level `sufficient` value means at least one group is sufficient, not that every category is sufficient.
 
 The advisory book must not change provider quotes, comparison ranking, private-budget eligibility, committed agreement totals or allowed counter citations. It supplies neither a fraud label nor a price guarantee. A future collection should create a new dated snapshot and output; the generator refuses to overwrite existing files.
+
+
+### 17.5 Release integration checks
+
+Renewed local Chrome checks passed: 27 consumer flows, 13 agreement/provider flows, eight navigation/theme checks, six provider-question checks, five modal/focus checks, six model-settings checks, four returning-session checks, two provider-photo checks and four explicit acceptance-to-active checks. These are separate suites with overlapping behavior, not independent quality samples.
+
+A delayed-authentication probe kept the welcome usable while the session read was paused for five seconds. The welcome became visible in 849 ms. Initial JavaScript is approximately 385 KB, split from the earlier 506 KB. Five synthetic provider photos use 384-pixel WebP assets totaling approximately 106 KB and do not load on Welcome.
+
+The full five-category HTTP journey passes 60/60 stages and 260/260 stage checks. Separate live OpenAI AC journeys each complete 12/12 stages, including a capped run that continues through verified rules after transport failures. No perfect-model-quality claim is made.
+
+Neon Free is provisioned and connected. Real PostgreSQL migrations and fresh pools pass; persisted revision caching reduces repeated cold migration work from approximately 6.5 seconds to approximately 0.2 seconds. Public transaction verification follows the integrated deployment.

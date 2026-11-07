@@ -2,7 +2,7 @@
 
 Production URL: https://wasit-id.vercel.app. Hosting uses Vercel and a free project subdomain; no domain purchase is required.
 
-The current published build includes the customer/provider frontend and business API. GET /api/health reports configured model capability. Production business actions require a shared PostgreSQL database. Until that is provisioned, authenticated business routes return storage_not_configured with HTTP 503. This is separate from an unknown API route, which returns JSON 404.
+The current published build includes the customer/provider frontend and business API. GET /api/health reports configured model capability. Production business actions require a shared PostgreSQL database. The earlier foundation release returned storage_not_configured until the database was provisioned; the integrated release is being redeployed and verified. This is separate from an unknown API route, which returns JSON 404.
 
 Local development uses SQLite and is available at http://localhost:5180 with the API at http://127.0.0.1:3301. The development supervisor watches backend modules. A stale process must be restarted after changing the supervisor or environment file.
 
@@ -31,7 +31,7 @@ Vercel enforces human acceptance of marketplace terms. Its agent CLI refuses to 
 vercel integration accept-terms neon --scope fayadhs-projects-f3190830
 ```
 
-After acceptance, provisioning and environment connection can continue automatically. No Neon resource is currently provisioned. A database connection must be tested before transactional production readiness is marked complete.
+After acceptance, provisioning and environment connection can continue automatically. The Neon Free resource is provisioned and connected. A real PostgreSQL connection and migrations passed; cached cold migrations take approximately 0.2 seconds. Hosted transaction rehearsal remains the release gate.
 
 ## Release verification
 

@@ -1,24 +1,35 @@
-# Frontend tickets — Wasit 4.1
+# Frontend tickets - Wasit 4.1
 
-Owner: B. Preserve Wasit colors, spacing, radii, typography, motion and component markup. Light is the default; dark/system are explicit user choices. All product copy is English. Visual components do not imply connected business endpoints.
+Implementation ownership: B scope, completed collaboratively with parallel agents. Preserve Wasit colors, spacing, radii, typography, motion and component markup. Light is the default; dark/system are explicit user choices. Product copy is English. Status below describes implemented behavior and actual verification, not deployment readiness.
 
 | Ticket | Status | Scope / acceptance |
 |---|---|---|
-| FE-01 | Done | React shell, exact Wasit tokens/styles, brand, API/router/viewport helpers, default Light and component gallery. |
-| FE-02 | Partial | Cta, Avatar, Safety, flags, range, RefCard, ticker and engine chips exist. Complete remaining screen-level component bindings and interaction/accessibility states. |
-| FE-03 | Partial | Consumer/provider client boundaries and CSRF/bearer hooks exist. Sign-in, session store, logout and account switching remain. |
-| FE-04 | Todo | Request/profile/priority form and clarification sheet; preserve input; map English answers to canonical values. |
-| FE-05 | Todo | Provider inbox/chat and fragment-to-memory bearer. Stable client_message_id on retries; polling stops at unmount. |
-| FE-06 | Todo | Scoreboard/negotiation room with sources, engine, explanations, takeover and finish; no chain-of-thought display. |
-| FE-07 | Todo | Compare/deck, comparison groups, preference presets, incomplete/scope exclusions and transparent ranking. |
-| FE-08 | Todo | Agreement draft/submit/two-party accept/reject, stale conflict reload; never auto-accept a refreshed version. |
-| FE-09 | Todo | Ticket and version history, public/provider projection, pending changes and full active agreement. |
-| FE-10 | Todo | Bill form/OCR confirmation, results, provider-sourced change candidates, explicit new limit and version 2. |
-| FE-11 | Todo | Simulation lifecycle and payment labels, extra amount due, provider completion and consumer release. |
-| FE-12 | Todo | Provider profile, consent/area/hours, price list and own-quote feedback. |
-| FE-13 | Todo | Dispute/evidence/review surfaces with shared role-aware components. |
-| FE-14 | Todo | Demo controls/story/presentation mode and honest labels for script/model/human. |
-| FE-15 | Partial | Default Light, dark option, reduced motion and core styles exist. Verify all finished screens at 390px/desktop, focus, keyboard and 44px targets. |
-| FE-16 | Todo | Full English UI integration, five-category smoke tests, deployment/mobile verification and demo rehearsal. |
+| FE-01 | Done | React shell, Wasit tokens/styles, brand, API/router/viewport helpers, default Light and component gallery. Integrated production build passes. |
+| FE-02 | Done | Existing buttons, avatars, safety labels, cards, tickers and engine chips are bound to consumer, provider and agreement screens, with loading/error/empty/action states. |
+| FE-03 | Done | Named registration/sign-in, invalid-password errors, explicit sign-out/account switching and session restoration use real authenticated routes. CSRF and provider bearer tokens stay in memory; customer and provider boundaries remain separate. |
+| FE-04 | Done | Persistent two-step profile/area and locked priority sliders, compact composer, rotating examples, presets, repeated request, draft preservation and inline canonical clarification are connected. Profile defaults never silently fill a spending cap or override a different requested service. |
+| FE-05 | Done | Private provider inbox/chat, fragment-to-memory bearer and unmount cleanup are implemented. A deliberately lost response retries the same client message ID and stores one message. |
+| FE-06 | Done | Animated scoreboard, phases, negotiation trace, provider focus/QR invitation, source snippets, engine/action summaries, takeover/send/handback and finish use current request contracts. Completed requests transition to offers after the progress completion beat. |
+| FE-07 | Done | Expandable offer list, scope groups, view-order presets, item/source/conversation details, exclusions and visible weight/score parts are connected. Retry starts a separate request; optional planning never enters quoted totals or agreement approval. |
+| FE-08 | Done | Agreement draft/submit, independent two-party acceptance/rejection and stale-conflict reload are implemented. Browser verification proves one acceptance does not activate a version; refreshed versions require explicit review. |
+| FE-09 | Done | Active agreement, pending proposal, version history and provider public projection are connected. A pending version preserves the active version until both parties accept. |
+| FE-10 | Done | Bill item entry, photo-preview/edit/confirmation surface, active-version results, provider-sourced changes, explicit spending limit and version 2 are implemented. Manual bill/change flow is browser-verified; live image-model verification remains FE-16. |
+| FE-11 | Done | Labeled payment simulation, extra amount due/top-up, provider completion and customer release are connected and browser-verified. No real payment processing is claimed. |
+| FE-12 | Done | Provider consent, business area/hours/radius, editable private price list, own reviews and own-quote feedback load and save through authorized routes. |
+| FE-13 | Done | Role-aware dispute/evidence/review/reply surfaces are connected. Browser verification covers accepted rework, held funds, one-time review and provider reply. |
+| FE-14 | Done | Five-category scenario cards, explicit owner reset, watch/story/presentation display tiles, keyboard controls, wide scoreboard/room layout and capability-aware fullscreen are implemented. Explicit app/welcome return preserves the session and data; labels stay honest. |
+| FE-15 | Partial | Default Light, dark/system choices, reduced motion, keyboard priority/room controls and mobile/desktop layouts are implemented. Current consumer flows pass 390px comparison and desktop composer/presentation overflow checks; agreement/provider pass mobile overflow. A complete keyboard and 44px touch-target audit across every role screen remains. |
+| FE-16 | Partial | Integrated English UI build and local browser flows pass. Hosted database availability, configured live model/image calls, public production smoke and a complete timed demo rehearsal still require verification. |
 
-Build against validated fixtures, then switch transports to live APIs. Do not change schema shapes in a component. Every screen shows loading/error/empty/next-action states. Unknown cost is never displayed as free. A pending version never replaces the active version in UI. Do not expose secrets or private budgets in provider markup, payloads or logs.
+Unknown cost is never displayed as free. A pending version never replaces the active version in UI. Provider payloads and screens exclude customer spending limits, customer acceptance identifiers, internal events and competitor branches. Source messages retain the provider's original wording.
+
+## Verification log
+
+- `npm run build`: integrated consumer, agreement and provider frontend passed production compilation.
+- `node scripts/smoke-consumer.mjs`: 27 real Chrome checks passed after the screen-flow alignment, against the isolated current backend. Covered chrome-less entry, profile setup and locked weights, saved defaults with a blank cap, compact composer, inline clarification, scoreboard/negotiation, takeover/send/handback, keyboard tabs, expandable comparison/source/exclusions/advisory planning, immutable agreement review, real named registration/login/errors/session restore, persistent profile, draft preservation, mobile/desktop overflow, demo app/welcome return, fullscreen and no runtime exceptions.
+- Five additional focused Chrome checks passed for watch/presentation keyboard preferences, wide scoreboard plus negotiation room and phase narration, explicit lazy-loaded provider QR invitation, session-preserving welcome/app re-entry and no runtime exceptions.
+- Entry, composer, scoreboard and offer-list screenshots were opened side by side during visual review. Composer geometry matched x=20px, y=291.765625px, width=350px, radius=28px and padding=22px; offer width=350px, radius=24px, header padding=14px 16px and body padding=14px 16px 16px.
+
+- `node scripts/smoke-agreements.mjs`: 13 real Chrome checkpoints passed with separate customer/provider contexts. Covered bearer cleanup, lost-response replay, provider quote, two-party version activation, simulated payment/top-up, version 2, confirmed manual bill check, completion/release/review/reply, provider settings/feedback, 390px overflow, dispute evidence/accepted rework and no runtime exceptions.
+- Consumer welcome/request/compare and agreement/provider screenshots were opened for visual inspection. Browser outputs use isolated local SQLite storage and labeled demo data.
+- Live bill-image reading was not exercised with configured model credentials. Local results do not establish hosted PostgreSQL readiness, production deployment access or completion of a timed presentation rehearsal.

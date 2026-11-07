@@ -1,0 +1,6 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://wasit.local/contracts/deal.schema.json",
+  "title": "Wasit deal",
+  "$ref": "common.schema.json#/$defs/deal"
+}

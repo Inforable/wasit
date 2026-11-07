@@ -1,0 +1,357 @@
+{
+  "_note": "Strict model outputs. Server validates sources, amounts, allowed actions and privacy. Model output is not an agreement or a payment.",
+  "extractor": {
+    "name": "wasit_extract",
+    "role": "extract",
+    "schema": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schedule_label",
+        "schedule_source",
+        "lines"
+      ],
+      "properties": {
+        "schedule_label": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 1000
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "schedule_source": {
+          "anyOf": [
+            {
+              "$ref": "common.schema.json#/$defs/source"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "lines": {
+          "type": "array",
+          "items": {
+            "$ref": "common.schema.json#/$defs/quote_line"
+          },
+          "maxItems": 16
+        }
+      }
+    }
+  },
+  "buyer": {
+    "name": "wasit_buyer",
+    "role": "buyer",
+    "schema": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "action",
+        "detail_key",
+        "cite",
+        "source_message_ids",
+        "reason"
+      ],
+      "properties": {
+        "action": {
+          "enum": [
+            "ask_detail",
+            "counter",
+            "counter_terms",
+            "close"
+          ]
+        },
+        "detail_key": {
+          "enum": [
+            "base_price",
+            "transport",
+            "schedule",
+            "scope",
+            "addon",
+            null
+          ]
+        },
+        "cite": {
+          "enum": [
+            "none",
+            "competitor_best",
+            "target",
+            "waive_transport",
+            "longer_warranty"
+          ]
+        },
+        "source_message_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z]+_[a-zA-Z0-9_-]{6,64}$"
+          },
+          "maxItems": 8
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 240
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "action": {
+                "const": "ask_detail"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "detail_key": {
+                "type": "string"
+              },
+              "cite": {
+                "const": "none"
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "detail_key": {
+                "type": "null"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "action": {
+                "const": "counter"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "cite": {
+                "enum": [
+                  "competitor_best",
+                  "target"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "action": {
+                "const": "counter_terms"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "cite": {
+                "enum": [
+                  "waive_transport",
+                  "longer_warranty"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "action": {
+                "const": "close"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "cite": {
+                "const": "none"
+              }
+            }
+          }
+        }
+      ]
+    }
+  },
+  "provider": {
+    "name": "wasit_provider",
+    "role": "provider",
+    "schema": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "message"
+      ],
+      "properties": {
+        "message": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1000
+        }
+      }
+    }
+  },
+  "bill": {
+    "name": "wasit_bill",
+    "role": "support",
+    "schema": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "lines"
+      ],
+      "properties": {
+        "lines": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "item",
+              "unit",
+              "quantity",
+              "unit_price"
+            ],
+            "properties": {
+              "item": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 1000
+              },
+              "unit": {
+                "enum": [
+                  "job",
+                  "unit",
+                  "pcs",
+                  "service",
+                  "hour",
+                  "m2"
+                ]
+              },
+              "quantity": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 20
+              },
+              "unit_price": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 100000000
+              }
+            }
+          },
+          "maxItems": 16
+        }
+      }
+    }
+  },
+  "formatter": {
+    "name": "wasit_formatter",
+    "role": "formatter",
+    "schema": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "category",
+        "location_label",
+        "schedule_label",
+        "max_budget",
+        "target_price"
+      ],
+      "properties": {
+        "category": {
+          "anyOf": [
+            {
+              "enum": [
+                "ac_service",
+                "washer",
+                "plumbing",
+                "electrical",
+                "cleaning"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "location_label": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 1000
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "schedule_label": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 1000
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "max_budget": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 100000000
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "target_price": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 100000000
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    }
+  },
+  "explainer": {
+    "name": "wasit_explain",
+    "role": "support",
+    "schema": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sentence"
+      ],
+      "properties": {
+        "sentence": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 220
+        }
+      }
+    }
+  }
+}

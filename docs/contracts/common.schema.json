@@ -1,0 +1,1697 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://wasit.local/contracts/common.schema.json",
+  "title": "Wasit product contracts 4.1",
+  "$defs": {
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "message_id",
+        "snippet"
+      ],
+      "properties": {
+        "message_id": {
+          "type": "string",
+          "pattern": "^[a-z]+_[a-zA-Z0-9_-]{6,64}$"
+        },
+        "snippet": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1000
+        }
+      }
+    },
+    "message": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "branch_id",
+        "sender",
+        "text",
+        "created_at",
+        "engine"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z]+_[a-zA-Z0-9_-]{6,64}$"
+        },
+        "branch_id": {
+          "type": "string",
+          "pattern": "^[a-z]+_[a-zA-Z0-9_-]{6,64}$"
+        },
+        "sender": {
+          "enum": [
+            "consumer",
+            "provider",
+            "agent"
+          ]
+        },
+        "text": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1000
+        },
+        "created_at": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "engine": {
+          "enum": [
+            "rules",
+            "model",
+            null
+          ]
+        }
+      }
+    },
+    "weights": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "price",
+        "slot",
+        "trust"
+      ],
+      "properties": {
+        "price": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "slot": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "trust": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100
+        }
+      }
+    },
+    "job": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "category",
+        "units",
+        "scope",
+        "request_text",
+        "location_label",
+        "schedule_label",
+        "time_window",
+        "max_budget",
+        "target_price",
+        "target_authorized",
+        "weights",
+        "created_at"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z]+_[a-zA-Z0-9_-]{6,64}$"
+        },
+        "category": {
+          "enum": [
+            "ac_service",
+            "washer",
+            "plumbing",
+            "electrical",
+            "cleaning"
+          ]
+        },
+        "units": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 20
+        },
+        "scope": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]{2,80}$"
+        },
+        "request_text": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1000
+        },
+        "location_label": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1000
+        },
+        "schedule_label": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1000
+        },
+        "time_window": {
+          "anyOf": [
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "start",
+                "end"
+              ],
+              "properties": {
+                "start": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "end": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "max_budget": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100000000
+        },
+        "target_price": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 100000000
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "target_authorized": {
+          "type": "boolean"
+        },
+        "weights": {
+          "$ref": "common.schema.json#/$defs/weights"
+        },
+        "created_at": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "quote_line": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "item_code",
+        "label",
+        "kind",
+        "unit",
+        "quantity",
+        "unit_price",
+        "condition",
+        "source"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z]+_[a-zA-Z0-9_-]{6,64}$"
+        },
+        "item_code": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]{2,80}$"
+        },
+        "label": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1000
+        },
+        "kind": {
+          "enum": [
+            "fixed",
+            "included",
+            "optional",
+            "unknown"
+          ]
+        },
+        "unit": {
+          "enum": [
+            "job",
+            "unit",
+            "pcs",
+            "service",
+            "hour",
+            "m2"
+          ]
+        },
+        "quantity": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 20
+        },
+        "unit_price": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 100000000
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "condition": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 1000
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "source": {
+          "$ref": "common.schema.json#/$defs/source"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "unknown"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "unit_price": {
+                "type": "null"
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "unit_price": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 100000000
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "included"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "unit_price": {
+                "const": 0
+              }
+            }
+          }
+        }
+      ]
+    },
+    "term_line": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "item_code",
+        "label",
+        "kind",
+        "unit",
+        "quantity",
+        "unit_price",
+        "condition",
+        "source_message_id"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z]+_[a-zA-Z0-9_-]{6,64}$"
+        },
+        "item_code": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]{2,80}$"
+        },
+        "label": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1000
+        },
+        "kind": {
+          "enum": [
+            "committed",
+            "included",
+            "optional",
+            "unknown"
+          ]
+        },
+        "unit": {
+          "enum": [
+            "job",
+            "unit",
+            "pcs",
+            "service",
+            "hour",
+            "m2"
+          ]
+        },
+        "quantity": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 20
+        },
+        "unit_price": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 100000000
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "condition": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 1000
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "source_message_id": {
+          "type": "string",
+          "pattern": "^[a-z]+_[a-zA-Z0-9_-]{6,64}$"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "unknown"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "unit_price": {
+                "type": "null"
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "unit_price": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 100000000
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "included"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "unit_price": {
+                "const": 0
+              }
+            }
+          }
+        }
+      ]
+    },
+    "quote": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "branch_id",
+        "revision",
+        "category",
+        "scope",
+        "units",
+        "schedule_label",
+        "lines",
+        "status",
+        "fixed_total",
+        "unresolved",
+        "updated_at"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z]+_[a-zA-Z0-9_-]{6,64}$"
+        },
+        "branch_id": {
+          "type": "string",
+          "pattern": "^[a-z]+_[a-zA-Z0-9_-]{6,64}$"
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "category": {
+          "enum": [
+            "ac_service",
+            "washer",
+            "plumbing",
+            "electrical",
+            "cleaning"
+          ]
+        },
+        "scope": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]{2,80}$"
+        },
+        "units": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 20
+        },
+        "schedule_label": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 1000
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "lines": {
+          "type": "array",
+          "items": {
+            "$ref": "common.schema.json#/$defs/quote_line"
+          },
+          "maxItems": 16
+        },
+        "status": {
+          "enum": [
+            "needs_detail",
+            "ready",
+            "over_budget"
+          ]
+        },
+        "fixed_total": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 100000000
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "unresolved": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "base_price",
+              "transport",
+              "schedule",
+              "scope",
+              "unit_quantity"
+            ]
+          },
+          "maxItems": 5
+        },
+        "updated_at": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "branch": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "provider_label",
+        "mode",
+        "status",
+        "clarifications_sent",
+        "countered",
+        "asked_terms",
+        "messages",
+        "quote"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z]+_[a-zA-Z0-9_-]{6,64}$"
+        },
+        "provider_label": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1000
+        },
+        "mode": {
+          "enum": [
+            "script",
+            "model",
+            "human"
+          ]
+        },
+        "status": {
+          "enum": [
+            "awaiting_reply",
+            "processing",
+            "ready",
+            "closed",
+            "timed_out"
+          ]
+        },
+        "clarifications_sent": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 3
+        },
+        "countered": {
+          "type": "boolean"
+        },
+        "asked_terms": {
+          "type": "boolean"
+        },
+        "messages": {
+          "type": "array",
+          "items": {
+            "$ref": "common.schema.json#/$defs/message"
+          },
+          "maxItems": 100
+        },
+        "quote": {
+          "anyOf": [
+            {
+              "$ref": "common.schema.json#/$defs/quote"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    },
+    "event": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "request_id",
+        "branch_id",
+        "created_at",
+        "kind",
+        "engine",
+        "summary",
+        "source_message_ids"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z]+_[a-zA-Z0-9_-]{6,64}$"
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[a-z]+_[a-zA-Z0-9_-]{6,64}$"
+        },
+        "branch_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[a-z]+_[a-zA-Z0-9_-]{6,64}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "created_at": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "kind": {
+          "enum": [
+            "request_created",
+            "message_received",
+            "quote_updated",
+            "decision",
+            "validation_rejected",
+            "fallback",
+            "branch_timeout",
+            "rank",
+            "version_proposed",
+            "version_accepted",
+            "version_activated",
+            "bill_checked",
+            "reset"
+          ]
+        },
+        "engine": {
+          "enum": [
+            "rules",
+            "model",
+            null
+          ]
+        },
+        "summary": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1000
+        },
+        "source_message_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z]+_[a-zA-Z0-9_-]{6,64}$"
+          },
+          "maxItems": 16
+        }
+      }
+    },
+    "card": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "quote_id",
+        "group_id",
+        "rank",
+        "quoted_total",
+        "score",
+        "parts",
+        "reason"
+      ],
+      "properties": {
+        "quote_id": {
+          "type": "string",
+          "pattern": "^[a-z]+_[a-zA-Z0-9_-]{6,64}$"
+        },
+        "group_id": {
+          "type": "string",
+          "pattern": "^[a-z]+_[a-zA-Z0-9_-]{6,64}$"
+        },
+        "rank": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "quoted_total": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100000000
+        },
+        "score": {
+          "type": "number"
+        },
+        "parts": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "price",
+            "slot",
+            "trust"
+          ],
+          "properties": {
+            "price": {
+              "type": "number"
+            },
+            "slot": {
+              "type": "number"
+            },
+            "trust": {
+              "type": "number"
+            }
+          }
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1000
+        }
+      }
+    },
+    "comparison": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "groups",
+        "excluded"
+      ],
+      "properties": {
+        "groups": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "id",
+              "scope_key",
+              "quote_ids"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[a-z]+_[a-zA-Z0-9_-]{6,64}$"
+              },
+              "scope_key": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 1000
+              },
+              "quote_ids": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^[a-z]+_[a-zA-Z0-9_-]{6,64}$"
+                },
+                "maxItems": 5
+              }
+            }
+          },
+          "maxItems": 5
+        },
+        "excluded": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "quote_id",
+              "reason"
+            ],
+            "properties": {
+              "quote_id": {
+                "type": "string",
+                "pattern": "^[a-z]+_[a-zA-Z0-9_-]{6,64}$"
+              },
+              "reason": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 1000
+              }
+            }
+          },
+          "maxItems": 5
+        }
+      }
+    },
+    "public_terms": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "scope",
+        "units",
+        "location_label",
+        "schedule_label",
+        "lines",
+        "committed_total",
+        "change_reason"
+      ],
+      "properties": {
+        "scope": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]{2,80}$"
+        },
+        "units": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 20
+        },
+        "location_label": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1000
+        },
+        "schedule_label": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1000
+        },
+        "lines": {
+          "type": "array",
+          "items": {
+            "$ref": "common.schema.json#/$defs/term_line"
+          },
+          "maxItems": 16
+        },
+        "committed_total": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100000000
+        },
+        "change_reason": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 1000
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    },
+    "terms": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "scope",
+        "units",
+        "location_label",
+        "schedule_label",
+        "lines",
+        "committed_total",
+        "change_reason",
+        "spending_limit"
+      ],
+      "properties": {
+        "scope": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]{2,80}$"
+        },
+        "units": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 20
+        },
+        "location_label": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1000
+        },
+        "schedule_label": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1000
+        },
+        "lines": {
+          "type": "array",
+          "items": {
+            "$ref": "common.schema.json#/$defs/term_line"
+          },
+          "maxItems": 16
+        },
+        "committed_total": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100000000
+        },
+        "change_reason": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 1000
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "spending_limit": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100000000
+        }
+      }
+    },
+    "acceptance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "role",
+        "actor_id",
+        "version_id",
+        "terms_digest",
+        "accepted_at",
+        "budget_ack_limit"
+      ],
+      "properties": {
+        "role": {
+          "enum": [
+            "consumer",
+            "provider"
+          ]
+        },
+        "actor_id": {
+          "type": "string",
+          "pattern": "^[a-z]+_[a-zA-Z0-9_-]{6,64}$"
+        },
+        "version_id": {
+          "type": "string",
+          "pattern": "^[a-z]+_[a-zA-Z0-9_-]{6,64}$"
+        },
+        "terms_digest": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "accepted_at": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "budget_ack_limit": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 100000000
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    },
+    "version": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "number",
+        "parent_version_id",
+        "status",
+        "terms",
+        "terms_digest",
+        "acceptances",
+        "created_at"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z]+_[a-zA-Z0-9_-]{6,64}$"
+        },
+        "number": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "parent_version_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[a-z]+_[a-zA-Z0-9_-]{6,64}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "status": {
+          "enum": [
+            "draft",
+            "pending",
+            "active",
+            "superseded",
+            "rejected"
+          ]
+        },
+        "terms": {
+          "$ref": "common.schema.json#/$defs/terms"
+        },
+        "terms_digest": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "acceptances": {
+          "type": "array",
+          "items": {
+            "$ref": "common.schema.json#/$defs/acceptance"
+          },
+          "maxItems": 2
+        },
+        "created_at": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "provider_version": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "number",
+        "parent_version_id",
+        "status",
+        "public_terms",
+        "terms_digest",
+        "consumer_accepted",
+        "provider_accepted"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z]+_[a-zA-Z0-9_-]{6,64}$"
+        },
+        "number": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "parent_version_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[a-z]+_[a-zA-Z0-9_-]{6,64}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "status": {
+          "enum": [
+            "draft",
+            "pending",
+            "active",
+            "superseded",
+            "rejected"
+          ]
+        },
+        "public_terms": {
+          "$ref": "common.schema.json#/$defs/public_terms"
+        },
+        "terms_digest": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "consumer_accepted": {
+          "type": "boolean"
+        },
+        "provider_accepted": {
+          "type": "boolean"
+        }
+      }
+    },
+    "payment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "version_id",
+        "kind",
+        "amount",
+        "created_at"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z]+_[a-zA-Z0-9_-]{6,64}$"
+        },
+        "version_id": {
+          "type": "string",
+          "pattern": "^[a-z]+_[a-zA-Z0-9_-]{6,64}$"
+        },
+        "kind": {
+          "enum": [
+            "hold",
+            "topup",
+            "release",
+            "refund"
+          ]
+        },
+        "amount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100000000
+        },
+        "created_at": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "lifecycle": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "held",
+        "released",
+        "refunded",
+        "payments",
+        "auto_release_at"
+      ],
+      "properties": {
+        "status": {
+          "enum": [
+            "locked",
+            "paid",
+            "done",
+            "released",
+            "disputed",
+            "resolved",
+            "escalated"
+          ]
+        },
+        "held": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100000000
+        },
+        "released": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100000000
+        },
+        "refunded": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100000000
+        },
+        "payments": {
+          "type": "array",
+          "items": {
+            "$ref": "common.schema.json#/$defs/payment"
+          },
+          "maxItems": 100
+        },
+        "auto_release_at": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    },
+    "deal": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "request_id",
+        "branch_id",
+        "provider_label",
+        "active_version_id",
+        "pending_version_id",
+        "versions",
+        "lifecycle"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z]+_[a-zA-Z0-9_-]{6,64}$"
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[a-z]+_[a-zA-Z0-9_-]{6,64}$"
+        },
+        "branch_id": {
+          "type": "string",
+          "pattern": "^[a-z]+_[a-zA-Z0-9_-]{6,64}$"
+        },
+        "provider_label": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1000
+        },
+        "active_version_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[a-z]+_[a-zA-Z0-9_-]{6,64}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "pending_version_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[a-z]+_[a-zA-Z0-9_-]{6,64}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "versions": {
+          "type": "array",
+          "items": {
+            "$ref": "common.schema.json#/$defs/version"
+          },
+          "maxItems": 30
+        },
+        "lifecycle": {
+          "anyOf": [
+            {
+              "$ref": "common.schema.json#/$defs/lifecycle"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    },
+    "bill_line": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "item_code",
+        "label",
+        "unit",
+        "quantity",
+        "unit_price",
+        "explanation"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z]+_[a-zA-Z0-9_-]{6,64}$"
+        },
+        "item_code": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]{2,80}$"
+        },
+        "label": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1000
+        },
+        "unit": {
+          "enum": [
+            "job",
+            "unit",
+            "pcs",
+            "service",
+            "hour",
+            "m2"
+          ]
+        },
+        "quantity": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 20
+        },
+        "unit_price": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100000000
+        },
+        "explanation": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 1000
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    },
+    "bill_result": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "bill_line_id",
+        "status",
+        "agreement_line_id",
+        "reason",
+        "source_message_id"
+      ],
+      "properties": {
+        "bill_line_id": {
+          "type": "string",
+          "pattern": "^[a-z]+_[a-zA-Z0-9_-]{6,64}$"
+        },
+        "status": {
+          "enum": [
+            "matches",
+            "already_included",
+            "price_changed",
+            "new_work",
+            "needs_clarification"
+          ]
+        },
+        "agreement_line_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[a-z]+_[a-zA-Z0-9_-]{6,64}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1000
+        },
+        "source_message_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[a-z]+_[a-zA-Z0-9_-]{6,64}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    },
+    "bill_check": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "deal_id",
+        "version_id",
+        "lines",
+        "results",
+        "submitted_total",
+        "created_at"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z]+_[a-zA-Z0-9_-]{6,64}$"
+        },
+        "deal_id": {
+          "type": "string",
+          "pattern": "^[a-z]+_[a-zA-Z0-9_-]{6,64}$"
+        },
+        "version_id": {
+          "type": "string",
+          "pattern": "^[a-z]+_[a-zA-Z0-9_-]{6,64}$"
+        },
+        "lines": {
+          "type": "array",
+          "items": {
+            "$ref": "common.schema.json#/$defs/bill_line"
+          },
+          "maxItems": 16
+        },
+        "results": {
+          "type": "array",
+          "items": {
+            "$ref": "common.schema.json#/$defs/bill_result"
+          },
+          "maxItems": 16
+        },
+        "submitted_total": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100000000
+        },
+        "created_at": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "snapshot": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "status",
+        "job",
+        "questions",
+        "branches",
+        "events",
+        "comparison",
+        "cards",
+        "deal",
+        "created_at"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z]+_[a-zA-Z0-9_-]{6,64}$"
+        },
+        "status": {
+          "enum": [
+            "submitted",
+            "formatting",
+            "needs_clarification",
+            "contacting",
+            "negotiating",
+            "evaluating",
+            "awaiting_customer",
+            "no_match",
+            "locked",
+            "failed"
+          ]
+        },
+        "job": {
+          "anyOf": [
+            {
+              "$ref": "common.schema.json#/$defs/job"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "questions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "id",
+              "label",
+              "options"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 1000
+              },
+              "label": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 1000
+              },
+              "options": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 1000
+                },
+                "maxItems": 8
+              }
+            }
+          },
+          "maxItems": 3
+        },
+        "branches": {
+          "type": "array",
+          "items": {
+            "$ref": "common.schema.json#/$defs/branch"
+          },
+          "maxItems": 5
+        },
+        "events": {
+          "type": "array",
+          "items": {
+            "$ref": "common.schema.json#/$defs/event"
+          },
+          "maxItems": 500
+        },
+        "comparison": {
+          "$ref": "common.schema.json#/$defs/comparison"
+        },
+        "cards": {
+          "type": "array",
+          "items": {
+            "$ref": "common.schema.json#/$defs/card"
+          },
+          "maxItems": 5
+        },
+        "deal": {
+          "anyOf": [
+            {
+              "$ref": "common.schema.json#/$defs/deal"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "created_at": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "provider_snapshot": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "branch_id",
+        "provider_label",
+        "mode",
+        "active_version_id",
+        "pending_version_id",
+        "job_public",
+        "messages",
+        "versions"
+      ],
+      "properties": {
+        "branch_id": {
+          "type": "string",
+          "pattern": "^[a-z]+_[a-zA-Z0-9_-]{6,64}$"
+        },
+        "provider_label": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1000
+        },
+        "mode": {
+          "enum": [
+            "script",
+            "model",
+            "human"
+          ]
+        },
+        "active_version_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[a-z]+_[a-zA-Z0-9_-]{6,64}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "pending_version_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[a-z]+_[a-zA-Z0-9_-]{6,64}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "job_public": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "category",
+            "scope",
+            "units",
+            "location_label",
+            "schedule_label"
+          ],
+          "properties": {
+            "category": {
+              "enum": [
+                "ac_service",
+                "washer",
+                "plumbing",
+                "electrical",
+                "cleaning"
+              ]
+            },
+            "scope": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]{2,80}$"
+            },
+            "units": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 20
+            },
+            "location_label": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 1000
+            },
+            "schedule_label": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 1000
+            }
+          }
+        },
+        "messages": {
+          "type": "array",
+          "items": {
+            "$ref": "common.schema.json#/$defs/message"
+          },
+          "maxItems": 100
+        },
+        "versions": {
+          "type": "array",
+          "items": {
+            "$ref": "common.schema.json#/$defs/provider_version"
+          },
+          "maxItems": 30
+        }
+      }
+    },
+    "error": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "error",
+        "message"
+      ],
+      "properties": {
+        "error": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1000
+        },
+        "message": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1000
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,138 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://wasit.local/contracts/agent-buyer.schema.json",
+  "title": "Wasit buyer model output",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "action",
+    "detail_key",
+    "cite",
+    "source_message_ids",
+    "reason"
+  ],
+  "properties": {
+    "action": {
+      "enum": [
+        "ask_detail",
+        "counter",
+        "counter_terms",
+        "close"
+      ]
+    },
+    "detail_key": {
+      "enum": [
+        "base_price",
+        "transport",
+        "schedule",
+        "scope",
+        "addon",
+        null
+      ]
+    },
+    "cite": {
+      "enum": [
+        "none",
+        "competitor_best",
+        "target",
+        "waive_transport",
+        "longer_warranty"
+      ]
+    },
+    "source_message_ids": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z]+_[a-zA-Z0-9_-]{6,64}$"
+      },
+      "maxItems": 8
+    },
+    "reason": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 240
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "action": {
+            "const": "ask_detail"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "detail_key": {
+            "type": "string"
+          },
+          "cite": {
+            "const": "none"
+          }
+        }
+      },
+      "else": {
+        "properties": {
+          "detail_key": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "action": {
+            "const": "counter"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "cite": {
+            "enum": [
+              "competitor_best",
+              "target"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "action": {
+            "const": "counter_terms"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "cite": {
+            "enum": [
+              "waive_transport",
+              "longer_warranty"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "action": {
+            "const": "close"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "cite": {
+            "const": "none"
+          }
+        }
+      }
+    }
+  ]
+}

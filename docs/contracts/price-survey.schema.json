@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "wasit/price-survey.schema.json",
+  "title": "PriceSurvey",
+  "description": "One snapshot of collected prices. Each new survey is a new file; never overwrite an old snapshot. A file with synthetic: true is never used by the server.",
+  "type": "object",
+  "required": ["snapshot_id", "synthetic", "rows"],
+  "properties": {
+    "_note": { "type": "string" },
+    "snapshot_id": { "type": "string" },
+    "synthetic": { "type": "boolean" },
+    "rows": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["category", "item", "price", "publisher", "source", "date"],
+        "properties": {
+          "category": { "enum": ["ac_service", "washer", "plumbing", "electrical", "cleaning"] },
+          "item": { "type": "string", "description": "Item id (cuci_ac, isi_freon, …) or its name ('ganti kapasitor')" },
+          "price": { "type": "integer", "minimum": 1 },
+          "publisher": { "type": "string", "description": "Who quoted it (shop or technician). Distinct publishers are counted separately." },
+          "source": { "type": "string", "description": "Where it came from: URL, 'WA ke Teknik X', 'telepon', …" },
+          "date": { "type": "string", "format": "date" },
+          "kecamatan": { "type": ["string", "null"] }
+        }
+      }
+    }
+  }
+}
